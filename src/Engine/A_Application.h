@@ -9,8 +9,8 @@
 #include "SDL.h"
 
 // Defines
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 
 #define MAX_STRLEN 255      // Max lenght of a string to read
 

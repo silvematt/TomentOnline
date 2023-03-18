@@ -15,8 +15,8 @@
 
 
 // Max values the projection plane can be
-#define MAX_PROJECTION_PLANE_WIDTH 640
-#define MAX_PROJECTION_PLANE_HEIGHT 480
+#define MAX_PROJECTION_PLANE_WIDTH 800
+#define MAX_PROJECTION_PLANE_HEIGHT 600
 
 // Runtime Graphichs
 typedef enum GraphicsOptions_e
@@ -201,6 +201,8 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle);
 //-------------------------------------
 void R_DrawWallBottom(walldata_t* wall, float height, float screenZ, bool isInFront);
 
+void R_BottomWallCast();
+
 //-------------------------------------
 // Draws the bottom top of a cube that's located below camera's head
 //-------------------------------------
@@ -223,7 +225,10 @@ void R_DrawThinWall(walldata_t* wall);
 // - rayAngle = the current rayangle
 // - x = the x coordinate on the screen for this specific floor cast call
 //-------------------------------------
-void R_FloorCasting(int end, float rayAngle, int x, float wallHeight);
+void R_FloorCasting(int level, int end, float rayAngle, int x, float wallHeight);
+void R_FloorCastingOld(int end, float rayAngle, int x, float wallHeight);
+
+void R_FloorCastingHor();
 
 //-------------------------------------
 // Floorcast and ceilingcast
@@ -233,6 +238,10 @@ void R_FloorCasting(int end, float rayAngle, int x, float wallHeight);
 // - x = the x coordinate on the screen for this specific floor cast call
 //-------------------------------------
 void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallHeight);
+void R_CeilingCastingOld(int level, float start, float rayAngle, int x, float wallHeight);
+bool R_DoesCeilingCast(wallObject_t* obj);
+
+bool R_DoesFloorCast(wallObject_t* obj);
 
 //-------------------------------------
 // Adds a sprite to the visible sprite array and adds its corresponding drawable

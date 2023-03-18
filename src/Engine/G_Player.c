@@ -308,11 +308,13 @@ void G_InGameInputHandling(const uint8_t* keyboardState)
     if(keyboardState[SDL_SCANCODE_KP_MINUS])
     {
         player.attributes.curHealth -= 1.0f;
+        player.z -= 1.0f;
     }
 
     if(keyboardState[SDL_SCANCODE_KP_PLUS])
     {
         player.attributes.curHealth += 1.0f;
+        player.z += 1.0f;
     }
 
     if(keyboardState[SDL_SCANCODE_KP_3])
@@ -335,7 +337,7 @@ void G_InGameInputHandling(const uint8_t* keyboardState)
 void G_PlayerRender(void)
 {
     SDL_Rect screenPos = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_Rect size = {(0), (0), SCREEN_WIDTH/2, SCREEN_HEIGHT/2};
+    SDL_Rect size = {(0), (0), SCREEN_WIDTH/3, SCREEN_HEIGHT/3};
 
     // Select Animation
     SDL_Surface* curAnim;
@@ -692,12 +694,10 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 A_ChangeState(GSTATE_MENU);
             }
 
-            /*
             if(e->key.keysym.sym == SDLK_F1)
             {
-                debugRendering = !debugRendering;
+                //debugRendering = !debugRendering;
             }
-            */
 
             else if(e->key.keysym.sym == SDLK_F2)
             {

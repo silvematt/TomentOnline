@@ -80,16 +80,6 @@ void R_SetRenderingGraphics(GraphicsOptions_e setting)
     switch(setting)
     {
         case GRAPHICS_LOW:
-            PROJECTION_PLANE_WIDTH = 260;
-            PROJECTION_PLANE_HEIGHT = 180;
-            PROJECTION_PLANE_CENTER = 90;
-            DISTANCE_TO_PROJECTION = 225;
-
-            MAX_VERTICAL_HEAD_MOV = 20;
-            MIN_VERTICAL_HEAD_MOV = -20;
-            break;
-
-        case GRAPHICS_MEDIUM:
             PROJECTION_PLANE_WIDTH = 320;
             PROJECTION_PLANE_HEIGHT = 240;
             PROJECTION_PLANE_CENTER = 120;
@@ -99,11 +89,21 @@ void R_SetRenderingGraphics(GraphicsOptions_e setting)
             MIN_VERTICAL_HEAD_MOV = -25;
             break;
 
-        case GRAPHICS_HIGH:
+        case GRAPHICS_MEDIUM:
             PROJECTION_PLANE_WIDTH = 640;
             PROJECTION_PLANE_HEIGHT = 480;
             PROJECTION_PLANE_CENTER = 240;
             DISTANCE_TO_PROJECTION = 554;
+
+            MAX_VERTICAL_HEAD_MOV = 50;
+            MIN_VERTICAL_HEAD_MOV = -50;
+            break;
+
+        case GRAPHICS_HIGH:
+            PROJECTION_PLANE_WIDTH = 800;
+            PROJECTION_PLANE_HEIGHT = 600;
+            PROJECTION_PLANE_CENTER = 300;
+            DISTANCE_TO_PROJECTION = 693;
 
             MAX_VERTICAL_HEAD_MOV = 50;
             MIN_VERTICAL_HEAD_MOV = -50;
@@ -330,6 +330,8 @@ void I_Ray(int level, int playersLevel)
 //-------------------------------------
 void R_Raycast(void)
 {
+    clock_t begin = clock();
+
     // Reset wall heights (
     for(int y = 0; y < PROJECTION_PLANE_HEIGHT; y++)
         for(int x = 0; x < PROJECTION_PLANE_WIDTH; x++)
@@ -339,6 +341,7 @@ void R_Raycast(void)
     // Determine player's level
     player.level = (int)floor(player.z / TILE_SIZE);
     player.level = SDL_clamp(player.level, 0, MAX_N_LEVELS-1);
+
 
     for(int i = MAX_N_LEVELS-1; i >= player.level+1; i--)
     {
@@ -351,6 +354,10 @@ void R_Raycast(void)
         I_Ray(i, player.level);
     }
 
+    
+    R_FloorCastingHor();
+    //R_BottomWallCast();
+
     // Raycast player's level
     I_Ray(player.level, player.level);
 
@@ -359,7 +366,14 @@ void R_Raycast(void)
     // Copy raycast surface to the screen surface
     if(application.gamestate == GSTATE_GAME)
         SDL_BlitScaled(raycast_surface, NULL, win_surface, &size);
+
+
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 }
+
+
+
 
 void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
 {
@@ -776,12 +790,6 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
             
             if(curObject->texturesArray[textureType] > 0)
                 R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance);
-
-            if(debugRendering)
-            {
-                SDL_Delay(10);
-                SDL_UpdateWindowSurface(application.win);
-            }
         }
         else if(!isOffScreenBottom)
         {
@@ -808,18 +816,43 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
             if(curObject->texturesArray[textureType] > 0)
                 R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance);
 
-            if(debugRendering)
-            {
-                SDL_Delay(10);
-                SDL_UpdateWindowSurface(application.win);
-            }
+        }
+        
+        // If the player is at lvl1, draw the floor of the level above
+        if(level == 1)
+        {
+            if(player.z > TILE_SIZE + 2)
+                R_FloorCasting(1, leveledEnd, rayAngle, x, wallHeight);
+        }
+        // If the player is at the last level, draw the 1 and 2
+        else if(level == 2)
+        {
+            if(player.z > TILE_SIZE + 2)
+                R_FloorCasting(1, leveledEnd, rayAngle, x, wallHeight);
+
+            if(player.z > (TILE_SIZE*2) + 2)
+                R_FloorCasting(2, leveledEnd, rayAngle, x, wallHeight);
         }
 
+        // If the player is at ground level
         if(level == 0)
-            R_FloorCasting(bottomOfWall, rayAngle, x, wallHeight);
-        
+        {
+            // Ceilingcast the 1st floor
+            R_CeilingCasting(level, leveledStart, rayAngle, x, wallHeight);
+
+            // Check if you should ceiling cast the second floor too
+            if(!(currentMap.hasAbsCeiling && currentMap.absCeilingLevel == level+1))
+                R_CeilingCasting(level+1, leveledStart, rayAngle, x, wallHeight);
+        }
+        // If the player is at the second floor
+        else if(level == 1 && !(currentMap.hasAbsCeiling && currentMap.absCeilingLevel == level))
+        {
+            R_CeilingCasting(level, leveledStart, rayAngle, x, wallHeight);
+        }
+
+        // Always ceil cast the abs floor (which may be the highest)
         if(currentMap.hasAbsCeiling)
-            R_CeilingCasting(currentMap.absCeilingLevel, leveledStart, rayAngle, x, wallHeight);
+            R_CeilingCastingOld(currentMap.absCeilingLevel, leveledStart, rayAngle, x, wallHeight);
 
         //R_DrawPixel(x, start, r_debugColor);
     }
@@ -1289,9 +1322,6 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         mapEndedOrMaxDistanceReached = (horEnded && verEnded && !thinWallHit);
     }
 
-    // Order the todraw list from further to nearest
-    U_QuicksortWallData(toDraw, 0, toDrawLength-1);
-
     // Draw everything found in reverse order
     for(int tD = 0; tD < toDrawLength; tD++)
     {
@@ -1354,12 +1384,6 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
                 
                 if(curObject->texturesArray[textureType] > 0)
                     R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance);
-
-                if(debugRendering)
-                {
-                    SDL_Delay(10);
-                    SDL_UpdateWindowSurface(application.win);
-                }
             }
             else if(!isOffScreenBottom)
             {
@@ -1385,18 +1409,12 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
 
                 if(curObject->texturesArray[textureType] > 0)
                     R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance);
-
-                if(debugRendering)
-                {
-                    SDL_Delay(10);
-                    SDL_UpdateWindowSurface(application.win);
-                }
             }
         }
 
         // Abs Floor casting
-        if(level == 0)
-            R_FloorCasting(leveledEnd, rayAngle, x, wallHeight);
+        //if(level == 0)
+        //    R_FloorCasting(leveledEnd, rayAngle, x, wallHeight);
 
         // Draw bottom of walls
         float wallBottom = TILE_SIZE * level;
@@ -1417,7 +1435,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         {
             bool isInFront = (player.inFrontGridPosition.x == toDraw[tD].gridPos.x && player.inFrontGridPosition.y == toDraw[tD].gridPos.y);
             // Draw the bottom
-            R_DrawWallBottom(&toDraw[tD], wallHeight, screenZ, isInFront);
+            //R_DrawWallBottom(&toDraw[tD], wallHeight, screenZ, isInFront);
         }
 
         // Draw top of walls
@@ -1439,7 +1457,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         {
             // Draw the bottom
             bool isInFront = (player.inFrontGridPosition.x == toDraw[tD].gridPos.x && player.inFrontGridPosition.y == toDraw[tD].gridPos.y);
-            R_DrawWallTop(&toDraw[tD], wallHeight, screenZ, isInFront);
+            //R_DrawWallTop(&toDraw[tD], wallHeight, screenZ, isInFront);
         }
     }
 }
@@ -1518,6 +1536,90 @@ void R_DrawWallBottom(walldata_t* wall, float height, float screenZ, bool isInFr
                     R_DrawColumnOfPixelShaded(wall->x, y+player.verticalHeadMovement-2, y+player.verticalHeadMovement+2, R_GetPixelFromSurface(tomentdatapack.textures[textureID]->texture, textureX, textureY), lightingMult, straightlinedist);
 
                 startedDrawing = true;
+            }
+        }
+    }
+}
+
+void R_BottomWallCast()
+{
+    float rayAngle = (player.angle - (RADIAN * (PLAYER_FOV / 2)));
+    float finalRayAngle = (player.angle + (RADIAN * (PLAYER_FOV/2)));
+    FIX_ANGLES(rayAngle);
+    FIX_ANGLES(finalRayAngle);
+    float beta = (player.angle - finalRayAngle);
+    FIX_ANGLES(beta);
+
+    // Precompute cos/sin
+    float cosBeta = cos(beta);
+    float cosrayAngle = cos(rayAngle);
+    float sinrayAngle = sin(rayAngle);
+
+    float cosfinalRayAngle = cos(finalRayAngle);
+    float sinfinalRayAngle = sin(finalRayAngle);
+
+    for(int y = 0; y < PROJECTION_PLANE_CENTER+1+player.verticalHeadMovement; y++)
+    {
+        float ceilingHeight = TILE_SIZE;
+
+        // Get distance
+        float straightlinedist = (((ceilingHeight - player.z) * DISTANCE_TO_PROJECTION) / ((PROJECTION_PLANE_CENTER+ player.verticalHeadMovement)-y));
+        float d1 = straightlinedist / cosBeta;
+
+        // Calculate lighting intensity
+        float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d1;
+        floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
+
+        // Get coordinates
+        float floorx1 = player.centeredPos.x + (cosrayAngle * d1);
+        float floory1 = player.centeredPos.y + (sinrayAngle * d1);
+
+        float floor_xa = d1 * (cosfinalRayAngle - cosrayAngle) / PROJECTION_PLANE_WIDTH; 
+        float floor_ya = d1 * (sinfinalRayAngle - sinrayAngle) / PROJECTION_PLANE_WIDTH;
+
+        float floorx = floorx1;
+        float floory = floory1;
+        
+        for(int x = 0; x < PROJECTION_PLANE_WIDTH; x++)
+        {
+            // Get textels
+            int textureX = (int)floorx % TILE_SIZE;
+            int textureY = (int)floory % TILE_SIZE;
+
+            // Get map coordinates
+            int curGridX = floor(floorx / TILE_SIZE);
+            int curGridY = floor(floory / TILE_SIZE);
+
+            wallObject_t* wallObj = R_GetWallObjectFromMap(1, curGridY, curGridX);
+            bool isInWall = (wallObj != NULL && wallObj->assetID > 0);
+
+            floorx += floor_xa;
+            floory += floor_ya;
+            
+            if(!isInWall)
+                continue;
+
+            int floorObjectID = -1;
+            int ceilingObjectID = -1;
+
+            // If the ray is in a grid that is inside the map
+            if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
+            {
+                // Check the floor texture at that point
+                if(currentMap.floorMap[curGridY][curGridX] >= 1)
+                {
+                    floorObjectID = currentMap.floorMap[curGridY][curGridX];
+                    
+                    // Draw floor
+                    R_DrawPixelShaded(x, y, R_GetPixelFromSurface(tomentdatapack.textures[floorObjectID]->texture, textureX, textureY), floorLighting, straightlinedist);
+
+                    if(debugRendering)
+                    {
+                        SDL_UpdateWindowSurface(application.win);
+                        SDL_Rect size = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+                        SDL_BlitScaled(raycast_surface, NULL, win_surface, &size);
+                    }
+                }
             }
         }
     }
@@ -1611,7 +1713,164 @@ void R_DrawWallTop(walldata_t* wall, float height, float screenZ, bool isInFront
 // - rayAngle = the current rayangle
 // - x = the x coordinate on the screen for this specific floor cast call
 //-------------------------------------
-void R_FloorCasting(int end, float rayAngle, int x, float wallHeight)
+void R_FloorCasting(int level, int end, float rayAngle, int x, float wallHeight)
+{
+    if(end > PROJECTION_PLANE_HEIGHT)
+        end = PROJECTION_PLANE_HEIGHT;
+
+    // Floor Casting & Ceiling
+    float beta = (player.angle - rayAngle);
+    FIX_ANGLES(beta);
+
+    int walltop = TILE_SIZE*level;
+
+    // Precompute
+    float cosBeta = cos(beta);
+    float cosrayAngle = cos(rayAngle);
+    float sinrayAngle = sin(rayAngle);
+
+    for(int y = end; y < PROJECTION_PLANE_HEIGHT; y++)
+    {
+        // Get distance
+        float straightlinedist = ((player.z - walltop) * DISTANCE_TO_PROJECTION) / (y - (PROJECTION_PLANE_CENTER+ player.verticalHeadMovement));
+        float d = straightlinedist / cosBeta;
+
+        // Calculate lighting intensity
+        float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d;
+        floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
+
+        // Get coordinates
+        float floorx = player.centeredPos.x + (cosrayAngle * d);
+        float floory = player.centeredPos.y + (sinrayAngle * d);
+
+        // Get textels
+        int textureX = (int)floorx % TILE_SIZE;
+        int textureY = (int)floory % TILE_SIZE;
+
+        // Get map coordinates
+        int curGridX = floor(floorx / TILE_SIZE);
+        int curGridY = floor(floory / TILE_SIZE);
+
+        int floorObjectID = -1;
+        int ceilingObjectID = -1;
+
+        // If the ray is in a grid that is inside the map
+        if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
+        {
+            wallObject_t* wall = R_GetWallObjectFromMap(level-1, curGridY, curGridX);
+                
+            // Check the floor texture at that point
+            if(R_DoesFloorCast(wall))
+            {
+                floorObjectID = wall->texturesArray[TEXTURE_ARRAY_TOP];;
+                
+                if(floorObjectID > 0)
+                {
+                    // Draw floor
+                    R_DrawPixelShaded(x, y, R_GetPixelFromSurface(tomentdatapack.textures[floorObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+
+                    if(debugRendering)
+                    {
+                        SDL_Delay(5);
+                        SDL_UpdateWindowSurface(application.win);
+                        SDL_Rect size = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+                        SDL_BlitScaled(raycast_surface, NULL, win_surface, &size);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void R_FloorCastingHor()
+{
+    float rayAngle = (player.angle - (RADIAN * (PLAYER_FOV / 2)));
+    float finalRayAngle = (player.angle - (RADIAN * (PLAYER_FOV/2))) + (((RADIAN * PLAYER_FOV) / PROJECTION_PLANE_WIDTH) * PROJECTION_PLANE_WIDTH);
+    FIX_ANGLES(rayAngle);
+    FIX_ANGLES(finalRayAngle);
+    float beta = (player.angle - rayAngle);
+    FIX_ANGLES(beta);
+
+    // Precompute cos/sin
+    float cosBeta = cos(beta);
+    float cosrayAngle = cos(rayAngle);
+    float sinrayAngle = sin(rayAngle);
+
+    float cosfinalRayAngle = cos(finalRayAngle);
+    float sinfinalRayAngle = sin(finalRayAngle);
+
+    for(int y = PROJECTION_PLANE_CENTER+1+ player.verticalHeadMovement; y < PROJECTION_PLANE_HEIGHT; y++)
+    {
+        // Get distance
+        float straightlinedist = (player.z * DISTANCE_TO_PROJECTION) / (y - (PROJECTION_PLANE_CENTER+ player.verticalHeadMovement));
+        float d1 = straightlinedist / cosBeta;
+
+        // Calculate lighting intensity
+        float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / straightlinedist;
+        floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
+
+        // Get coordinates
+        float floorx1 = player.centeredPos.x + (cosrayAngle * straightlinedist);
+        float floory1 = player.centeredPos.y + (sinrayAngle * straightlinedist);
+
+        float floor_xa = straightlinedist * (cosfinalRayAngle - cosrayAngle) / PROJECTION_PLANE_WIDTH;
+        float floor_ya = straightlinedist * (sinfinalRayAngle - sinrayAngle) / PROJECTION_PLANE_WIDTH;
+
+        float floorx = floorx1;
+        float floory = floory1;
+
+        for(int x = 0; x < PROJECTION_PLANE_WIDTH; x++)
+        {
+            // Get textels
+            int textureX = (int)floorx % TILE_SIZE;
+            int textureY = (int)floory % TILE_SIZE;
+
+            // Get map coordinates
+            int curGridX = floor(floorx / TILE_SIZE);
+            int curGridY = floor(floory / TILE_SIZE);
+
+            floorx += floor_xa;
+            floory += floor_ya;
+
+            int floorObjectID = -1;
+            int ceilingObjectID = -1;
+
+            // If the ray is in a grid that is inside the map
+            if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
+            {
+                // Check the floor texture at that point
+                if(currentMap.floorMap[curGridY][curGridX] >= 1)
+                {
+                    floorObjectID = currentMap.floorMap[curGridY][curGridX];
+                    
+                    // Draw floor
+                    R_DrawPixelShaded(x, y, R_GetPixelFromSurface(tomentdatapack.textures[floorObjectID]->texture, textureX, textureY), floorLighting, straightlinedist);
+
+                    /*
+                    if(debugRendering)
+                    {
+                        SDL_Delay(5);
+                        SDL_UpdateWindowSurface(application.win);
+                        SDL_Rect size = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+                        SDL_BlitScaled(raycast_surface, NULL, win_surface, &size);
+                    }
+                    */
+                }
+            }
+        }
+
+    }
+}
+
+//-------------------------------------
+// Floorcast and ceilingcast
+// Params:
+// - end = the end of the wall that states where to start to floorcast
+// - rayAngle = the current rayangle
+// - x = the x coordinate on the screen for this specific floor cast call
+//-------------------------------------
+void R_FloorCastingOld(int end, float rayAngle, int x, float wallHeight)
 {
     if(end > PROJECTION_PLANE_HEIGHT)
         end = PROJECTION_PLANE_HEIGHT;
@@ -1695,6 +1954,56 @@ void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallH
         // If the ray is in a grid that is inside the map
         if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
         {
+            wallObject_t* wall = R_GetWallObjectFromMap(level+1, curGridY, curGridX);
+
+            if(R_DoesCeilingCast(wall))
+            {
+                ceilingObjectID = wall->texturesArray[TEXTURE_ARRAY_BOTTOM];
+
+                // Draw ceiling
+                if(ceilingObjectID > 0)
+                    R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[ceilingObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+            }
+        }
+    }
+
+}
+
+void R_CeilingCastingOld(int level, float start, float rayAngle, int x, float wallHeight)
+{
+    // Floor Casting & Ceiling
+    float beta = (player.angle - rayAngle);
+    FIX_ANGLES(beta);
+    float ceilingHeight = TILE_SIZE * (level+1);
+    // If the current ceiling height is greater than 1, ceiling needs to be calculated on its own
+    for(int y = floor(start); y >= 0; y--)
+    {
+        // Get distance
+        float straightlinedist = (((ceilingHeight - player.z) * DISTANCE_TO_PROJECTION) / ((PROJECTION_PLANE_CENTER+ player.verticalHeadMovement)-y));
+        float d = straightlinedist / cos(beta);
+
+        // Get coordinates
+        float floorx = player.centeredPos.x + (cos(rayAngle) * d);
+        float floory = player.centeredPos.y + (sin(rayAngle) * d);
+
+        // Get textels
+        int textureX = (int)floorx % TILE_SIZE;
+        int textureY = (int)floory % TILE_SIZE;
+
+        // Get map coordinates
+        int curGridX = floor(floorx / TILE_SIZE);
+        int curGridY = floor(floory / TILE_SIZE);
+
+        // Calculate lighting intensity
+        float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d;
+        floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
+
+        int floorObjectID = -1;
+        int ceilingObjectID = -1;
+
+        // If the ray is in a grid that is inside the map
+        if(curGridX >= 0 && curGridY >= 0 && curGridX < MAP_WIDTH && curGridY < MAP_HEIGHT)
+        {
             if(currentMap.ceilingMap[curGridY][curGridX] >= 1)
             {
                 ceilingObjectID = currentMap.ceilingMap[curGridY][curGridX];
@@ -1705,6 +2014,16 @@ void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallH
         }
     }
 
+}
+
+bool R_DoesCeilingCast(wallObject_t* obj)
+{
+    return (obj->assetID == 1);
+}
+
+bool R_DoesFloorCast(wallObject_t* obj)
+{
+    return (obj->assetID == 1 || obj->assetID == 7);
 }
 
 //-------------------------------------
