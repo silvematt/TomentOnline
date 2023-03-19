@@ -20,7 +20,7 @@
 #define PLAYER_ROT_SPEED 0.5f
 
 // Speed of the vertical head motion
-#define PLAYER_VERTICAL_HEAD_MOVEMENT_SPEED 60.0f
+#define PLAYER_VERTICAL_HEAD_MOVEMENT_SPEED 120.0f
 
 // Default Player's starting rotation
 #define PLAYER_STARTING_ROT M_PI

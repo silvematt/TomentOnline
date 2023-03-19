@@ -92,6 +92,9 @@ extern uint32_t r_transparencyColor;    // Color marked as "transparency", rende
 // Wall heights, saved for each x for each level
 extern float zBuffer[MAX_PROJECTION_PLANE_HEIGHT][MAX_PROJECTION_PLANE_WIDTH];
 
+extern float floorcastLookUp[MAX_N_LEVELS][MAX_PROJECTION_PLANE_HEIGHT];
+extern float ceilingcastLookUp[MAX_N_LEVELS][MAX_PROJECTION_PLANE_HEIGHT];
+
 // Drawables
 #define MAX_DRAWABLES MAX_PROJECTION_PLANE_WIDTH * MAX_THIN_WALL_TRANSPARENCY_RECURSION + MAXVISABLE
 extern drawabledata_t allDrawables[MAX_DRAWABLES];
@@ -238,10 +241,11 @@ void R_FloorCastingHor();
 // - x = the x coordinate on the screen for this specific floor cast call
 //-------------------------------------
 void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallHeight);
-void R_CeilingCastingOld(int level, float start, float rayAngle, int x, float wallHeight);
+void R_CeilingCastingOld(int level,float start, float rayAngle, int x, float wallHeight);
 bool R_DoesCeilingCast(wallObject_t* obj);
 
 bool R_DoesFloorCast(wallObject_t* obj);
+void R_CeilingCastingHor(int level);
 
 //-------------------------------------
 // Adds a sprite to the visible sprite array and adds its corresponding drawable
