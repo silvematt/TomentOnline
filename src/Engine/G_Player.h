@@ -14,7 +14,7 @@
 #define PLAYER_CENTER_FIX 8     
 
 // Speed of the player
-#define PLAYER_SPEED 250.0f
+#define PLAYER_SPEED 4250.0f
 
 // Rotation speed of the player
 #define PLAYER_ROT_SPEED 0.5f

@@ -144,7 +144,7 @@ void R_RenderDev(void)
     G_PlayerRender();
 
     // Render UI
-    R_DrawMinimap();
+    //R_DrawMinimap();
     G_PlayerUIRender();
     R_UpdateAlertMessages();
 }

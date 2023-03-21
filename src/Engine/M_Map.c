@@ -521,9 +521,9 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
       int indx;                   // Index of the =
       int i;                      // Index for writing in new string
 
-      fgets(curLine, MAX_STRLEN, fp); // Layout =
-      fgets(curLine, MAX_STRLEN, fp); // [ start of map
-      fgets(curLine, MAX_STRLEN, fp); // First Row
+      fgets(curLine, MAX_STRL_R, fp); // Layout =
+      fgets(curLine, MAX_STRL_R, fp); // [ start of map
+      fgets(curLine, MAX_STRL_R, fp); // First Row
 
       // Find the first row
       str = strchr(curLine, '{');
@@ -566,7 +566,7 @@ static void I_LoadMapFromFile(int map[MAP_HEIGHT][MAP_WIDTH], FILE* fp)
                   column++;
                   indx = 1; // Move at the start of the next column
                   row = 0;
-                  fgets(curLine, MAX_STRLEN, fp); // Get next line
+                  fgets(curLine, MAX_STRL_R, fp); // Get next line
                   continue;
             }
             else if(curLine[indx + 1] == ']')

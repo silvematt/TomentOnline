@@ -10,8 +10,8 @@
 #include "U_Utilities.h"
 
 // Max Map Width/Height
-#define MAP_WIDTH 24
-#define MAP_HEIGHT 24
+#define MAP_WIDTH 128
+#define MAP_HEIGHT 128
 #define TILE_SIZE 64
 #define HALF_TILE_SIZE 32
 
