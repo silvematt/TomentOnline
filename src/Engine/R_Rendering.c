@@ -304,14 +304,11 @@ void I_Ray(int level, int playersLevel)
     allDrawablesLength = 0;
 
     float rayAngle = player.angle - (RADIAN * (PLAYER_FOV / 2));
+    
     // Cast a ray foreach pixel of the projection plane
+    bool occlusionEnabled = (level == playersLevel) ? true : false; // for now player can only be on level 0
     for(int x = 0; x < PROJECTION_PLANE_WIDTH; x++)
     {
-        bool occlusionEnabled = (level == playersLevel) ? true : false; // for now player can only be on level 0
-
-        // Variables set by Raycast functions to draw floor
-        float outHeight;
-        float outEnd;
 
         if(occlusionEnabled)
             R_RaycastPlayersLevel(level, x, rayAngle);
