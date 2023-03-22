@@ -156,7 +156,7 @@ void R_DrawPixel(int x, int y, int color);
 //-------------------------------------
 // Draw a single pixel with shading
 //-------------------------------------
-void R_DrawPixelShaded(int x, int y, int color, float intensity, float distance);
+void R_DrawPixelShaded(int x, int y, int color, float intensity, float dist, bool usesFog, float fogBlendingFactor);
 
 //-------------------------------------
 // Draw a column of pixels with shading
@@ -203,8 +203,6 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle);
 // Draws the bottom face of a cube that's located above camera's head
 //-------------------------------------
 void R_DrawWallBottom(walldata_t* wall, float height, float screenZ, bool isInFront);
-
-void R_BottomWallCast();
 
 //-------------------------------------
 // Draws the bottom top of a cube that's located below camera's head
@@ -294,7 +292,7 @@ void R_DrawColumnTextured(int x, int y, int endY, SDL_Surface* texture, int xOff
 //-------------------------------------
 // Draws a column of pixels with texture mapping and shading
 //-------------------------------------
-void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, float wallheight, float intensity, float dist);
+void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, float wallheight, float intensity, float dist, bool hasFog, float fogBlendingFactor);
 
 //-------------------------------------
 // Queue an Alert Message to be displayed
