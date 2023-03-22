@@ -277,15 +277,15 @@ void R_DrawBackground(void)
         // Blit the sky texture
         object_t* curSky = tomentdatapack.skies[currentMap.skyID];
 
-        SDL_Rect size = {SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_Rect pos =  {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+        float aspectRatio = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+        int skyWidth = (int)(curSky->texture->h * aspectRatio);
+        int skyHeight = curSky->texture->h;
 
-        // Correct the offset (player.Angle * 611 is the sweet spot to make the shift back seamless when the angles are fixed (round(6.28318.. * 611) % 640 = 0) )
-        scrollOffset = (int)round(player.angle*611) % SCREEN_WIDTH;
-        
-        // Limit the offset to max 640
-        if(scrollOffset < -SCREEN_WIDTH || scrollOffset > SCREEN_WIDTH)
-            scrollOffset = 0;
+        SDL_Rect size = {skyWidth, 0, skyWidth, skyHeight};
+        SDL_Rect pos = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
+        // Correct the offset (player.Angle * 611 is the sweet spot to make the shift back seamless when the angles are fixed (round(6.28318.. * 611) % skyWidth = 0) )
+        scrollOffset = (int)round(player.angle*611) % skyWidth;
 
         // Shift the sky with the rotation
         size.x = scrollOffset;
@@ -2780,9 +2780,16 @@ void R_DrawPixelShaded(int x, int y, int color, float intensity, float dist)
         r*=intensity;
         g*=intensity;
         b*=intensity;
+
+        // LinearFog
+        float blendingFactor = SDL_clamp((currentMap.floorFogMaxDist - dist) / (currentMap.floorFogMaxDist-currentMap.floorFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
+
+        Uint8 fog_r = (1 - blendingFactor) * currentMap.fogColor.r + blendingFactor * r;
+        Uint8 fog_g = (1 - blendingFactor) * currentMap.fogColor.g + blendingFactor * g;
+        Uint8 fog_b = (1 - blendingFactor) * currentMap.fogColor.b + blendingFactor * b;
     
         zBuffer[y][x] = dist;
-        raycast_pixels[x + y * raycast_surface->w] = SDL_MapRGB(raycast_surface->format, r,g,b);
+        raycast_pixels[x + y * raycast_surface->w] = SDL_MapRGB(raycast_surface->format, fog_r,fog_g,fog_b);
     }
 }
 
@@ -2910,10 +2917,17 @@ void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, in
                 g*=intensity;
                 b*=intensity;
 
+                // LinearFog
+                float blendingFactor = SDL_clamp((currentMap.wallFogMaxDist - dist) / (currentMap.wallFogMaxDist-currentMap.wallFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
+
+                Uint8 fog_r = (1 - blendingFactor) * currentMap.fogColor.r + blendingFactor * r;
+                Uint8 fog_g = (1 - blendingFactor) * currentMap.fogColor.g + blendingFactor * g;
+                Uint8 fog_b = (1 - blendingFactor) * currentMap.fogColor.b + blendingFactor * b;
+
                 // Put it in the framebuffer
 
                 // Update the Z buffer;
-                raycast_pixels[x + i * raycast_surface->w] = SDL_MapRGB(texture->format, r,g,b);
+                raycast_pixels[x + i * raycast_surface->w] = SDL_MapRGB(texture->format, fog_r,fog_g,fog_b);
                 zBuffer[i][x] = dist; 
             }
         }
