@@ -757,8 +757,8 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
         float scale = (DISTANCE_TO_PROJECTION*TILE_SIZE/finalDistance);	
         float topOfWall = bottomOfWall - scale;
 
-        float leveledStart = topOfWall - floor(wallHeight)*level;
-        float leveledEnd = bottomOfWall - floor(wallHeight)*level;
+        int leveledStart = topOfWall - (wallHeight)*level;
+        int leveledEnd = bottomOfWall - (wallHeight)*level;
 
         // Check if start and end are offscreen, if so, don't draw the walls, but draw the bottom/top regardless
         bool isOffScreenBottom = (leveledStart > PROJECTION_PLANE_HEIGHT);
@@ -1344,8 +1344,8 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
         float scale = (DISTANCE_TO_PROJECTION*TILE_SIZE/finalDistance);	
         float topOfWall = bottomOfWall - scale;
 
-        float leveledStart = topOfWall - floor(wallHeight)*level;
-        float leveledEnd = bottomOfWall - floor(wallHeight)*level;
+        int leveledStart = topOfWall - (wallHeight)*level;
+        int leveledEnd = bottomOfWall - (wallHeight)*level;
 
         // If stuff is not offscreen
         if(!(leveledStart < 0 && leveledEnd < 0))
@@ -2092,8 +2092,8 @@ void R_DrawThinWall(walldata_t* cur)
     float start = floor(wallOffset);
     float end = floor(wallOffset+wallHeight);
 
-    float leveledStart = start-(wallHeight*cur->level);
-    float leveledEnd = end-(wallHeight*cur->level);
+    int leveledStart = start-(wallHeight*cur->level);
+    int leveledEnd = end-(wallHeight*cur->level);
 
     // Check if start and end are offscreen, if so, don't draw the walls, but draw the bottom/top regardless
     bool isOffScreenBottom = (leveledStart > PROJECTION_PLANE_HEIGHT);
