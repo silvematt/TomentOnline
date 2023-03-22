@@ -161,7 +161,7 @@ void R_DrawPixelShaded(int x, int y, int color, float intensity, float dist, boo
 //-------------------------------------
 // Draw a column of pixels with shading
 //-------------------------------------
-void R_DrawColumnOfPixelShaded(int x, int y, int endY, int color, float intensity, float distance);
+void R_DrawColumnOfPixelShaded(int x, int y, int endY, int color, float intensity, float distance, bool usesFog, float fogBlendingFactor);
 
 //-------------------------------------
 // Draw a column of pixel

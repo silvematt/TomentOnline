@@ -1542,8 +1542,8 @@ void R_DrawWallBottom(walldata_t* wall, float height, float screenZ, bool isInFr
                 // Draw Bottom
                 int textureID = wall->objectHit->texturesArray[TEXTURE_ARRAY_BOTTOM];
 
-                if(textureID > 0)
-                    R_DrawColumnOfPixelShaded(wall->x, y+player.verticalHeadMovement-2, y+player.verticalHeadMovement+2, R_GetPixelFromSurface(tomentdatapack.textures[textureID]->texture, textureX, textureY), lightingMult, straightlinedist);
+                //if(textureID > 0)
+                    //R_DrawColumnOfPixelShaded(wall->x, y+player.verticalHeadMovement-2, y+player.verticalHeadMovement+2, R_GetPixelFromSurface(tomentdatapack.textures[textureID]->texture, textureX, textureY), lightingMult, straightlinedist);
 
                 startedDrawing = true;
             }
@@ -1623,7 +1623,7 @@ void R_DrawWallTop(walldata_t* wall, float height, float screenZ, bool isInFront
                 
                 if(textureID > 0)
                 {
-                    R_DrawColumnOfPixelShaded(wall->x, y+player.verticalHeadMovement-1, y+player.verticalHeadMovement+1, R_GetPixelFromSurface(tomentdatapack.textures[textureID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+                    //R_DrawColumnOfPixelShaded(wall->x, y+player.verticalHeadMovement-1, y+player.verticalHeadMovement+1, R_GetPixelFromSurface(tomentdatapack.textures[textureID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
                 }
 
                 startedDrawing = true;
@@ -1703,12 +1703,18 @@ void R_FloorCasting(int level, int end, float rayAngle, int x, float wallHeight)
                     float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d;
                     floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
 
+                    bool hasFog = currentMap.hasFog;
+                    float fogFactor = 0.0f;
+                    if(hasFog)
+                        fogFactor = SDL_clamp((currentMap.wallFogMaxDist - straightlinedist) / (currentMap.wallFogMaxDist-currentMap.wallFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
+
+
                     // Get textels
                     int textureX = (int)floorx % TILE_SIZE;
                     int textureY = (int)floory % TILE_SIZE;
 
                     // Draw floor
-                    R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[floorObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+                    R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[floorObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f, hasFog, fogFactor);
                 }
             }
         }
@@ -1914,11 +1920,16 @@ void R_CeilingCasting(int level, float start, float rayAngle, int x, float wallH
                     float floorLighting = (PLAYER_POINT_LIGHT_INTENSITY + currentMap.floorLight) / d;
                     floorLighting = SDL_clamp(floorLighting, 0, 1.0f);
 
+                    bool hasFog = currentMap.hasFog;
+                    float fogFactor = 0.0f;
+                    if(hasFog)
+                        fogFactor = SDL_clamp((currentMap.wallFogMaxDist - straightlinedist) / (currentMap.wallFogMaxDist-currentMap.wallFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
+
                     // Get textels
                     int textureX = (int)floorx % TILE_SIZE;
                     int textureY = (int)floory % TILE_SIZE;
 
-                    R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[ceilingObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+                    R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[ceilingObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f, hasFog, fogFactor);
                 }
             }
         }
@@ -1966,7 +1977,7 @@ void R_CeilingCastingOld(int level, float start, float rayAngle, int x, float wa
                 ceilingObjectID = currentMap.ceilingMap[curGridY][curGridX];
 
                 // Draw ceiling
-                R_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[ceilingObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
+                //_DrawColumnOfPixelShaded(x, y, y+1, R_GetPixelFromSurface(tomentdatapack.textures[ceilingObjectID]->texture, textureX, textureY), floorLighting, straightlinedist-1.0f);
             }
         }
     }
@@ -2750,7 +2761,7 @@ void R_DrawPixelShaded(int x, int y, int color, float intensity, float dist, boo
 //-------------------------------------
 // Draw a column of pixels with shading
 //-------------------------------------
-void R_DrawColumnOfPixelShaded(int x, int y, int endY, int color, float intensity, float distance)
+void R_DrawColumnOfPixelShaded(int x, int y, int endY, int color, float intensity, float distance, bool usesFog, float fogBlendingFactor)
 {
     Uint32 pixel;
 
@@ -2760,6 +2771,13 @@ void R_DrawColumnOfPixelShaded(int x, int y, int endY, int color, float intensit
     r*=intensity;
     g*=intensity;
     b*=intensity;
+
+    if(usesFog)
+    {
+        r = (1 - fogBlendingFactor) * currentMap.fogColor.r + fogBlendingFactor * r;
+        g = (1 - fogBlendingFactor) * currentMap.fogColor.g + fogBlendingFactor * g;
+        b = (1 - fogBlendingFactor) * currentMap.fogColor.b + fogBlendingFactor * b;
+    }
 
     pixel = SDL_MapRGB(raycast_surface->format, r,g,b);
 
