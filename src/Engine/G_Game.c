@@ -72,7 +72,7 @@ void G_InitGame(void)
         projectilesHead = NULL;
     }
 
-    G_ChangeMap("lvl1");
+    G_ChangeMap("devmap");
     
     gameTimer->Start(gameTimer);
 }

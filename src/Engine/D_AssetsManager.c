@@ -675,8 +675,9 @@ void D_InitLoadSprites(void)
     object_t* aiSkeletonBurnt = (object_t*)malloc(sizeof(object_t));
     object_t* pickupGreatsword = (object_t*)malloc(sizeof(object_t));
     object_t* aiSkeletonLord = (object_t*)malloc(sizeof(object_t));
+    object_t* achtung = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 19; // Set length
+    tomentdatapack.spritesLength = 20; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -697,6 +698,7 @@ void D_InitLoadSprites(void)
     D_InitObject(aiSkeletonBurnt);
     D_InitObject(pickupGreatsword);
     D_InitObject(aiSkeletonLord);
+    D_InitObject(achtung);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -718,6 +720,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_SkeletonBurnt] = aiSkeletonBurnt;
     tomentdatapack.sprites[S_PickupGreatsword] = pickupGreatsword;
     tomentdatapack.sprites[DS_SkeletonLord] = aiSkeletonLord;
+    tomentdatapack.sprites[S_Achtung] = achtung;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1215,6 +1218,23 @@ void D_InitLoadSprites(void)
 
     // Callback
     tomentdatapack.sprites[DS_SkeletonLord]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
+    // Static Skull
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_ACHTUNG].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_ACHTUNG].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_ACHTUNG))
+        tomentdatapack.sprites[S_Achtung]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.sprites[S_Achtung]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_Achtung]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[S_Achtung]->flags, 5); // Set 8 angled sprite
+
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_Achtung] = 0;
+    // Callback
+    tomentdatapack.sprites[S_Achtung]->Callback = NULL;
 
     SDL_FreeSurface(temp1);
 
@@ -1236,6 +1256,7 @@ void D_InitLoadSprites(void)
     D_SetObject(aiSkeletonBurnt, DS_SkeletonBurnt, tomentdatapack.sprites[DS_SkeletonBurnt]->texture, NULL);
     D_SetObject(pickupGreatsword, S_PickupGreatsword, tomentdatapack.sprites[S_PickupGreatsword]->texture, NULL);
     D_SetObject(aiSkeletonLord, DS_SkeletonLord, tomentdatapack.sprites[DS_SkeletonLord]->texture, NULL);
+    D_SetObject(achtung, S_Achtung, tomentdatapack.sprites[S_Achtung]->texture, NULL);
 }
 
 

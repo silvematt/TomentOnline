@@ -798,7 +798,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
                 textureType = TEXTURE_ARRAY_DOWN;
             
             if(curObject->texturesArray[textureType] > 0)
-                R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+                R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
         }
         else if(!isOffScreenBottom)
         {
@@ -823,7 +823,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
                 textureType = TEXTURE_ARRAY_LEFT;
 
             if(curObject->texturesArray[textureType] > 0)
-                R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+                R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
 
         }
 
@@ -1393,7 +1393,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
                     textureType = TEXTURE_ARRAY_DOWN;
                 
                 if(curObject->texturesArray[textureType] > 0)
-                    R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+                    R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
             }
             else if(!isOffScreenBottom)
             {
@@ -1418,7 +1418,7 @@ void R_RaycastLevelNoOcclusion(int level, int x, float _rayAngle)
                     textureType = TEXTURE_ARRAY_LEFT;
 
                 if(curObject->texturesArray[textureType] > 0)
-                    R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+                    R_DrawStripeTexturedShaded((x), leveledStart+1, leveledEnd+1, tomentdatapack.textures[curObject->texturesArray[textureType]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
             }
         }
 
@@ -2126,7 +2126,7 @@ void R_DrawThinWall(walldata_t* cur)
             offset = (TILE_SIZE-1) - offset;
         
         if(cur->extraData == 1) // If it is visible
-            R_DrawStripeTexturedShaded((cur->x), leveledStart, leveledEnd, tomentdatapack.textures[curObject->texturesArray[0]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+            R_DrawStripeTexturedShaded((cur->x), leveledStart, leveledEnd, tomentdatapack.textures[curObject->texturesArray[0]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
     }
     else if(!isOffScreenBottom)
     {
@@ -2142,7 +2142,7 @@ void R_DrawThinWall(walldata_t* cur)
             offset = (TILE_SIZE-1) - offset;
 
         if(cur->extraData == 1) // If it is visible
-            R_DrawStripeTexturedShaded((cur->x), leveledStart, leveledEnd, tomentdatapack.textures[curObject->texturesArray[0]]->texture, offset, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
+            R_DrawStripeTexturedShaded((cur->x), leveledStart, leveledEnd, tomentdatapack.textures[curObject->texturesArray[0]]->texture, offset, 0, wallHeightUncapped, wallLighting, finalDistance, hasFog, fogFactor);
     }
 }
 
@@ -2240,7 +2240,7 @@ void R_AddDeadDynamicToVisibleSprite(int level, int gridX, int gridY)
 //-------------------------------------
 // Draws the passed sprite
 //-------------------------------------
-void R_DrawSprite(sprite_t* sprite)
+void R_DrawSprite(sprite_t* sprite, bool angled)
 {
     // Done in degrees to avoid computations (even if I could cache radians values and stuff)
     // Calculate angle and convert to degrees (*-1 makes sure it uses SDL screen space coordinates for unit circle and quadrants)
@@ -2291,12 +2291,26 @@ void R_DrawSprite(sprite_t* sprite)
     if(hasFog)
         fogFactor = SDL_clamp((currentMap.wallFogMaxDist - dist) / (currentMap.wallFogMaxDist-currentMap.wallFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
 
+    
+    // Select the angle frame
+    int yOffsetValue = 0;
+    if(angled)
+    {
+        float angle2 = atan2(sprite->centeredPos.x - player.centeredPos.x, sprite->centeredPos.y - player.centeredPos.y) / (2 * M_PI) + 0.5f - sprite->angle / (2 * M_PI);
+        int angleFrame = (int)(round(angle2 * MAX_VIEWEABLE_SPRITE_ANGLES)) % MAX_VIEWEABLE_SPRITE_ANGLES;
+        if (angleFrame < 0) {
+            angleFrame += MAX_VIEWEABLE_SPRITE_ANGLES;
+        }
+        int offsetFrame = angleFrame % MAX_VIEWEABLE_SPRITE_ANGLES;
+        yOffsetValue = UNIT_SIZE*offsetFrame;
+    }
+
     for(int j = 0; j < sprite->height; j++)
     {
         offset = j*TILE_SIZE/sprite->height + (UNIT_SIZE*currentFrame);
         drawX = PROJECTION_PLANE_WIDTH-(spriteX)+j-(sprite->height/2);
 
-        R_DrawStripeTexturedShaded(drawX, drawYStart-(sprite->height*sprite->level)+1, drawYEnd-(sprite->height*sprite->level)+1, tomentdatapack.sprites[sprite->spriteID]->texture,offset, sprite->height, lighting, dist, hasFog, fogFactor);
+        R_DrawStripeTexturedShaded(drawX, drawYStart-(sprite->height*sprite->level)+1, drawYEnd-(sprite->height*sprite->level)+1, tomentdatapack.sprites[sprite->spriteID]->texture,offset, yOffsetValue, sprite->height, lighting, dist, hasFog, fogFactor);
     }
 
     // Draws the center of the sprite
@@ -2306,7 +2320,7 @@ void R_DrawSprite(sprite_t* sprite)
 //-------------------------------------
 // Draws the passed sprite
 //-------------------------------------
-void R_DrawDynamicSprite(dynamicSprite_t* sprite)
+void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
 {
     // Done in degrees to avoid computations (even if I could cache radians values and stuff)
     // Calculate angle and convert to degrees (*-1 makes sure it uses SDL screen space coordinates for unit circle and quadrants)
@@ -2362,6 +2376,19 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite)
         fogFactor = SDL_clamp((currentMap.wallFogMaxDist - dist) / (currentMap.wallFogMaxDist-currentMap.wallFogMinDist), 0, 1); // Calculate blending factor based on distance and max/min distances
 
 
+    // Select the angle frame
+    int yOffsetValue = 0;
+    if(angled)
+    {
+        float angle2 = atan2(sprite->base.centeredPos.x - player.centeredPos.x, sprite->base.centeredPos.y - player.centeredPos.y) / (2 * M_PI) + 0.5f - sprite->base.angle / (2 * M_PI);
+        int angleFrame = (int)(round(angle2 * MAX_VIEWEABLE_SPRITE_ANGLES)) % MAX_VIEWEABLE_SPRITE_ANGLES;
+        if (angleFrame < 0) {
+            angleFrame += MAX_VIEWEABLE_SPRITE_ANGLES;
+        }
+        int offsetFrame = angleFrame % MAX_VIEWEABLE_SPRITE_ANGLES;
+        yOffsetValue = UNIT_SIZE*offsetFrame;
+    }
+
     // Select Animation
     for(int j = 0; j < sprite->base.height; j++)
     {
@@ -2369,7 +2396,7 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite)
         drawX = PROJECTION_PLANE_WIDTH-(spriteX)+j-(sprite->base.height/2);
 
         if(sprite->curAnim != NULL)
-            R_DrawStripeTexturedShaded(drawX, drawYStart, drawYEnd, sprite->curAnim, offset, sprite->base.height, lighting, dist, hasFog, fogFactor);
+            R_DrawStripeTexturedShaded(drawX, drawYStart, drawYEnd, sprite->curAnim, offset, yOffsetValue, sprite->base.height, lighting, dist, hasFog, fogFactor);
     }
 
     // Draws the center of the sprite
@@ -2381,8 +2408,6 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite)
 //-------------------------------------
 void R_DrawDrawables(void)
 {
-    U_QuicksortDrawables(allDrawables, 0, allDrawablesLength-1);
-
     for(int i = 0; i < allDrawablesLength; i++)
     {
         switch(allDrawables[i].type)
@@ -2392,11 +2417,13 @@ void R_DrawDrawables(void)
                 break;
 
             case DRWB_SPRITE:
-                R_DrawSprite(allDrawables[i].spritePtr);
+                // Draw 8 angles or not
+                R_DrawSprite(allDrawables[i].spritePtr, U_GetBit(&tomentdatapack.sprites[allDrawables[i].spritePtr->spriteID]->flags, 5) == 1);
+
                 break;
 
             case DRWB_DYNAMIC_SPRITE:
-                R_DrawDynamicSprite(allDrawables[i].dynamicSpritePtr);
+                R_DrawDynamicSprite(allDrawables[i].dynamicSpritePtr, U_GetBit(&tomentdatapack.sprites[allDrawables[i].dynamicSpritePtr->base.spriteID]->flags, 5) == 1);
                 break;
         }
     }
@@ -2404,7 +2431,7 @@ void R_DrawDrawables(void)
     projectileNode_t* cur = projectilesHead;
     while(cur != NULL)
     {
-        R_DrawDynamicSprite(&cur->this);
+        R_DrawDynamicSprite(&cur->this, false);
         cur = cur->next;
     }
 
@@ -2863,7 +2890,7 @@ void R_DrawColumnTextured(int x, int y, int endY, SDL_Surface* texture, int xOff
 // xOffset = the x index of the texture for this column
 // wallheight = the height of the wall to be drawn (must be uncapped)
 //-------------------------------------------------
-void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, float wallheight, float intensity, float dist, bool hasFog, float fogBlendingFactor)
+void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, int yOffset, float wallheight, float intensity, float dist, bool hasFog, float fogBlendingFactor)
 {
     // The offset to extract Y pixels from the texture, this is != 0 only if the wall is bigger than the projection plane height
     float textureYoffset = 0.0f;
@@ -2872,7 +2899,7 @@ void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, in
     float offset = TILE_SIZE / (wallheight);
 
     // The actual Y index
-    float textureY = textureYoffset * offset;
+    float textureY = textureYoffset * offset + yOffset;
     for(int i = y; i < endY; i++)
     {
         if(x < PROJECTION_PLANE_WIDTH && x >= 0 && i < PROJECTION_PLANE_HEIGHT && i >= 0) // Don't overflow

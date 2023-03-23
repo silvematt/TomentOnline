@@ -75,7 +75,8 @@ typedef enum spritesObjectID_e
     S_AltarMana,
     DS_SkeletonBurnt,
     S_PickupGreatsword,
-    DS_SkeletonLord
+    DS_SkeletonLord,
+    S_Achtung
 } spritesObjectID_t;
 
 // All skies textures
@@ -299,6 +300,12 @@ typedef enum playerFPID_e
         // 0000 0  000
     //          \
     //           1 = Auto call callback (if present) upon player's collision
+
+        // 000 0 0000
+    //          \
+    //           1 = Is 8 angled sprite
+
+
 */
 
 // Table of Content elements for opening archives (MUST BE IN SYNCH WITH ARCH)
@@ -382,7 +389,8 @@ typedef enum imgIDs_e
     IMG_ID_SKELETON_LORD_DEATH,
     IMG_ID_SKELETON_LORD_SPELL_HELL,
     IMG_ID_SKELETON_LORD_SPELL_RESURRECTION,
-    IMG_ID_AI_SKELETON_RESURRECTION
+    IMG_ID_AI_SKELETON_RESURRECTION,
+    IMG_ID_ACHTUNG
 } imgIDs_e;
 
 // Archt Data

@@ -17,6 +17,7 @@
 // Max values the projection plane can be
 #define MAX_PROJECTION_PLANE_WIDTH 800
 #define MAX_PROJECTION_PLANE_HEIGHT 600
+#define MAX_VIEWEABLE_SPRITE_ANGLES 8
 
 // Runtime Graphichs
 typedef enum GraphicsOptions_e
@@ -263,12 +264,12 @@ void R_AddDeadDynamicToVisibleSprite(int level, int gridX, int gridY);
 //-------------------------------------
 // Draws the visible sprites
 //-------------------------------------
-void R_DrawSprite(sprite_t* sprite);
+void R_DrawSprite(sprite_t* sprite, bool angled);
 
 //-------------------------------------
 // Draws the visible sprites
 //-------------------------------------
-void R_DrawDynamicSprite(dynamicSprite_t* sprite);
+void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled);
 
 //-------------------------------------
 // Given a level and the grid coordinates, returns what is in the map
@@ -292,7 +293,7 @@ void R_DrawColumnTextured(int x, int y, int endY, SDL_Surface* texture, int xOff
 //-------------------------------------
 // Draws a column of pixels with texture mapping and shading
 //-------------------------------------
-void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, float wallheight, float intensity, float dist, bool hasFog, float fogBlendingFactor);
+void R_DrawStripeTexturedShaded(int x, int y, int endY, SDL_Surface* texture, int xOffset, int yOffset, float wallheight, float intensity, float dist, bool hasFog, float fogBlendingFactor);
 
 //-------------------------------------
 // Queue an Alert Message to be displayed
