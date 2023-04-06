@@ -3,11 +3,14 @@
 #include "R_Rendering.h"
 #include "T_TextRendering.h"
 #include "D_AssetsManager.h"
+#include "../Network/netdef.h"
 
 //-------------------------------------
 // BUTTONS CALLBACKS
 //-------------------------------------
 static void CALLBACK_MAINMENU_NewGame(void);
+static void CALLBACK_MAINMENU_HostGame(void);
+static void CALLBACK_MAINMENU_JoinGame(void);
 static void CALLBACK_MAINMENU_Options(void);
 static void CALLBACK_MAINMENU_Quit(void);
 static void CALLBACK_ReturnToMainMenu(void);
@@ -21,8 +24,8 @@ static void CALLBACK_Continue(void);
 menuelement_t MainMenuElements[] =
 {
     {"Continue",    {220, 150, 400, 40}, CALLBACK_Continue},
-    {"New  Game",   {220, 200, 400, 40}, CALLBACK_MAINMENU_NewGame},
-    {"Load  Game",  {220, 250, 400, 40}, NULL},
+    {"Host  Game",   {220, 200, 400, 40}, CALLBACK_MAINMENU_HostGame},
+    {"Join  Game",  {220, 250, 400, 40}, CALLBACK_MAINMENU_JoinGame},
     {"Options",     {220, 300, 400, 40}, CALLBACK_MAINMENU_Options},
     {"About",       {220, 350, 400, 40}, CALLBACK_MAINMENU_About},
     {"Quit",        {220, 400, 400, 40}, CALLBACK_MAINMENU_Quit}
@@ -186,6 +189,24 @@ static void CALLBACK_MAINMENU_NewGame(void)
 
     G_InitGame();
     A_ChangeState(GSTATE_GAME);
+}
+
+static void CALLBACK_MAINMENU_HostGame(void)
+{
+    // Initialize the player
+    player.hasBeenInitialized = false;
+
+    NET_InitializeNet();
+    NET_HostGameProcedure();
+}
+
+static void CALLBACK_MAINMENU_JoinGame(void)
+{
+    // Initialize the player
+    player.hasBeenInitialized = false;
+
+    NET_InitializeNet();
+    NET_JoinGameProcedure();
 }
 
 static void CALLBACK_MAINMENU_Options(void)

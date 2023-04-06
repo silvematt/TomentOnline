@@ -102,7 +102,7 @@ void G_GameLoop(void)
 
     frame_time = SDL_GetTicks()-start_time;
     fps = (frame_time > 0) ? 1000.0f / frame_time : 0.0f;
-    printf("%f\n", fps);
+    //printf("%f\n", fps);
 
 }
 

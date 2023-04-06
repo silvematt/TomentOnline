@@ -1056,5 +1056,5 @@ fogColorB=128;
 wallFogMinDist=10.0f;
 wallFogMaxDist=1000.0f;
 floorFogMinDist=10.0f;
-floorFogMaxDist=500.0f;
+floorFogMaxDist=1000.0f;
 ;
