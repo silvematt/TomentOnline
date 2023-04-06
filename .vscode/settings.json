@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "cmath": "c"
+        "cmath": "c",
+        "netdef.h": "c"
     }
 }

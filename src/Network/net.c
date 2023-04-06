@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "netdef.h"
+#include "packet.h"
 
 netplayer_t hostPlayer;
 netplayer_t otherPlayer;
@@ -18,6 +19,7 @@ int NET_HostGameProcedure()
     hostPlayer.id = 0;
     strcpy(hostPlayer.name, "PLAYER 1");
     
+    // Create the socket to listen
     hostPlayer.socket = INVALID_SOCKET;
     hostPlayer.socket = socket(AF_INET, SOCK_STREAM, 0);
     if(hostPlayer.socket == INVALID_SOCKET)
@@ -31,7 +33,7 @@ int NET_HostGameProcedure()
     u_long iMode = 1;
     ioctlsocket(hostPlayer.socket, FIONBIO, &iMode);
 
-    // Set address
+    // Set address of the host
     memset(hostPlayer.address.sin_zero, 0, sizeof(hostPlayer.address.sin_zero));
     hostPlayer.address.sin_family = AF_INET;
     hostPlayer.address.sin_addr.S_un.S_addr = htons(INADDR_ANY);
@@ -83,6 +85,9 @@ int NET_HostGameProcedure()
             otherPlayer.socket = acceptedSocket;
             otherPlayer.address = otherAddress;
             otherPlayerConnected = TRUE;
+            otherPlayer.status = NETSTS_JUST_CONNECTED;
+
+            // Send greet?
         }
 
         // Else check if user wishes to cancel
@@ -100,16 +105,22 @@ int NET_HostGameProcedure()
     }
     else if(otherPlayerConnected)
     {
-        // Shutdown the socket
+        // Shutdown and close the listening socket
         shutdown(hostPlayer.socket, SD_RECEIVE);
         closesocket(hostPlayer.socket);
 
         printf("All done.\n");
 
-        char buffer[35];
-        recv(otherPlayer.socket, buffer, 35, 0);
+        // Receive greet (for testing purposes, may not receive because socket is non-blocking, set to blocking and it will receive the other player's greet)
+        char buffer[MAX_PCKT_DATA];
+        int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
+        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
 
-        printf("He said: %s\n", buffer);
+        // Manage packet, if receivedPacket->id == PCKT_GREET:
+        pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
+
+        printf("%d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
+
         return 0;
     }
     else
@@ -156,16 +167,24 @@ int NET_JoinGameProcedure()
     char readAddress[1024] = "\0";
     printf("Enter address in 192.168.1.1 format...\n");
     gets(readAddress);
+    fflush(stdin);
 
     u_short readPort;
     printf("Enter port number\n");
     scanf("%hu", &readPort);
+    fflush(stdin);
 
+    char username[NET_MAX_PLAYER_NAME_LENGTH];
+    printf("Enter username: ");
+    gets(username);
+    fflush(stdin);
+
+    
+    // Setup host
     struct sockaddr_in hostAddress;
     int hostAddressLen = sizeof(hostAddress);
     memset(hostAddress.sin_zero, 0, sizeof(hostAddress.sin_zero));
 
-    // Setup host
     hostAddress.sin_family = AF_INET;
     hostAddress.sin_addr.S_un.S_addr = inet_addr(readAddress);
     hostAddress.sin_port = htons(readPort);
@@ -184,8 +203,15 @@ int NET_JoinGameProcedure()
 
         printf("Connection successfull!\n");
 
-        send(otherPlayer.socket, "MESSAGE?", 9, 0);
+        otherPlayer.status = NETSTS_JUST_CONNECTED;
 
+        // Send greet
+        // Make packet
+        pckt_t* greetPacket = PCKT_MakeGreetPacket(username);
+        char* sendBuff = PCKT_PcktToBytes(greetPacket);
+        int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
+
+        printf("SENDED VALUE : %d | %s\n", sendVal, sendBuff);
         return 0;
     }
     else
