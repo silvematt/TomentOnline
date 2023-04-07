@@ -14,7 +14,9 @@ typedef enum
     MENU_DEATH,
     MENU_OPTIONS,
     MENU_END_GAME,
-    MENU_ABOUT
+    MENU_ABOUT,
+    MENU_HOSTGAME,
+    MENU_JOINGAME
 } menusIDs_e;
 
 
@@ -51,6 +53,13 @@ extern menu_t EndGameMenu;
 
 extern menuelement_t AboutMenuElements[];
 extern menu_t AboutMenu;
+
+// TomentOnline
+extern menuelement_t HostGameMenuElements[];
+extern menu_t HostGameMenu;
+
+extern menuelement_t JoinGameMenuElements[];
+extern menu_t JoinGameMenu;
 
 //-------------------------------------
 // Initialize the Main Menu state

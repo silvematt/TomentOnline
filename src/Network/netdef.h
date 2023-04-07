@@ -15,6 +15,7 @@ typedef enum netstatus
 {
     NETSTS_NULL = 0,
     NETSTS_JUST_CONNECTED,
+    NETSTS_HAVE_TO_GREET,
     NETSTS_GREETED,
     NETSTS_PREPARING,
     NETSTS_READY,
@@ -36,13 +37,27 @@ typedef struct netplayer
 extern netplayer_t hostPlayer;
 extern netplayer_t otherPlayer;
 
+extern boolean wantsToAbortHosting;
+extern boolean wantsToAbortJoining;
+
 // Initializes network related stuff
 int NET_InitializeNet();
 
 // Starts the procedure to host a game
 int NET_HostGameProcedure();
+int NET_HostGameWaitForConnection();
+int NET_HostGameWaitForGreet();
+int NET_HostGameSendGreet();
+
+int NET_HostGameAbortConnection();
 
 // Starts the procedure to join a game
 int NET_JoinGameProcedure();
+int NET_JoinGameWaitForConnection();
+int NET_JoinGameOnConnectionEstabilishes();
+int NET_JoinGameWaitForGreet();
+
+int NET_JoinGameAbortConnection();
+
 
 #endif

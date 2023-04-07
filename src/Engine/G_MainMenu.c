@@ -19,6 +19,9 @@ static void CALLBACK_OPTIONSMENU_ChangeGraphics(void);
 static void CALLBACK_MAINMENU_About(void);
 static void CALLBACK_Continue(void);
 
+static void CALLBACK_HOSTMENU_Abort(void);
+static void CALLBACK_JOINMENU_Abort(void);
+
 // ----------------------------
 // Define Menus
 // ----------------------------
@@ -58,6 +61,20 @@ menuelement_t AboutMenuElements[] =
     {"Return",    {220, 350, 400, 40}, CALLBACK_ReturnToMainMenu},
 };
 menu_t AboutMenu = {MENU_ABOUT, AboutMenuElements, 1, &AboutMenuElements[0]};
+
+menuelement_t HostGameMenuElements[] =
+{
+    {"Abort",   {220, 350, 400, 40}, CALLBACK_HOSTMENU_Abort},
+};
+
+menu_t HostGameMenu = {MENU_HOSTGAME, HostGameMenuElements, 1, &HostGameMenuElements[0]};
+
+menuelement_t JoinGameMenuElements[] =
+{
+    {"Abort",   {220, 350, 400, 40}, CALLBACK_JOINMENU_Abort},
+};
+
+menu_t JoinGameMenu = {MENU_JOINGAME, JoinGameMenuElements, 1, &JoinGameMenuElements[0]};
 
 menu_t* currentMenu;
 
@@ -121,6 +138,72 @@ void G_RenderCurrentMenuBackground(void)
             T_DisplayTextScaled(FONT_BLKCRY, "About", 210, 80, 2.0f);
             T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia Silvestro  ( silvematt)\nVersion: 1.0", 80, 200, 1.0f);
 
+            break;
+        }
+
+        // Host Game
+        case MENU_HOSTGAME:
+        {
+            if(otherPlayer.status == NETSTS_NULL)
+            {
+                T_DisplayTextScaled(FONT_BLKCRY, "Waiting for players...", 210, 80, 2.0f);
+                int result = NET_HostGameWaitForConnection();
+
+                // If user wanted to abort
+                if(result == 2)
+                {
+                    wantsToAbortHosting = FALSE;
+                    G_SetMenu(&MainMenu);
+                    A_ChangeState(GSTATE_MENU);
+                    return;
+                }
+            }
+            else if(otherPlayer.status == NETSTS_JUST_CONNECTED)
+            {
+                T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 210, 80, 2.0f);
+                NET_HostGameWaitForGreet();
+            }
+            else if(otherPlayer.status == NETSTS_GREETED)
+            {
+                char string[22+NET_MAX_PLAYER_NAME_LENGTH] = "Connected to player: ";
+                strcat(string, otherPlayer.name);
+                T_DisplayTextScaled(FONT_BLKCRY, string, 210, 80, 2.0f);
+
+                // Receive packets (wait for readypacket etc)
+            }
+
+            break;
+        }
+
+        case MENU_JOINGAME:
+        {
+            if(otherPlayer.status == NETSTS_NULL)
+            {
+                T_DisplayTextScaled(FONT_BLKCRY, "Connecting to player...", 210, 80, 2.0f);
+                int result = NET_JoinGameWaitForConnection();
+
+                // If user wanted to abort
+                if(result == 2)
+                {
+                    wantsToAbortJoining = FALSE;
+                    G_SetMenu(&MainMenu);
+                    A_ChangeState(GSTATE_MENU);
+                    return;
+                }
+            }
+            else if(otherPlayer.status == NETSTS_JUST_CONNECTED)
+            {
+                T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 210, 80, 2.0f);
+                NET_JoinGameWaitForGreet();
+            }
+            else if(otherPlayer.status == NETSTS_GREETED)
+            {
+                char string[22+NET_MAX_PLAYER_NAME_LENGTH] = "Connected to player: ";
+                strcat(string, otherPlayer.name);
+                T_DisplayTextScaled(FONT_BLKCRY, string, 210, 80, 2.0f);
+
+                // Receive packets (wait for readypacket etc)
+            }
             break;
         }
     }
@@ -198,7 +281,11 @@ static void CALLBACK_MAINMENU_HostGame(void)
     player.hasBeenInitialized = false;
 
     NET_InitializeNet();
-    NET_HostGameProcedure();
+    if(NET_HostGameProcedure() == 0)
+    {
+        G_SetMenu(&HostGameMenu);
+        A_ChangeState(GSTATE_MENU);
+    }
 }
 
 static void CALLBACK_MAINMENU_JoinGame(void)
@@ -207,7 +294,11 @@ static void CALLBACK_MAINMENU_JoinGame(void)
     player.hasBeenInitialized = false;
 
     NET_InitializeNet();
-    NET_JoinGameProcedure();
+    if(NET_JoinGameProcedure() == 0)
+    {
+        G_SetMenu(&JoinGameMenu);
+        A_ChangeState(GSTATE_MENU);
+    }
 }
 
 static void CALLBACK_MAINMENU_Options(void)
@@ -250,4 +341,14 @@ static void CALLBACK_MAINMENU_About(void)
 {
     G_SetMenu(&AboutMenu);
     A_ChangeState(GSTATE_MENU);
+}
+
+static void CALLBACK_HOSTMENU_Abort(void)
+{
+    wantsToAbortHosting =  TRUE;
+}
+
+static void CALLBACK_JOINMENU_Abort(void)
+{
+    wantsToAbortJoining =  TRUE;
 }

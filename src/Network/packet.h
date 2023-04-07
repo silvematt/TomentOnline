@@ -5,7 +5,7 @@
 
 #define MAX_PCKT_DATA 1300
 
-#define PCKT_GREET 203
+#define PCKT_GREET 1
 
 typedef struct pckt_t
 {

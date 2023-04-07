@@ -5,16 +5,31 @@
 netplayer_t hostPlayer;
 netplayer_t otherPlayer;
 
+// Input related
+boolean wantsToAbortHosting = FALSE;
+boolean wantsToAbortJoining = FALSE;
+
+// Used to store values when joining game
+static char thisPlayerName[NET_MAX_PLAYER_NAME_LENGTH] = "\0";
+static char remoteAddress[1024] = "\0";
+static u_short remotePort = 0;
+
 int NET_InitializeNet()
 {
     WORD wVersion = MAKEWORD(2,2);
     WSADATA wsaData;
 
     WSAStartup(wVersion, &wsaData);
+
+    return 0;
 }
 
 int NET_HostGameProcedure()
 {
+    printf("Enter username: ");
+    gets(thisPlayerName);
+    fflush(stdin);
+
     // Player 1 is the host
     hostPlayer.id = 0;
     strcpy(hostPlayer.name, "PLAYER 1");
@@ -58,12 +73,19 @@ int NET_HostGameProcedure()
         return 3;
     }
 
-    printf("Waiting for connection...\n");
+    // Other player hasn't connected
+    otherPlayer.status = NETSTS_NULL;
 
+    printf("Hosting procedure initialized.\n");
+
+    return 0;
+}
+
+int NET_HostGameWaitForConnection()
+{
     // Accept new connections
     boolean otherPlayerConnected = FALSE;
-    boolean wishToCancel = FALSE;
-    while(!otherPlayerConnected && !wishToCancel)
+    if(!otherPlayerConnected && !wantsToAbortHosting)
     {
         struct sockaddr_in otherAddress;
         int otherAddressLength = sizeof(otherAddress);
@@ -86,47 +108,80 @@ int NET_HostGameProcedure()
             otherPlayer.address = otherAddress;
             otherPlayerConnected = TRUE;
             otherPlayer.status = NETSTS_JUST_CONNECTED;
-
-            // Send greet?
         }
-
-        // Else check if user wishes to cancel
     }
 
-    if(wishToCancel)
-    {
-        printf("Listening was aborted by user.\n");
 
-        // Shutdown the socket
-        shutdown(hostPlayer.socket, SD_RECEIVE);
-        closesocket(hostPlayer.socket);
-
-        return 4;
-    }
-    else if(otherPlayerConnected)
+    if(otherPlayerConnected)
     {
         // Shutdown and close the listening socket
         shutdown(hostPlayer.socket, SD_RECEIVE);
         closesocket(hostPlayer.socket);
 
-        printf("All done.\n");
-
-        // Receive greet (for testing purposes, may not receive because socket is non-blocking, set to blocking and it will receive the other player's greet)
-        char buffer[MAX_PCKT_DATA];
-        int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
-        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
-
-        // Manage packet, if receivedPacket->id == PCKT_GREET:
-        pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
-
-        printf("%d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
-
+        printf("Other player has connected, shutting down listening socket.\n");
         return 0;
     }
-    else
+    else if(wantsToAbortHosting)
     {
-        printf("Error 5?\n");
-        return 5;
+        NET_HostGameAbortConnection();
+        return 2;
+    }
+    else
+        return 1;
+}
+
+int NET_HostGameAbortConnection()
+{
+    printf("Listening was aborted by user.\n");
+
+    // Shutdown the socket
+    shutdown(hostPlayer.socket, SD_RECEIVE);
+    closesocket(hostPlayer.socket);
+
+    return 0;
+}
+
+int NET_HostGameWaitForGreet()
+{
+    // Receive greet
+    char buffer[MAX_PCKT_DATA];
+    int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
+
+    if(recvVal > 0)
+    {
+        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
+
+        if(receivedPacket->id == PCKT_GREET)
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
+
+            printf("%d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
+
+            strcpy(otherPlayer.name, greetPacket->name);
+
+            // Dispose greet and received packet
+            free(greetPacket);
+
+            NET_HostGameSendGreet();
+
+            otherPlayer.status = NETSTS_GREETED;
+        }
+
+        free(receivedPacket);
+    }
+}
+
+int NET_HostGameSendGreet()
+{
+    // Send our greet to the other player
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(thisPlayerName);
+    char* sendBuff = PCKT_PcktToBytes(greetPacket);
+    int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
+
+    if(sendVal < 0)
+    {
+        printf("Host could not send greet packet.\n");
     }
 }
 
@@ -135,6 +190,7 @@ int NET_JoinGameProcedure()
 {
     printf("Joining a game...\n");
 
+    otherPlayer.status = NETSTS_NULL;
     // Set basic info
     otherPlayer.id = 0;
     strcpy(otherPlayer.name, "PLAYER 1");
@@ -148,6 +204,10 @@ int NET_JoinGameProcedure()
         WSACleanup();
         return 1;
     }
+
+    // Set other player's socket to be non blocking
+    u_long iMode = 1;
+    ioctlsocket(otherPlayer.socket, FIONBIO, &iMode);
     
     // Setup address
     memset(otherPlayer.address.sin_zero, 0, sizeof(otherPlayer.address.sin_zero));
@@ -164,61 +224,155 @@ int NET_JoinGameProcedure()
     }
 
     // Get server address and port
-    char readAddress[1024] = "\0";
     printf("Enter address in 192.168.1.1 format...\n");
-    gets(readAddress);
+    gets(remoteAddress);
     fflush(stdin);
 
-    u_short readPort;
     printf("Enter port number\n");
-    scanf("%hu", &readPort);
+    scanf("%hu", &remotePort);
     fflush(stdin);
 
-    char username[NET_MAX_PLAYER_NAME_LENGTH];
     printf("Enter username: ");
-    gets(username);
+    gets(thisPlayerName);
     fflush(stdin);
 
-    
     // Setup host
     struct sockaddr_in hostAddress;
     int hostAddressLen = sizeof(hostAddress);
     memset(hostAddress.sin_zero, 0, sizeof(hostAddress.sin_zero));
 
     hostAddress.sin_family = AF_INET;
-    hostAddress.sin_addr.S_un.S_addr = inet_addr(readAddress);
-    hostAddress.sin_port = htons(readPort);
+    hostAddress.sin_addr.S_un.S_addr = inet_addr(remoteAddress);
+    hostAddress.sin_port = htons(remotePort);
 
     printf("Inserted IP Address: %s:%d\n", inet_ntoa(hostAddress.sin_addr), (int)ntohs(hostAddress.sin_port));
     printf("Attempting to connect...\n");
 
     // Attempt to connect
     int conn = connect(otherPlayer.socket, (struct sockaddr*)&hostAddress, hostAddressLen);
-
+    printf("CONN VALUE: %d\n", conn);
+    // If connection was instant
     if(conn == 0)
     {
-        // Set the socket to be non-blocking
-        u_long iMode = 1;
-        ioctlsocket(otherPlayer.socket, FIONBIO, &iMode);
-
-        printf("Connection successfull!\n");
-
-        otherPlayer.status = NETSTS_JUST_CONNECTED;
-
-        // Send greet
-        // Make packet
-        pckt_t* greetPacket = PCKT_MakeGreetPacket(username);
-        char* sendBuff = PCKT_PcktToBytes(greetPacket);
-        int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
-
-        printf("SENDED VALUE : %d | %s\n", sendVal, sendBuff);
+        NET_JoinGameOnConnectionEstabilishes();
+        return 0;
+    }
+    // If we need to wait for connection
+    else if(WSAGetLastError() == WSAEWOULDBLOCK)
+    {
         return 0;
     }
     else
     {
-        printf("Error while connecting to remote host. | WSAError: %d\n", WSAGetLastError());
-        WSACleanup();
-        fflush(stdin);
+        printf("Connection failed.\n");
         return 3;
+    }
+}
+
+int NET_JoinGameWaitForConnection()
+{
+    printf("Waiting for connection...\n");
+
+    // If connection is already estabilished
+    if(otherPlayer.status == NETSTS_JUST_CONNECTED)
+    {
+        return 3;
+    }
+    else
+    {
+        // Wait for it
+        fd_set connectionSet;
+        FD_ZERO(&connectionSet);
+        
+        FD_SET(otherPlayer.socket, &connectionSet);
+
+        struct timeval waitVal;
+        waitVal.tv_sec = 0;
+
+        int result = select(0, NULL, &connectionSet, NULL, &waitVal);
+
+        // If process ended
+        if(result > 0)
+        {
+            if(FD_ISSET(otherPlayer.socket, &connectionSet))
+            {
+                // Connection happened, find out what happened
+                struct sockaddr_in connectedAddr;
+                int connectedAddrLen = sizeof(connectedAddr);
+                memset(&connectedAddr, 0, sizeof(connectedAddr));
+                if (getpeername(otherPlayer.socket, (struct sockaddr *)&connectedAddr, &connectedAddrLen) == 0)
+                {
+                    printf("TCP Connection succeeded!\n");
+                    NET_JoinGameOnConnectionEstabilishes();
+                    return 0;
+                }
+                else
+                {
+                    printf("TCP Connection failed!\n");
+                    return 4;
+                }
+            }
+        }
+        else if(wantsToAbortJoining)
+        {
+            NET_JoinGameAbortConnection();
+            return 2;
+        }
+
+        return 1;
+    }
+}
+
+int NET_JoinGameAbortConnection()
+{
+    printf("Joining was aborted by user.\n");
+
+    // Shutdown the socket
+    shutdown(otherPlayer.socket, SD_BOTH);
+    closesocket(otherPlayer.socket);
+
+    return 0;
+}
+
+int NET_JoinGameOnConnectionEstabilishes()
+{
+    printf("Connection estabilished!\n");
+
+    otherPlayer.status = NETSTS_JUST_CONNECTED;
+
+    // Send greet
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(thisPlayerName);
+    char* sendBuff = PCKT_PcktToBytes(greetPacket);
+    int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
+
+    printf("SENDED VALUE : %d | %s\n", sendVal, sendBuff);
+    return 0;
+}
+
+int NET_JoinGameWaitForGreet()
+{
+    // Receive greet
+    char buffer[MAX_PCKT_DATA];
+    int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
+
+    if(recvVal > 0)
+    {
+        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
+
+        if(receivedPacket->id == PCKT_GREET)
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
+
+            printf("Received packet: %d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
+
+            strcpy(otherPlayer.name, greetPacket->name);
+
+            // Dispose greet and received packet
+            free(greetPacket);
+            free(receivedPacket);
+
+            otherPlayer.status = NETSTS_GREETED;
+        }
     }
 }
