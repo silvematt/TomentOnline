@@ -1,27 +1,20 @@
 #include "packet.h"
 
-char* PCKT_PcktToBytes(pckt_t* p)
+// Global packet data to send out
+pckt_t packetToSend;
+
+void PCKT_Zero(pckt_t* p)
 {
-    char* buffer = malloc(MAX_PCKT_DATA);
-
-    memcpy(buffer, p, sizeof(*p));
-
-    return buffer;
+    p->id = 0;
+    memset(p->data, 0, MAX_PCKT_DATA);
 }
 
-pckt_t* PCKT_BytesToPckt(const char* b)
+pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH])
 {
-    pckt_t* packet = (pckt_t*)malloc(sizeof(pckt_t));;
-
-    memcpy(packet, b, sizeof(*packet));
-
-    return packet;
-}
-
-pckt_t* PCKT_MakeGreetPacket(char pName[NET_MAX_PLAYER_NAME_LENGTH])
-{
+    PCKT_Zero(packet);
+    
     // Create the packet
-    pckt_t* packet = (pckt_t*)malloc(sizeof(pckt_t));;
+    packet->protocol = PROT_ID_TCP;
     packet->id = PCKT_GREET;
 
     // Create and fill the content
@@ -32,13 +25,4 @@ pckt_t* PCKT_MakeGreetPacket(char pName[NET_MAX_PLAYER_NAME_LENGTH])
     memcpy(packet->data, &content, sizeof(pckt_greet_t));
 
     return packet;
-}
-
-pckt_greet_t* PCKT_GetGreetPacket(pckt_t* p)
-{
-    pckt_greet_t* greetPckt = (pckt_greet_t*)malloc(sizeof(pckt_greet_t));
-
-    memcpy(greetPckt, p->data, sizeof(pckt_greet_t));
-
-    return greetPckt;   
 }

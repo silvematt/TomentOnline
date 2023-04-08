@@ -149,34 +149,29 @@ int NET_HostGameWaitForGreet()
 
     if(recvVal > 0)
     {
-        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
+        pckt_t* receivedPacket = (pckt_t*)buffer;
 
         if(receivedPacket->id == PCKT_GREET)
         {
             // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
+            pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
             printf("%d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
 
             strcpy(otherPlayer.name, greetPacket->name);
 
-            // Dispose greet and received packet
-            free(greetPacket);
-
             NET_HostGameSendGreet();
 
             otherPlayer.status = NETSTS_GREETED;
         }
-
-        free(receivedPacket);
     }
 }
 
 int NET_HostGameSendGreet()
 {
     // Send our greet to the other player
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(thisPlayerName);
-    char* sendBuff = PCKT_PcktToBytes(greetPacket);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
+    char* sendBuff = (char*)greetPacket; // Convert pckt to char array
     int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
 
     if(sendVal < 0)
@@ -341,8 +336,8 @@ int NET_JoinGameOnConnectionEstabilishes()
     otherPlayer.status = NETSTS_JUST_CONNECTED;
 
     // Send greet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(thisPlayerName);
-    char* sendBuff = PCKT_PcktToBytes(greetPacket);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
+    char* sendBuff = (char*)greetPacket; // Convert pckt to char array
     int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
 
     printf("SENDED VALUE : %d | %s\n", sendVal, sendBuff);
@@ -357,20 +352,16 @@ int NET_JoinGameWaitForGreet()
 
     if(recvVal > 0)
     {
-        pckt_t* receivedPacket = PCKT_BytesToPckt(buffer);
+        pckt_t* receivedPacket = (pckt_t*)buffer;
 
         if(receivedPacket->id == PCKT_GREET)
         {
             // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_greet_t* greetPacket = PCKT_GetGreetPacket(receivedPacket);
+            pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
             printf("Received packet: %d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
 
             strcpy(otherPlayer.name, greetPacket->name);
-
-            // Dispose greet and received packet
-            free(greetPacket);
-            free(receivedPacket);
 
             otherPlayer.status = NETSTS_GREETED;
         }
