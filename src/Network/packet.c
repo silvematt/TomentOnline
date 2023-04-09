@@ -74,8 +74,8 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
     {
         // We are waiting for a fragment
         int avail = PCKT_SIZE - inputPcktBuffer.len;
-        char buffer[avail];
-        recvVal = recv(otherPlayer.socket, buffer, avail, 0);
+
+        recvVal = recv(otherPlayer.socket, inputPcktBuffer.buffer+(inputPcktBuffer.len), avail, 0);
         
         // If invalid
         if(recvVal < 0)
@@ -94,8 +94,6 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
         // If we got just what we were waiting for
         if(recvVal == avail)
         {
-            memmove(inputPcktBuffer.buffer+(inputPcktBuffer.len), buffer, avail);
-
             inputPcktBuffer.shorted = FALSE;
             inputPcktBuffer.len += recvVal;
 
@@ -118,9 +116,7 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
             }
         }
         else // antoher fragment
-        {
-            memmove(inputPcktBuffer.buffer+(inputPcktBuffer.len), buffer, avail);
-            
+        {            
             // Short received, save what we got so far
             inputPcktBuffer.shorted = TRUE;
             inputPcktBuffer.len += recvVal;
@@ -181,7 +177,6 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
     {
         // We couldn't send the whole thing, we have to send another fragment
         int avail = PCKT_SIZE - outputPcktBuffer.len;
-        char buffer[avail];
 
         int sendValue = send(otherPlayer.socket, outputPcktBuffer.buffer+outputPcktBuffer.len, avail, 0);
 
