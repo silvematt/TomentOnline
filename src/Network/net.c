@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include<windows.h>
+
 #include "netdef.h"
 #include "packet.h"
 
@@ -14,17 +16,20 @@ static char thisPlayerName[NET_MAX_PLAYER_NAME_LENGTH] = "\0";
 static char remoteAddress[1024] = "\0";
 static u_short remotePort = 0;
 
-int NET_InitializeNet()
+int NET_InitializeNet(void)
 {
     WORD wVersion = MAKEWORD(2,2);
     WSADATA wsaData;
 
     WSAStartup(wVersion, &wsaData);
 
+    PCKT_ZeroBuffer(&inputPcktBuffer);
+    PCKT_ZeroBuffer(&outputPcktBuffer);
+
     return 0;
 }
 
-int NET_HostGameProcedure()
+int NET_HostGameProcedure(void)
 {
     printf("Enter username: ");
     gets(thisPlayerName);
@@ -81,7 +86,7 @@ int NET_HostGameProcedure()
     return 0;
 }
 
-int NET_HostGameWaitForConnection()
+int NET_HostGameWaitForConnection(void)
 {
     // Accept new connections
     boolean otherPlayerConnected = FALSE;
@@ -114,11 +119,10 @@ int NET_HostGameWaitForConnection()
 
     if(otherPlayerConnected)
     {
-        // Shutdown and close the listening socket
-        shutdown(hostPlayer.socket, SD_RECEIVE);
+        // Close the listening socket
         closesocket(hostPlayer.socket);
 
-        printf("Other player has connected, shutting down listening socket.\n");
+        printf("Other player has connected, closing listening socket.\n");
         return 0;
     }
     else if(wantsToAbortHosting)
@@ -130,60 +134,67 @@ int NET_HostGameWaitForConnection()
         return 1;
 }
 
-int NET_HostGameAbortConnection()
+int NET_HostGameAbortConnection(void)
 {
     printf("Listening was aborted by user.\n");
 
-    // Shutdown the socket
-    shutdown(hostPlayer.socket, SD_RECEIVE);
+    // Close the socket
     closesocket(hostPlayer.socket);
 
     return 0;
 }
 
-int NET_HostGameWaitForGreet()
+int NET_HostGameWaitForGreet(void)
 {
-    // Receive greet
-    char buffer[MAX_PCKT_DATA];
-    int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
+    printf("HOST WAIT FOR GREET\n");
+    
+    // When this function gets called, the packet arrived on the PCKT_ReceivePacket call and was saved inside the inputPacketBuffer->buffer
+    // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
+    pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
 
-    if(recvVal > 0)
+    if(receivedPacket->id == PCKT_GREET)
     {
-        pckt_t* receivedPacket = (pckt_t*)buffer;
+        // Manage packet, if receivedPacket->id == PCKT_GREET:
+        pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
-        if(receivedPacket->id == PCKT_GREET)
-        {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
+        printf("Packet received! ID: %d | Greet value: %s\n", receivedPacket->id, greetPacket->name);
 
-            printf("%d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
+        strcpy(otherPlayer.name, greetPacket->name);
 
-            strcpy(otherPlayer.name, greetPacket->name);
+        otherPlayer.hasGreeted = TRUE;
 
-            NET_HostGameSendGreet();
-
-            otherPlayer.status = NETSTS_GREETED;
-        }
+        return 0;
     }
 }
 
-int NET_HostGameSendGreet()
+int NET_HostGameMakeGreetPacket(void)
 {
-    // Send our greet to the other player
+    // Make greet packet
     pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
-    char* sendBuff = (char*)greetPacket; // Convert pckt to char array
-    int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
+    
+    // Store the greet packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer, (char*)greetPacket, PCKT_SIZE);
+    printf("GREET PACKET MADE!\n");
+}
 
-    if(sendVal < 0)
-    {
-        printf("Host could not send greet packet.\n");
-    }
+int NET_HostGameSendGreet(void)
+{
+    // When this function gets called, the packet got sent on the PCKT_SendPacket call and was saved inside the output->buffer
+    // At this point, receivedPacket points at the output->buffer that contains the packet that arrived
+    pckt_t* sent = (pckt_t*)outputPcktBuffer.buffer;
+
+    printf("Host sent greet %s\n", sent);
+    otherPlayer.status = NETSTS_GREETED;
 }
 
 
-int NET_JoinGameProcedure()
+int NET_JoinGameProcedure(void)
 {
     printf("Joining a game...\n");
+    
+    // this is used for letting us know if we've greeted or not to the host in order to know when to stop trying to send the packet and when to start receiving for his greet instead 
+    hostPlayer.hasGreeted = FALSE;
 
     otherPlayer.status = NETSTS_NULL;
     // Set basic info
@@ -264,7 +275,7 @@ int NET_JoinGameProcedure()
     }
 }
 
-int NET_JoinGameWaitForConnection()
+int NET_JoinGameWaitForConnection(void)
 {
     printf("Waiting for connection...\n");
 
@@ -318,52 +329,63 @@ int NET_JoinGameWaitForConnection()
     }
 }
 
-int NET_JoinGameAbortConnection()
+int NET_JoinGameAbortConnection(void)
 {
     printf("Joining was aborted by user.\n");
 
-    // Shutdown the socket
-    shutdown(otherPlayer.socket, SD_BOTH);
+    // Close the socket
     closesocket(otherPlayer.socket);
 
     return 0;
 }
 
-int NET_JoinGameOnConnectionEstabilishes()
+int NET_JoinGameOnConnectionEstabilishes(void)
 {
     printf("Connection estabilished!\n");
 
     otherPlayer.status = NETSTS_JUST_CONNECTED;
 
-    // Send greet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
-    char* sendBuff = (char*)greetPacket; // Convert pckt to char array
-    int sendVal = send(otherPlayer.socket, sendBuff, MAX_PCKT_DATA, 0);
-
-    printf("SENDED VALUE : %d | %s\n", sendVal, sendBuff);
     return 0;
 }
 
-int NET_JoinGameWaitForGreet()
+int NET_JoinGameWaitForGreet(void)
 {
-    // Receive greet
-    char buffer[MAX_PCKT_DATA];
-    int recvVal = recv(otherPlayer.socket, buffer, MAX_PCKT_DATA, 0);
+    // When this function gets called, the packet arrived on the PCKT_ReceivePacket call and was saved inside the inputPacketBuffer->buffer
+    // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
+    pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
 
-    if(recvVal > 0)
+    if(receivedPacket->id == PCKT_GREET)
     {
-        pckt_t* receivedPacket = (pckt_t*)buffer;
+        // Manage packet, if receivedPacket->id == PCKT_GREET:
+        pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
-        if(receivedPacket->id == PCKT_GREET)
-        {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
+        printf("Packet received! ID: %d | Greet value: %s\n", receivedPacket->id, greetPacket->name);
 
-            printf("Received packet: %d Packet ID: %d | Greet value: %s\n", recvVal, receivedPacket->id, greetPacket->name);
+        strcpy(otherPlayer.name, greetPacket->name);
 
-            strcpy(otherPlayer.name, greetPacket->name);
+        otherPlayer.status = NETSTS_GREETED;
 
-            otherPlayer.status = NETSTS_GREETED;
-        }
+        return 0;
     }
+}
+
+int NET_JoinGameMakeGreetPacket(void)
+{
+    // Make greet packet
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
+    
+    // Store the greet packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer, (char*)greetPacket, PCKT_SIZE);
+    printf("GREET PACKET MADE!\n");
+}
+
+int NET_JoinGameSendGreet(void)
+{
+    // When this function gets called, the packet got sent on the PCKT_SendPacket call and was saved inside the output->buffer
+    // At this point, receivedPacket points at the output->buffer that contains the packet that arrived
+    pckt_t* sent = (pckt_t*)outputPcktBuffer.buffer;
+
+    printf("Join sent greet %s\n", sent);
+    hostPlayer.hasGreeted = TRUE;
 }

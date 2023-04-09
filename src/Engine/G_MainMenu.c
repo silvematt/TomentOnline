@@ -5,6 +5,7 @@
 #include "D_AssetsManager.h"
 
 #include "../Network/netdef.h"
+#include "../Network/packet.h"
 
 //-------------------------------------
 // BUTTONS CALLBACKS
@@ -161,7 +162,19 @@ void G_RenderCurrentMenuBackground(void)
             else if(otherPlayer.status == NETSTS_JUST_CONNECTED)
             {
                 T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 210, 80, 2.0f);
-                NET_HostGameWaitForGreet();
+
+                // If the other player has not greeted yet, wait for his greet
+                if(!otherPlayer.hasGreeted)
+                    PCKT_ReceivePacket(NET_HostGameWaitForGreet);
+                else // If he has greet, send our greet and when that is done, set the status = NETSTS_GREETEED
+                {   
+                    // If it never tried to send, there's nothing setup to send yet
+                    if(!outputPcktBuffer.hasBegunWriting)
+                        NET_HostGameMakeGreetPacket();
+
+                    // Keep trying to send until NET_HostGameSendGreet gets called and changes otherPlayer.status to NETSTS_GREETED
+                    PCKT_SendPacket(NET_HostGameSendGreet);
+                }
             }
             else if(otherPlayer.status == NETSTS_GREETED)
             {
@@ -179,7 +192,7 @@ void G_RenderCurrentMenuBackground(void)
         {
             if(otherPlayer.status == NETSTS_NULL)
             {
-                T_DisplayTextScaled(FONT_BLKCRY, "Connecting to player...", 210, 80, 2.0f);
+                T_DisplayTextScaled(FONT_BLKCRY, "Connecting to player...", 200, 80, 2.0f);
                 int result = NET_JoinGameWaitForConnection();
 
                 // If user wanted to abort
@@ -193,8 +206,24 @@ void G_RenderCurrentMenuBackground(void)
             }
             else if(otherPlayer.status == NETSTS_JUST_CONNECTED)
             {
-                T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 210, 80, 2.0f);
-                NET_JoinGameWaitForGreet();
+                T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 200, 80, 2.0f);
+
+                // Send our greet packet
+                // In this case "hostPlayer" is thisPlayer
+                if(!hostPlayer.hasGreeted)
+                {
+                    // If it never tried to send yet, there's nothing setup to send, so set it up
+                    if(!outputPcktBuffer.hasBegunWriting)
+                        NET_JoinGameMakeGreetPacket();
+
+                    // Keep trying to send until NET_JoinGameSendGreet gets called and changes hostPlayer.hasGreeted = TRUE so we can wait for the host's greet
+                    PCKT_SendPacket(NET_JoinGameSendGreet);
+                }
+                else
+                {
+                    // Receive the other player's greet packet until NET_JoinGameWaitForGreet sets otherPlayer.status to NETSTS_GREETED
+                    PCKT_ReceivePacket(NET_JoinGameWaitForGreet);
+                }
             }
             else if(otherPlayer.status == NETSTS_GREETED)
             {

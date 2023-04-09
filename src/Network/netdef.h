@@ -31,6 +31,7 @@ typedef struct netplayer
     SOCKET socket;
     struct sockaddr_in address;
 
+    boolean hasGreeted;
     netstatus_e status;
 } netplayer_t;
 
@@ -41,23 +42,27 @@ extern boolean wantsToAbortHosting;
 extern boolean wantsToAbortJoining;
 
 // Initializes network related stuff
-int NET_InitializeNet();
+int NET_InitializeNet(void);
 
 // Starts the procedure to host a game
-int NET_HostGameProcedure();
-int NET_HostGameWaitForConnection();
-int NET_HostGameWaitForGreet();
-int NET_HostGameSendGreet();
+int NET_HostGameProcedure(void);
+int NET_HostGameWaitForConnection(void);
+int NET_HostGameWaitForGreet(void);
 
-int NET_HostGameAbortConnection();
+int NET_HostGameMakeGreetPacket(void);
+int NET_HostGameSendGreet(void);
+
+int NET_HostGameAbortConnection(void);
 
 // Starts the procedure to join a game
-int NET_JoinGameProcedure();
-int NET_JoinGameWaitForConnection();
-int NET_JoinGameOnConnectionEstabilishes();
-int NET_JoinGameWaitForGreet();
+int NET_JoinGameProcedure(void);
+int NET_JoinGameWaitForConnection(void);
+int NET_JoinGameOnConnectionEstabilishes(void);
+int NET_JoinGameWaitForGreet(void);
 
-int NET_JoinGameAbortConnection();
+int NET_JoinGameMakeGreetPacket(void);
+int NET_JoinGameSendGreet(void);
 
+int NET_JoinGameAbortConnection(void);
 
 #endif
