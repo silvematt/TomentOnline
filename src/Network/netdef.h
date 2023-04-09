@@ -31,7 +31,6 @@ typedef struct netplayer
     SOCKET socket;
     struct sockaddr_in address;
 
-    boolean hasGreeted;
     netstatus_e status;
 } netplayer_t;
 

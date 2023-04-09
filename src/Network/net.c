@@ -161,8 +161,7 @@ int NET_HostGameWaitForGreet(void)
 
         strcpy(otherPlayer.name, greetPacket->name);
 
-        otherPlayer.hasGreeted = TRUE;
-
+        otherPlayer.status = NETSTS_HAVE_TO_GREET;
         return 0;
     }
 }
@@ -193,10 +192,8 @@ int NET_JoinGameProcedure(void)
 {
     printf("Joining a game...\n");
     
-    // this is used for letting us know if we've greeted or not to the host in order to know when to stop trying to send the packet and when to start receiving for his greet instead 
-    hostPlayer.hasGreeted = FALSE;
-
     otherPlayer.status = NETSTS_NULL;
+    
     // Set basic info
     otherPlayer.id = 0;
     strcpy(otherPlayer.name, "PLAYER 1");
@@ -387,5 +384,5 @@ int NET_JoinGameSendGreet(void)
     pckt_t* sent = (pckt_t*)outputPcktBuffer.buffer;
 
     printf("Join sent greet %s\n", sent);
-    hostPlayer.hasGreeted = TRUE;
+    otherPlayer.status = NETSTS_HAVE_TO_GREET;
 }
