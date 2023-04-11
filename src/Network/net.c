@@ -4,15 +4,14 @@
 #include "netdef.h"
 #include "packet.h"
 
-netplayer_t hostPlayer;
+netplayer_t thisPlayer;
 netplayer_t otherPlayer;
 
 // Input related
-boolean wantsToAbortHosting = FALSE;
-boolean wantsToAbortJoining = FALSE;
+bool wantsToAbortHosting = FALSE;
+bool wantsToAbortJoining = FALSE;
 
 // Used to store values when joining game
-static char thisPlayerName[NET_MAX_PLAYER_NAME_LENGTH] = "\0";
 static char remoteAddress[1024] = "\0";
 static u_short remotePort = 0;
 
@@ -32,17 +31,16 @@ int NET_InitializeNet(void)
 int NET_HostGameProcedure(void)
 {
     printf("Enter username: ");
-    gets(thisPlayerName);
+    gets(thisPlayer.name);
     fflush(stdin);
 
     // Player 1 is the host
-    hostPlayer.id = 0;
-    strcpy(hostPlayer.name, "PLAYER 1");
+    thisPlayer.id = 0;
     
     // Create the socket to listen
-    hostPlayer.socket = INVALID_SOCKET;
-    hostPlayer.socket = socket(AF_INET, SOCK_STREAM, 0);
-    if(hostPlayer.socket == INVALID_SOCKET)
+    thisPlayer.socket = INVALID_SOCKET;
+    thisPlayer.socket = socket(AF_INET, SOCK_STREAM, 0);
+    if(thisPlayer.socket == INVALID_SOCKET)
     {
         printf("Error creating a socket while hosting a game | WSAError: %d\n", WSAGetLastError());
         WSACleanup();
@@ -51,19 +49,19 @@ int NET_HostGameProcedure(void)
 
     // Set the listen socket to be non-blocking
     u_long iMode = 1;
-    ioctlsocket(hostPlayer.socket, FIONBIO, &iMode);
+    ioctlsocket(thisPlayer.socket, FIONBIO, &iMode);
 
     // Set address of the host
-    memset(hostPlayer.address.sin_zero, 0, sizeof(hostPlayer.address.sin_zero));
-    hostPlayer.address.sin_family = AF_INET;
-    hostPlayer.address.sin_addr.S_un.S_addr = htons(INADDR_ANY);
-    hostPlayer.address.sin_port = htons(NET_LISTENING_PORT);
-    int hostPlayerAddressLen = sizeof(hostPlayer.address);
+    memset(thisPlayer.address.sin_zero, 0, sizeof(thisPlayer.address.sin_zero));
+    thisPlayer.address.sin_family = AF_INET;
+    thisPlayer.address.sin_addr.S_un.S_addr = htons(INADDR_ANY);
+    thisPlayer.address.sin_port = htons(NET_LISTENING_PORT);
+    int hostPlayerAddressLen = sizeof(thisPlayer.address);
 
-    printf("IP Address: %s:%d\n", inet_ntoa(hostPlayer.address.sin_addr), (int)ntohs(hostPlayer.address.sin_port));
+    printf("IP Address: %s:%d\n", inet_ntoa(thisPlayer.address.sin_addr), (int)ntohs(thisPlayer.address.sin_port));
 
     // Attempt to bind
-    if(bind(hostPlayer.socket, (struct sockaddr*)&hostPlayer.address, hostPlayerAddressLen) < 0)
+    if(bind(thisPlayer.socket, (struct sockaddr*)&thisPlayer.address, hostPlayerAddressLen) < 0)
     {
         printf("Error binding a socket while hosting a game | WSAError: %d\n", WSAGetLastError());
         WSACleanup();
@@ -71,7 +69,7 @@ int NET_HostGameProcedure(void)
     }
 
     // Set socket to listen mode
-    if(listen(hostPlayer.socket, SOMAXCONN) < 0)
+    if(listen(thisPlayer.socket, SOMAXCONN) < 0)
     {
         printf("Error setting a socket to listen while hosting a game | WSAError: %d\n", WSAGetLastError());
         WSACleanup();
@@ -89,12 +87,12 @@ int NET_HostGameProcedure(void)
 int NET_HostGameWaitForConnection(void)
 {
     // Accept new connections
-    boolean otherPlayerConnected = FALSE;
+    bool otherPlayerConnected = FALSE;
     if(!otherPlayerConnected && !wantsToAbortHosting)
     {
         struct sockaddr_in otherAddress;
         int otherAddressLength = sizeof(otherAddress);
-        SOCKET acceptedSocket = accept(hostPlayer.socket, (struct sockaddr*)&otherAddress, &otherAddressLength);
+        SOCKET acceptedSocket = accept(thisPlayer.socket, (struct sockaddr*)&otherAddress, &otherAddressLength);
 
         // Wait until other player connects
         if(acceptedSocket != SOCKET_ERROR)
@@ -106,7 +104,6 @@ int NET_HostGameWaitForConnection(void)
             ioctlsocket(acceptedSocket, FIONBIO, &iMode);
 
             otherPlayer.id = 1;
-            strcpy(otherPlayer.name, "PLAYER 2");
 
             // Copy inner struct data to otherPlayer
             otherPlayer.socket = acceptedSocket;
@@ -120,7 +117,7 @@ int NET_HostGameWaitForConnection(void)
     if(otherPlayerConnected)
     {
         // Close the listening socket
-        closesocket(hostPlayer.socket);
+        closesocket(thisPlayer.socket);
 
         printf("Other player has connected, closing listening socket.\n");
         return 0;
@@ -139,7 +136,7 @@ int NET_HostGameAbortConnection(void)
     printf("Listening was aborted by user.\n");
 
     // Close the socket
-    closesocket(hostPlayer.socket);
+    closesocket(thisPlayer.socket);
 
     return 0;
 }
@@ -169,7 +166,7 @@ int NET_HostGameWaitForGreet(void)
 int NET_HostGameMakeGreetPacket(void)
 {
     // Make greet packet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name);
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
@@ -196,7 +193,6 @@ int NET_JoinGameProcedure(void)
     
     // Set basic info
     otherPlayer.id = 0;
-    strcpy(otherPlayer.name, "PLAYER 1");
 
     // Create socket
     otherPlayer.socket = INVALID_SOCKET;
@@ -236,7 +232,7 @@ int NET_JoinGameProcedure(void)
     fflush(stdin);
 
     printf("Enter username: ");
-    gets(thisPlayerName);
+    gets(thisPlayer.name);
     fflush(stdin);
 
     // Setup host
@@ -369,7 +365,7 @@ int NET_JoinGameWaitForGreet(void)
 int NET_JoinGameMakeGreetPacket(void)
 {
     // Make greet packet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayerName);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name);
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;

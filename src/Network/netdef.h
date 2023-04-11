@@ -5,7 +5,10 @@
 #ifndef NETDEF_H_INCLUDED
 #define NETDEF_H_INCLUDED
 
+#include <stdbool.h>
 #include <WinSock2.h>
+
+#include "../Online/O_GameDef.h"
 
 #define NET_MAX_PLAYER_NAME_LENGTH 24
 #define NET_LISTENING_PORT 61530
@@ -27,18 +30,19 @@ typedef enum netstatus
 typedef struct netplayer
 {
     unsigned int id;
-    char name[NET_MAX_PLAYER_NAME_LENGTH];
     SOCKET socket;
     struct sockaddr_in address;
-
     netstatus_e status;
+
+    char name[NET_MAX_PLAYER_NAME_LENGTH];
+    playableclasses_e class;
 } netplayer_t;
 
-extern netplayer_t hostPlayer;
+extern netplayer_t thisPlayer;
 extern netplayer_t otherPlayer;
 
-extern boolean wantsToAbortHosting;
-extern boolean wantsToAbortJoining;
+extern bool wantsToAbortHosting;
+extern bool wantsToAbortJoining;
 
 // Initializes network related stuff
 int NET_InitializeNet(void);

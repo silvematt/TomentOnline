@@ -31,10 +31,10 @@ typedef struct pckt_buffer_t
     
     // For short receive, lenght of what got received so far and flag
     int len;
-    boolean shorted;
+    bool shorted;
 
     // For short send, this flag fills the buffer for writing and tells the program to not do it again on future PCKT_Send calls
-    boolean hasBegunWriting;
+    bool hasBegunWriting;
 } pckt_buffer_t;
 
 

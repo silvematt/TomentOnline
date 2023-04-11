@@ -6,6 +6,7 @@
 
 #include "../Network/netdef.h"
 #include "../Network/packet.h"
+#include "../Online/O_Lobby.h"
 
 //-------------------------------------
 // BUTTONS CALLBACKS
@@ -76,6 +77,14 @@ menuelement_t JoinGameMenuElements[] =
 };
 
 menu_t JoinGameMenu = {MENU_JOINGAME, JoinGameMenuElements, 1, &JoinGameMenuElements[0]};
+
+
+menuelement_t InLobbyMenuElements[] =
+{
+    {"Ready",       {650, 550, 400, 40}, NULL},
+    {"Leave",       {50, 550, 200, 40}, NULL},
+};
+menu_t InLobbyMenu = {MENU_INLOBBY, InLobbyMenuElements, 2, &InLobbyMenuElements[0]};
 
 menu_t* currentMenu;
 
@@ -183,6 +192,8 @@ void G_RenderCurrentMenuBackground(void)
                 T_DisplayTextScaled(FONT_BLKCRY, string, 210, 80, 2.0f);
 
                 // Receive packets (wait for readypacket etc)
+                G_SetMenu(&InLobbyMenu);
+                A_ChangeState(GSTATE_MENU);
             }
 
             break;
@@ -213,7 +224,7 @@ void G_RenderCurrentMenuBackground(void)
                 if(!outputPcktBuffer.hasBegunWriting)
                     NET_JoinGameMakeGreetPacket();
 
-                // Keep trying to send until NET_JoinGameSendGreet gets called and changes hostPlayer.hasGreeted = TRUE so we can wait for the host's greet
+                // Keep trying to send until NET_JoinGameSendGreet gets called
                 PCKT_SendPacket(NET_JoinGameSendGreet);
             }
             else if(otherPlayer.status == NETSTS_HAVE_TO_GREET)
@@ -223,12 +234,19 @@ void G_RenderCurrentMenuBackground(void)
             }
             else if(otherPlayer.status == NETSTS_GREETED)
             {
-                char string[22+NET_MAX_PLAYER_NAME_LENGTH] = "Connected to player: ";
-                strcat(string, otherPlayer.name);
-                T_DisplayTextScaled(FONT_BLKCRY, string, 210, 80, 2.0f);
+                T_DisplayTextScaled(FONT_BLKCRY, "Lobby", 300, 30, 2.0f);
 
                 // Receive packets (wait for readypacket etc)
+                G_SetMenu(&InLobbyMenu);
+                A_ChangeState(GSTATE_MENU);
             }
+            break;
+        }
+
+        case MENU_INLOBBY:
+        {
+            O_LobbyRender();
+
             break;
         }
     }

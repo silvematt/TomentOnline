@@ -16,7 +16,8 @@ typedef enum
     MENU_END_GAME,
     MENU_ABOUT,
     MENU_HOSTGAME,
-    MENU_JOINGAME
+    MENU_JOINGAME,
+    MENU_INLOBBY
 } menusIDs_e;
 
 
@@ -60,6 +61,9 @@ extern menu_t HostGameMenu;
 
 extern menuelement_t JoinGameMenuElements[];
 extern menu_t JoinGameMenu;
+
+extern menuelement_t InLobbyMenuElements[];
+extern menu_t InLobbyMenu;
 
 //-------------------------------------
 // Initialize the Main Menu state

@@ -141,6 +141,16 @@ void D_InitUIAssets(void)
     uiAssets_t* bossHealthBarEmpty = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* bossHealthBarFill = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* iconGreatsword = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* tankClassPotrait = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* healerClassPotrait = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* dpsClassPotrait = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* tankClassIcon = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* healerClassIcon = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* dpsClassIcon = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* classIconSelection = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* classIconSelectionDisabled = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* iconReady = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* iconNotReady = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -157,8 +167,18 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_BOSS_HEALTHBAR_EMPTY] = bossHealthBarEmpty;
     tomentdatapack.uiAssets[G_ASSET_BOSS_HEALTHBAR_FILL] = bossHealthBarFill;
     tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD] = iconGreatsword;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK] = tankClassPotrait;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_HEALER] = healerClassPotrait;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_DPS] = dpsClassPotrait;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_TANK] = tankClassIcon;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_HEALER] = healerClassIcon;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_DPS] = dpsClassIcon;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION] = classIconSelection;
+    tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION_DISABLED] = classIconSelectionDisabled;
+    tomentdatapack.uiAssets[G_ASSET_ICON_READY] = iconReady;
+    tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY] = iconNotReady;
 
-    tomentdatapack.uiAssetsLenght = 15;
+    tomentdatapack.uiAssetsLenght = 25;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -347,6 +367,137 @@ void D_InitUIAssets(void)
     {
         tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
         SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Tank class potrait
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_TANK_CLASS_POTRAIT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_TANK_CLASS_POTRAIT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_TANK_CLASS_POTRAIT))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+     // Healer class potrait
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_HEALER_CLASS_POTRAIT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_HEALER_CLASS_POTRAIT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_HEALER_CLASS_POTRAIT))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_HEALER]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_HEALER]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+     // DPS class potrait
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_DPS_CLASS_POTRAIT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_DPS_CLASS_POTRAIT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_DPS_CLASS_POTRAIT))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_DPS]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_DPS]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+
+    // Tank class icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_TANK_CLASS_ICON].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_TANK_CLASS_ICON].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_TANK_CLASS_ICON))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_TANK]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_TANK]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Healer class icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_HEALER_CLASS_ICON].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_HEALER_CLASS_ICON].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_HEALER_CLASS_ICON))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_HEALER]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_HEALER]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // DPS class icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_DPS_CLASS_ICON].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_DPS_CLASS_ICON].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_DPS_CLASS_ICON))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_DPS]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_DPS]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Class icon selection
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_CLASS_ICON_SELECTION].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_CLASS_ICON_SELECTION].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_CLASS_ICON_SELECTION))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Class icon selection disabled
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_CLASS_ICON_SELECTION_DISABLED].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_CLASS_ICON_SELECTION_DISABLED].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_CLASS_ICON_SELECTION_DISABLED))
+    {
+        tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION_DISABLED]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION_DISABLED]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Ready Icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_ICON_READY].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_ICON_READY].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_ICON_READY))
+    {
+        tomentdatapack.uiAssets[G_ASSET_ICON_READY]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_ICON_READY]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Not Ready Icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_ICON_NOTREADY].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_ICON_NOTREADY].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_ICON_NOTREADY))
+    {
+        tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
     }
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);

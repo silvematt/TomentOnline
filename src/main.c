@@ -23,6 +23,7 @@
 //  M_ [Map]
 //  D_ [Game data/Asset management]
 //  U_ [Utilities]
+//  O_ [Online]
 // ------------------------------------------------
 
 int main(int argc, char* argv[])

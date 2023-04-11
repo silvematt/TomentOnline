@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "cmath": "c",
-        "netdef.h": "c"
+        "netdef.h": "c",
+        "d_assetsmanager.h": "c",
+        "packet.h": "c",
+        "r_rendering.h": "c"
     }
 }
