@@ -177,7 +177,8 @@ int NET_HostGameMakeGreetPacket(void)
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer, (char*)greetPacket, PCKT_SIZE);
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
     printf("GREET PACKET MADE!\n");
 }
 
@@ -387,7 +388,8 @@ int NET_JoinGameMakeGreetPacket(void)
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer, (char*)greetPacket, PCKT_SIZE);
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
     printf("GREET PACKET MADE!\n");
 }
 

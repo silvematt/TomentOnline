@@ -36,9 +36,10 @@ typedef struct pckt_set_class_t
     byte classSet;
 } pckt_set_class_t;
 
+#define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
 {
-    char buffer [PCKT_SIZE];
+    char buffer [PCKT_SIZE*MAX_PCKTS_PER_BUFFER];
     
     // For short receive, lenght of what got received so far and flag
     int len;
@@ -46,6 +47,8 @@ typedef struct pckt_buffer_t
 
     // For short send, this flag fills the buffer for writing and tells the program to not do it again on future PCKT_Send calls
     bool hasBegunWriting;
+    int packetsToWrite; // how many packets are written in the buffer to send
+    int packetOffset;
 } pckt_buffer_t;
 
 

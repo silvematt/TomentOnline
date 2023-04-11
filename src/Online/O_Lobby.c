@@ -110,17 +110,17 @@ int O_LobbySetMap(void)
 
 int O_LobbySetClass(playableclasses_e selected)
 {
-    if(selected == thisPlayer.selectedClass || selected == otherPlayer.selectedClass)
-        return 1;
-
     // Send packet to change class
     pckt_t* setClassPacket = PCKT_MakeSetClassPacket(&packetToSend, selected);
 
-    if(!outputPcktBuffer.hasBegunWriting)
+    // outputpcktbuffer was already sending something, check if we can append this packet
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
     {
-        // Store the greet packet in the output buffer
+        // Append this packet, it will be sent after the ones already in buffer
         outputPcktBuffer.hasBegunWriting = TRUE;
-        memcpy(outputPcktBuffer.buffer, (char*)setClassPacket, PCKT_SIZE);
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)setClassPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+
         printf("Set Class Packet made!\n");
 
         thisPlayer.selectedClass = selected;
@@ -128,7 +128,8 @@ int O_LobbySetClass(playableclasses_e selected)
     }
     else
     {
-        // outputpcktbuffer was already sending something, what to do now?
+        // Outputpcktbuffer is full and this packet should be sent, what to do?
+        printf("CRITICAL ERROR: Send buffer was full when trying to send SetClassPacket\n");
         return 2;
     }
 }

@@ -22,6 +22,8 @@ void PCKT_ZeroBuffer(pckt_buffer_t* pBuf)
     pBuf->len = 0;
     pBuf->shorted = FALSE;
     pBuf->hasBegunWriting = FALSE;
+    pBuf->packetsToWrite = 0;
+    pBuf->packetOffset = 0;
 }
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
@@ -134,98 +136,127 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
         return 1;
     }
 
-    int sendVal = 0;
-    if(!outputPcktBuffer.shorted)
+    while(outputPcktBuffer.packetsToWrite > 0)
     {
-        sendVal = send(otherPlayer.socket, outputPcktBuffer.buffer, PCKT_SIZE, 0);
-
-        // If invalid
-        if(sendVal < 0)
+        int sendVal = 0;
+        if(!outputPcktBuffer.shorted)
         {
-            if(WSAGetLastError() != WSAEWOULDBLOCK)
+            sendVal = send(otherPlayer.socket, outputPcktBuffer.buffer+(outputPcktBuffer.packetOffset), PCKT_SIZE, 0);
+            
+            // If invalid
+            if(sendVal < 0)
             {
-                printf("Send Error. SendVal = %d | WSAError: %d\n", sendVal, WSAGetLastError());
-                return 2;
+                if(WSAGetLastError() != WSAEWOULDBLOCK)
+                {
+                    printf("Send Error. SendVal = %d | WSAError: %d\n", sendVal, WSAGetLastError());
+                    return 2;
+                }
+                else
+                    return 1;
             }
-            else
-                return 1;
-        }
 
-        printf("%d Sent!\n", sendVal);
+            printf("%d Sent!\n", sendVal);
 
-        if(sendVal > 0)
-        {
-            if(sendVal >= PCKT_SIZE)
+            if(sendVal > 0)
             {
-                //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
-                //OnPacketIsSent must do the conversion, it may use the outputBuffer for its all purpose or allocate a pckt_t and release the outputBuffer for future use  
-                OnPacketIsSent();
+                if(sendVal >= PCKT_SIZE)
+                {
+                    //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
+                    //OnPacketIsSent must do the conversion, it may use the outputBuffer for its all purpose or allocate a pckt_t and release the outputBuffer for future use  
+                    OnPacketIsSent();
 
-                // Reset the outuput buffer when the packet arrived
-                PCKT_ZeroBuffer(&outputPcktBuffer);
-                return 0;
-            }
-            else
-            {
-                // Short received, save what we got so far
-                outputPcktBuffer.shorted = TRUE;
-                outputPcktBuffer.len = sendVal;
-            }
-        }
-    }
-    else
-    {
-        // We couldn't send the whole thing, we have to send another fragment
-        int avail = PCKT_SIZE - outputPcktBuffer.len;
-
-        int sendValue = send(otherPlayer.socket, outputPcktBuffer.buffer+outputPcktBuffer.len, avail, 0);
-
-        // If invalid
-        if(sendValue < 0)
-        {
-            if(WSAGetLastError() != WSAEWOULDBLOCK)
-            {
-                printf("SendFrag Error. SendVal = %d | WSAError: %d\n", sendVal, WSAGetLastError());
-                return 2;
-            }
-            else
-                return 1;
-        }
-
-        printf("Fragment Sent! Size: %d\n", sendVal);
-
-        if(sendValue == avail)
-        {
-            // We are done sending everyting
-
-            outputPcktBuffer.shorted = FALSE;
-            outputPcktBuffer.len += sendVal;
-
-            if(outputPcktBuffer.len == PCKT_SIZE)
-            {
-                //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
-                //OnPacketIsSent must do the conversion, it may use the outputBuffer for its all purpose or allocate a pckt_t and release the outputBuffer for future use  
-                OnPacketIsSent();
-
-                // Reset the outuput buffer when the packet arrived
-                PCKT_ZeroBuffer(&outputPcktBuffer);
-                return 0;
-            }
-            else
-            {
-                // How?
-                printf("Critical error. CODE-02\n");
-                return 2;
+                    // Check if there are other packets queued
+                    if(outputPcktBuffer.packetsToWrite > 1)
+                    {
+                        // Don't zero the buffer, increment the offset and discard if previous information was shorted
+                        outputPcktBuffer.packetOffset += PCKT_SIZE;
+                        outputPcktBuffer.packetsToWrite--;
+                        outputPcktBuffer.shorted = FALSE;
+                        outputPcktBuffer.len = 0;
+                    }
+                    else
+                    {
+                        // Reset the outuput buffer, it did all it had to do
+                        PCKT_ZeroBuffer(&outputPcktBuffer);
+                    }
+                    
+                    return 0;
+                }
+                else
+                {
+                    // Short received, save what we got so far
+                    outputPcktBuffer.shorted = TRUE;
+                    outputPcktBuffer.len = sendVal;
+                }
             }
         }
         else
         {
-            // We need to send yet another fragment
-            // Short sent, save what we got so far
-            outputPcktBuffer.shorted = TRUE;
-            outputPcktBuffer.len += sendVal;
+            // We couldn't send the whole thing, we have to send another fragment
+            int avail = PCKT_SIZE - outputPcktBuffer.len;
 
-            return 1;
+            int sendValue = send(otherPlayer.socket, outputPcktBuffer.buffer+outputPcktBuffer.len, avail, 0);
+
+            // If invalid
+            if(sendValue < 0)
+            {
+                if(WSAGetLastError() != WSAEWOULDBLOCK)
+                {
+                    printf("SendFrag Error. SendVal = %d | WSAError: %d\n", sendVal, WSAGetLastError());
+                    return 2;
+                }
+                else
+                    return 1;
+            }
+
+            printf("Fragment Sent! Size: %d\n", sendVal);
+
+            if(sendValue == avail)
+            {
+                // We are done sending everyting
+
+                outputPcktBuffer.shorted = FALSE;
+                outputPcktBuffer.len += sendVal;
+
+                if(outputPcktBuffer.len == PCKT_SIZE)
+                {
+                    //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
+                    //OnPacketIsSent must do the conversion, it may use the outputBuffer for its all purpose or allocate a pckt_t and release the outputBuffer for future use  
+                    OnPacketIsSent();
+
+                    // Check if there are other packets queued
+                    if(outputPcktBuffer.packetsToWrite > 1)
+                    {
+                        // Don't zero the buffer, increment the offset
+                        outputPcktBuffer.packetOffset += PCKT_SIZE;
+                        outputPcktBuffer.packetsToWrite--;
+                        outputPcktBuffer.shorted = FALSE;
+                        outputPcktBuffer.len = 0;
+                    }
+                    else
+                    {
+                        // Reset the outuput buffer, it did all it had to do
+                        PCKT_ZeroBuffer(&outputPcktBuffer);
+                    }
+                    
+                    return 0;
+                }
+                else
+                {
+                    // How?
+                    printf("Critical error. CODE-02\n");
+                    return 2;
+                }
+            }
+            else
+            {
+                // We need to send yet another fragment
+                // Short sent, save what we got so far
+                outputPcktBuffer.shorted = TRUE;
+                outputPcktBuffer.len += sendVal;
+
+                return 1;
+            }
         }
     }
 }
