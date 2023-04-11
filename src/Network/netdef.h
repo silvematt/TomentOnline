@@ -33,6 +33,7 @@ typedef struct netplayer
     SOCKET socket;
     struct sockaddr_in address;
     netstatus_e status;
+    bool isHost;
 
     char name[NET_MAX_PLAYER_NAME_LENGTH];
     playableclasses_e favoriteClass; // The class contained in the greet packet, used to initialize the lobby state and set in the Options main menu

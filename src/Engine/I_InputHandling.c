@@ -1,4 +1,5 @@
 #include "I_InputHandling.h"
+#include "../Online/O_Lobby.h"
 
 playerinput_t playerinput;
 
@@ -54,5 +55,9 @@ void I_HandleInputMenu(void)
         }
 
         G_InMenuInputHandling(&e);
+
+        // Check if user is in lobby
+        if(application.gamestate == GSTATE_MENU && currentMenu == &InLobbyMenu)
+            O_LobbyInputHandling(&e);
     }
 }

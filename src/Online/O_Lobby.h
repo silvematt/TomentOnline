@@ -2,6 +2,7 @@
 #define LOBBY_H_INCLUDED
 
 #include <stdbool.h>
+#include "SDL.h"
 #include "O_GameDef.h"
 
 extern bool thisPlayerReady;
@@ -20,10 +21,18 @@ int O_LobbyLeave(void);
 
 int O_LobbySetReady(void);
 int O_LobbySetMap(void);
-int O_LobbySetClass(void);
+int O_LobbySetClass(playableclasses_e selected);
 
 int O_LobbyRender(void);
 
 int O_LobbyStartGame(void);
+
+int O_LobbySendPackets(void);
+int O_LobbyOnPacketIsSent(void);
+
+int O_LobbyReceivePackets(void);
+int O_LobbyOnPacketIsReceived(void);
+
+void O_LobbyInputHandling(SDL_Event* e);
 
 #endif

@@ -130,7 +130,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
 {
     if(outputPcktBuffer.hasBegunWriting == FALSE)
     {
-        printf("There is nothing to write.\n");
+        //printf("There is nothing to write.\n");
         return 1;
     }
 
@@ -244,7 +244,25 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
     content.favoriteClass = pFavClass;
 
     // Convert content as packet.data
-    memcpy(packet->data, &content, sizeof(pckt_greet_t));
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKT_SET_CLASS;
+
+    // Create and fill the content
+    pckt_set_class_t content;
+    content.classSet = pClassToSet;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
 
     return packet;
 }

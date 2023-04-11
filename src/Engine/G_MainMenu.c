@@ -254,7 +254,6 @@ void G_RenderCurrentMenuBackground(void)
             {
                 T_DisplayTextScaled(FONT_BLKCRY, "Lobby", 300, 30, 2.0f);
 
-                // Receive packets (wait for readypacket etc)
                 G_SetMenu(&InLobbyMenu);
                 A_ChangeState(GSTATE_MENU);
             }
@@ -263,8 +262,13 @@ void G_RenderCurrentMenuBackground(void)
 
         case MENU_INLOBBY:
         {
+            // Receive packets (wait for readypacket, class changes)
+            O_LobbyReceivePackets();
+
             O_LobbyRender();
 
+            // Send packets (readypacket, class changes)
+            O_LobbySendPackets();
             break;
         }
     }

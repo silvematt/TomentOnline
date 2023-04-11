@@ -37,6 +37,10 @@ int NET_HostGameProcedure(void)
 
     // Player 1 is the host
     thisPlayer.id = 0;
+
+    // Set who is host
+    thisPlayer.isHost = true;
+    otherPlayer.isHost = false;
     
     // Create the socket to listen
     thisPlayer.socket = INVALID_SOCKET;
@@ -199,6 +203,10 @@ int NET_JoinGameProcedure(void)
     
     // Set basic info
     otherPlayer.id = 0;
+
+    // Set who is host
+    thisPlayer.isHost = false;
+    otherPlayer.isHost = true;
 
     // Create socket
     otherPlayer.socket = INVALID_SOCKET;

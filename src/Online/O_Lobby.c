@@ -14,6 +14,19 @@ bool otherPlayerReady;
 
 gamedungeons_e selectedDungeon;
 
+// Lobby menu buttons
+static void CALLBACK_ClassSelectTank(void);
+static void CALLBACK_ClassSelectHealer(void);
+static void CALLBACK_ClassSelectDps(void);
+
+menuelement_t lobbyButtons[] =
+{
+    {"CLASS_SELECT_TANK",       {14,  336, 32, 32}, CALLBACK_ClassSelectTank},
+    {"CLASS_SELECT_HEALER",     {76,  336, 32, 32}, CALLBACK_ClassSelectHealer},
+    {"CLASS_SELECT_DPS",        {134, 336, 32, 32}, CALLBACK_ClassSelectDps}
+};
+int lobbyButtonsLength = 3;
+
 int O_LobbyDefineClassesHostwise(void)
 {
     if(thisPlayer.favoriteClass != otherPlayer.favoriteClass)
@@ -95,9 +108,29 @@ int O_LobbySetMap(void)
 
 }
 
-int O_LobbySetClass(void)
+int O_LobbySetClass(playableclasses_e selected)
 {
+    if(selected == thisPlayer.selectedClass || selected == otherPlayer.selectedClass)
+        return 1;
 
+    // Send packet to change class
+    pckt_t* setClassPacket = PCKT_MakeSetClassPacket(&packetToSend, selected);
+
+    if(!outputPcktBuffer.hasBegunWriting)
+    {
+        // Store the greet packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer, (char*)setClassPacket, PCKT_SIZE);
+        printf("Set Class Packet made!\n");
+
+        thisPlayer.selectedClass = selected;
+        return 0;
+    }
+    else
+    {
+        // outputpcktbuffer was already sending something, what to do now?
+        return 2;
+    }
 }
 
 int O_LobbyLeave(void)
@@ -176,4 +209,123 @@ int O_LobbyRender(void)
 
     SDL_Rect otherReadyIcon = {716, 405, SCREEN_WIDTH, SCREEN_HEIGHT};
     R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture, &otherReadyIcon);
+}
+
+void O_LobbyInputHandling(SDL_Event* e)
+{
+    // Offset mouse pos
+    static int x = 0;
+    static int y = 0;
+
+    //Get the mouse offsets
+    x = e->button.x;
+    y = e->button.y;
+
+    for(int i = 0; i < lobbyButtonsLength; i++)
+    {
+        bool isOn = (( x > lobbyButtons[i].box.x) && ( x < lobbyButtons[i].box.x + lobbyButtons[i].box.w ) && 
+                     ( y > lobbyButtons[i].box.y) && ( y < lobbyButtons[i].box.y + lobbyButtons[i].box.h ));
+
+        if(e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
+        {
+            if (isOn && lobbyButtons[i].OnClick != NULL)
+            {
+                lobbyButtons[i].OnClick();
+                return;
+            }
+        }
+    }
+}
+
+static void CALLBACK_ClassSelectTank(void)
+{
+    O_LobbySetClass(CLASS_TANK);
+}
+
+static void CALLBACK_ClassSelectHealer(void)
+{
+    O_LobbySetClass(CLASS_HEALER);
+}
+
+static void CALLBACK_ClassSelectDps(void)
+{
+    O_LobbySetClass(CLASS_DPS);
+}
+
+int O_LobbySendPackets(void)
+{
+    return PCKT_SendPacket(O_LobbyOnPacketIsSent);
+}
+
+int O_LobbyOnPacketIsSent(void)
+{
+    
+}
+
+int O_LobbyReceivePackets(void)
+{
+    return PCKT_ReceivePacket(O_LobbyOnPacketIsReceived);
+}
+
+int O_LobbyOnPacketIsReceived(void)
+{
+    // When this function gets called, the packet arrived on the PCKT_ReceivePacket call and was saved inside the inputPacketBuffer->buffer
+    // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
+    pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
+
+    printf("Packet received! ID: %d\n", receivedPacket->id);
+    if(receivedPacket->id == PCKT_SET_CLASS)
+    {
+        // Manage packet, if receivedPacket->id == PCKT_GREET:
+        pckt_set_class_t* setClassPacket = (pckt_set_class_t*)receivedPacket->data;
+
+        printf("Packet received! ID: %d | - Class: %d\n", receivedPacket->id, setClassPacket->classSet);
+
+        // Parse packet, check if it is the same as ours?
+        if(setClassPacket->classSet == thisPlayer.selectedClass)
+        {
+            // Class clash, may be caused by delay, if this is the host, keep the class, if this is the client change it
+            printf("Class clash!\n");
+            if(thisPlayer.isHost)
+            {
+                switch(thisPlayer.selectedClass)
+                {
+                    case CLASS_TANK:
+                        otherPlayer.selectedClass = CLASS_HEALER;
+                        break;
+
+                    case CLASS_HEALER:
+                        otherPlayer.selectedClass = CLASS_TANK;
+                        break;
+
+                    case CLASS_DPS:
+                        otherPlayer.selectedClass = CLASS_TANK;
+                        break;
+                }
+            }
+            else
+            {
+                switch(setClassPacket->classSet)
+                {
+                    case CLASS_TANK:
+                        thisPlayer.selectedClass = CLASS_HEALER;
+                        break;
+
+                    case CLASS_HEALER:
+                        thisPlayer.selectedClass = CLASS_TANK;
+                        break;
+                    
+                    case CLASS_DPS:
+                        thisPlayer.selectedClass = CLASS_TANK;
+                        break;
+                }
+
+                otherPlayer.selectedClass = setClassPacket->classSet;
+            }
+        }
+        else
+            otherPlayer.selectedClass = setClassPacket->classSet;
+
+        return 0;
+    }
 }
