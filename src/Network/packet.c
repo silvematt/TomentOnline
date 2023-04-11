@@ -230,7 +230,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
     }
 }
 
-pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH])
+pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH], byte pFavClass)
 {
     PCKT_Zero(packet);
     
@@ -241,6 +241,7 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
     // Create and fill the content
     pckt_greet_t content;
     strcpy(content.name, pName);
+    content.favoriteClass = pFavClass;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(pckt_greet_t));

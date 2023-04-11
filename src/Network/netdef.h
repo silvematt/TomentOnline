@@ -35,7 +35,9 @@ typedef struct netplayer
     netstatus_e status;
 
     char name[NET_MAX_PLAYER_NAME_LENGTH];
-    playableclasses_e class;
+    playableclasses_e favoriteClass; // The class contained in the greet packet, used to initialize the lobby state and set in the Options main menu
+
+    playableclasses_e selectedClass;
 } netplayer_t;
 
 extern netplayer_t thisPlayer;

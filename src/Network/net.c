@@ -3,6 +3,7 @@
 
 #include "netdef.h"
 #include "packet.h"
+#include "../Online/O_Lobby.h"
 
 netplayer_t thisPlayer;
 netplayer_t otherPlayer;
@@ -154,9 +155,11 @@ int NET_HostGameWaitForGreet(void)
         // Manage packet, if receivedPacket->id == PCKT_GREET:
         pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
-        printf("Packet received! ID: %d | Greet value: %s\n", receivedPacket->id, greetPacket->name);
+        printf("Packet received! ID: %d | Greet value: %s | Class: %d\n", receivedPacket->id, greetPacket->name, greetPacket->favoriteClass);
 
+        // Parse packet
         strcpy(otherPlayer.name, greetPacket->name);
+        otherPlayer.favoriteClass = greetPacket->favoriteClass;
 
         otherPlayer.status = NETSTS_HAVE_TO_GREET;
         return 0;
@@ -166,7 +169,7 @@ int NET_HostGameWaitForGreet(void)
 int NET_HostGameMakeGreetPacket(void)
 {
     // Make greet packet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name, thisPlayer.favoriteClass);
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
@@ -181,6 +184,9 @@ int NET_HostGameSendGreet(void)
     pckt_t* sent = (pckt_t*)outputPcktBuffer.buffer;
 
     printf("Host sent greet %s\n", sent);
+
+    O_LobbyDefineClassesHostwise();
+
     otherPlayer.status = NETSTS_GREETED;
 }
 
@@ -352,9 +358,13 @@ int NET_JoinGameWaitForGreet(void)
         // Manage packet, if receivedPacket->id == PCKT_GREET:
         pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
 
-        printf("Packet received! ID: %d | Greet value: %s\n", receivedPacket->id, greetPacket->name);
+        printf("Packet received! ID: %d | Greet value: %s - Class: %d\n", receivedPacket->id, greetPacket->name, greetPacket->favoriteClass);
 
+        // Parse packet
         strcpy(otherPlayer.name, greetPacket->name);
+        otherPlayer.favoriteClass = greetPacket->favoriteClass;
+
+        O_LobbyDefineClassesJoinerwise();
 
         otherPlayer.status = NETSTS_GREETED;
 
@@ -365,7 +375,7 @@ int NET_JoinGameWaitForGreet(void)
 int NET_JoinGameMakeGreetPacket(void)
 {
     // Make greet packet
-    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name);
+    pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name, thisPlayer.favoriteClass);
     
     // Store the greet packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;

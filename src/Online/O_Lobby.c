@@ -14,6 +14,77 @@ bool otherPlayerReady;
 
 gamedungeons_e selectedDungeon;
 
+int O_LobbyDefineClassesHostwise(void)
+{
+    if(thisPlayer.favoriteClass != otherPlayer.favoriteClass)
+    {
+        printf("LOBBYINFO: Default classes are ok\n");
+        thisPlayer.selectedClass = thisPlayer.favoriteClass;
+        otherPlayer.selectedClass = otherPlayer.favoriteClass;
+        return 0;
+    }
+    else
+    {
+        printf("LOBBYINFO: Default classes are not ok, prioritizing host...\n");
+
+        // Both players wants the same class, prioritize the host
+        thisPlayer.selectedClass = thisPlayer.favoriteClass;
+
+        switch(thisPlayer.favoriteClass)
+        {
+            case CLASS_TANK:
+                otherPlayer.selectedClass = CLASS_HEALER;
+                break;
+
+            case CLASS_HEALER:
+                otherPlayer.selectedClass = CLASS_TANK;
+                break;
+
+            case CLASS_DPS:
+                otherPlayer.selectedClass = CLASS_TANK;
+                break;
+        }
+
+        return 1;
+    }
+}
+
+int O_LobbyDefineClassesJoinerwise(void)
+{
+    if(thisPlayer.favoriteClass != otherPlayer.favoriteClass)
+    {
+        printf("LOBBYINFO: Default classes are ok\n");
+
+        thisPlayer.selectedClass = thisPlayer.favoriteClass;
+        otherPlayer.selectedClass = otherPlayer.favoriteClass;
+        return 0;
+    }
+    else
+    {
+        printf("LOBBYINFO: Default classes are not ok, prioritizing host...\n");
+
+        // Both players wants the same class, prioritize the host
+        otherPlayer.selectedClass = otherPlayer.favoriteClass;
+
+        switch(otherPlayer.favoriteClass)
+        {
+            case CLASS_TANK:
+                thisPlayer.selectedClass = CLASS_HEALER;
+                break;
+
+            case CLASS_HEALER:
+                thisPlayer.selectedClass = CLASS_TANK;
+                break;
+
+            case CLASS_DPS:
+                thisPlayer.selectedClass = CLASS_TANK;
+                break;
+        }
+
+        return 1;
+    }
+}
+
 int O_LobbySetReady(void)
 {
 
@@ -46,7 +117,7 @@ int O_LobbyRender(void)
 
     // Display this player potrait
     SDL_Rect thisPotraitScreenPos = {20, 190, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK]->texture, &thisPotraitScreenPos);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK+thisPlayer.selectedClass]->texture, &thisPotraitScreenPos);
 
     // Display this player classess
     SDL_Rect thisTankIcon = {14, 336, SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -59,9 +130,22 @@ int O_LobbyRender(void)
     R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_DPS]->texture, &thisDpsIcon);
 
     SDL_Rect selectionIcon = {14, 336, SCREEN_WIDTH, SCREEN_HEIGHT};
+    if(thisPlayer.selectedClass == 0)
+        selectionIcon.x = 14;
+    else if(thisPlayer.selectedClass == 1)
+        selectionIcon.x = 76;
+    else
+        selectionIcon.x = 134;
+
     R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION]->texture, &selectionIcon);
     
     SDL_Rect disabledIcon = {134, 336, SCREEN_WIDTH, SCREEN_HEIGHT};
+    if(otherPlayer.selectedClass == 0)
+        disabledIcon.x = 14;
+    else if(otherPlayer.selectedClass == 1)
+        disabledIcon.x = 76;
+    else
+        disabledIcon.x = 134;
     R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION_DISABLED]->texture, &disabledIcon);
 
     // Ready text
@@ -76,13 +160,13 @@ int O_LobbyRender(void)
     
     // Display OTHER player potrait
     SDL_Rect otherPotraitScreenPos = {630, 190, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_DPS]->texture, &otherPotraitScreenPos);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK+otherPlayer.selectedClass]->texture, &otherPotraitScreenPos);
     
     // Display other player class
 
     // Display this player classess
     SDL_Rect otherClassIcon = {680, 336, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_DPS]->texture, &otherClassIcon);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_TANK+otherPlayer.selectedClass]->texture, &otherClassIcon);
 
     SDL_Rect otherClassSelection = {680, 336, SCREEN_WIDTH, SCREEN_HEIGHT};
     R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_CLASS_ICON_SELECTION]->texture, &otherClassSelection);
@@ -91,5 +175,5 @@ int O_LobbyRender(void)
     T_DisplayTextScaled(FONT_BLKCRY, "Ready: ", 610, 405, 1.0f);
 
     SDL_Rect otherReadyIcon = {716, 405, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_ICON_READY]->texture, &otherReadyIcon);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture, &otherReadyIcon);
 }

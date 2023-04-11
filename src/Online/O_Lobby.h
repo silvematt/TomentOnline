@@ -9,6 +9,13 @@ extern bool otherPlayerReady;
 
 extern gamedungeons_e selectedDungeon;
 
+// ------------------------------------------------------------------------------------------------------------------------------
+// This function checks wether each of the favorite players classess are ok to play together (if they are not the same)
+// If they're the same, the host keeps its own while the client will send a SetClass packet
+// ------------------------------------------------------------------------------------------------------------------------------
+int O_LobbyDefineClassesHostwise(void);
+int O_LobbyDefineClassesJoinerwise(void);
+
 int O_LobbyLeave(void);
 
 int O_LobbySetReady(void);

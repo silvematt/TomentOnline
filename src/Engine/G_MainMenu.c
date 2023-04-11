@@ -18,6 +18,7 @@ static void CALLBACK_MAINMENU_Options(void);
 static void CALLBACK_MAINMENU_Quit(void);
 static void CALLBACK_ReturnToMainMenu(void);
 static void CALLBACK_OPTIONSMENU_ChangeGraphics(void);
+static void CALLBACK_OPTIONSMENU_ChangeDefaultClass(void);
 static void CALLBACK_MAINMENU_About(void);
 static void CALLBACK_Continue(void);
 
@@ -47,10 +48,11 @@ menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 2, &DeathMenuElements[0]};
 
 menuelement_t OptionsMenuElements[] =
 {
-    {"Graphics:",    {220, 200, 400, 40}, CALLBACK_OPTIONSMENU_ChangeGraphics},
-    {"Return",       {220, 250, 200, 40}, CALLBACK_ReturnToMainMenu},
+    {"Graphics:",       {220, 200, 400, 40}, CALLBACK_OPTIONSMENU_ChangeGraphics},
+    {"Default class:",  {220, 250, 400, 40}, CALLBACK_OPTIONSMENU_ChangeDefaultClass},
+    {"Return",          {220, 350, 200, 40}, CALLBACK_ReturnToMainMenu},
 };
-menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 2, &OptionsMenuElements[0]};
+menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 3, &OptionsMenuElements[0]};
 
 menuelement_t EndGameMenuElements[] =
 {
@@ -125,6 +127,22 @@ void G_RenderCurrentMenuBackground(void)
 
                 case GRAPHICS_HIGH:
                     T_DisplayTextScaled(FONT_BLKCRY, "High", 350, 205, 1.0f);
+                    break;
+            }
+
+            // Display favorite class current setting:
+            switch(thisPlayer.favoriteClass)
+            {
+                case CLASS_TANK:
+                    T_DisplayTextScaled(FONT_BLKCRY, "Tank", 400, 255, 1.0f);
+                    break;
+                
+                case CLASS_HEALER:
+                    T_DisplayTextScaled(FONT_BLKCRY, "Healer", 400, 255, 1.0f);
+                    break;
+
+                case CLASS_DPS:
+                    T_DisplayTextScaled(FONT_BLKCRY, "Dps", 400, 255, 1.0f);
                     break;
             }
             break;
@@ -372,6 +390,14 @@ static void CALLBACK_OPTIONSMENU_ChangeGraphics(void)
 
     R_SetRenderingGraphics(r_CurrentGraphicsSetting);
     R_ClearRendering();
+}
+
+static void CALLBACK_OPTIONSMENU_ChangeDefaultClass(void)
+{
+    if(thisPlayer.favoriteClass+1 < 3)
+        thisPlayer.favoriteClass++;
+    else
+        thisPlayer.favoriteClass = 0;
 }
 
 static void CALLBACK_Continue(void)

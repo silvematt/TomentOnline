@@ -23,6 +23,7 @@ typedef struct pckt_t
 typedef struct pckt_greet_t
 {
     char name[NET_MAX_PLAYER_NAME_LENGTH];
+    byte favoriteClass;
 } pckt_greet_t;
 
 typedef struct pckt_buffer_t
@@ -50,7 +51,7 @@ extern pckt_buffer_t outputPcktBuffer;
 void PCKT_Zero(pckt_t* p);
 void PCKT_ZeroBuffer(pckt_buffer_t* pBuf);
 
-pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH]);
+pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH], byte pFavClass);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));
