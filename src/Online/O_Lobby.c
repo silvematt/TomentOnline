@@ -5,6 +5,7 @@
 #include "../Engine/D_AssetsManager.h"
 #include "../Engine/R_Rendering.h"
 #include "../Engine/T_TextRendering.h"
+#include "../Engine/G_Game.h"
 
 #include "../Network/netdef.h"
 #include "../Network/packet.h"
@@ -118,8 +119,11 @@ int O_LobbySetReady(bool ready)
         thisPlayer.isReady = ready;
 
         // Check if both are ready
-        if(thisPlayer.isReady && otherPlayer.isReady)   
+        if(thisPlayer.isReady && otherPlayer.isReady && !thisPlayer.startingGame)
+        {
             printf("BOTH READY, SHOULD START THE GAME\n");
+            O_LobbyStartGame();
+        }
 
         return 0;
     }
@@ -291,7 +295,30 @@ int O_LobbySendPackets(void)
 
 int O_LobbyOnPacketIsSent(void)
 {
-    
+    printf("Packet just got sent, offset: %d\n", outputPcktBuffer.packetOffset);
+    char thisPcktBuffer[PCKT_SIZE];
+    memcpy(thisPcktBuffer, outputPcktBuffer.buffer+(outputPcktBuffer.packetOffset), PCKT_SIZE);
+
+    pckt_t* pcktSent = (pckt_t*)thisPcktBuffer;
+
+    switch(pcktSent->id)
+    {
+        case PCKTID_STARTING:
+        {
+            // Start the game, we warned the other user
+            printf("Starting the game.\n");
+
+            // Load game
+            // Initialize the player
+            player.hasBeenInitialized = false;
+
+            G_InitGame();
+            A_ChangeState(GSTATE_GAME);
+            break;
+        }
+    }
+
+    return 0;
 }
 
 int O_LobbyReceivePackets(void)
@@ -373,10 +400,64 @@ int O_LobbyOnPacketIsReceived(void)
 
             otherPlayer.isReady = (readyPacket->isReady);
 
-            if(thisPlayer.isReady && otherPlayer.isReady)
+            if(thisPlayer.isReady && otherPlayer.isReady && !thisPlayer.startingGame)
+            {
                 printf("BOTH READY, SHOULD START THE GAME\n");
+                O_LobbyStartGame();
+            }
 
             break;
         }
+
+        case PCKTID_STARTING:
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_starting_t* startingPacket = (pckt_starting_t*)receivedPacket->data;
+
+            printf("Packet received! ID: %d | - Starting value: %d\n", receivedPacket->id, startingPacket->starting);
+            
+            if(startingPacket->starting == 1)
+            {
+                otherPlayer.startingGame = true;
+
+                // At this point the other player is starting the game, if we are not, we have to start it as well.
+                printf("Other player is starting the game.\n");
+                if(!thisPlayer.startingGame)
+                {
+                    // This may happen if one client was aware of both starting and while one packet was traveling one of either set himself unready.
+                    printf("We were not, force start.\n");
+                    O_LobbyStartGame();
+                }
+            }
+            
+            break;
+        }
+    }
+}
+
+int O_LobbyStartGame(void)
+{
+    thisPlayer.startingGame = TRUE;
+    thisPlayer.gameStated = FALSE;
+    
+    // Send packet to notice other player that we are starting the game, he will start as soon as this packet is received
+    pckt_t* startingPacket = PCKT_MakeStartingPacket(&packetToSend, 1);
+
+    // outputpcktbuffer was already sending something, check if we can append this packet
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Append this packet, it will be sent after the ones already in buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)startingPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+
+        printf("StartingPacket made!\n");
+        return 0;
+    }
+    else
+    {
+        // Outputpcktbuffer is full and this packet should be sent, what to do?
+        printf("CRITICAL ERROR: Send buffer was full when in O_LobbyStartGame\n");
+        return 2;
     }
 }

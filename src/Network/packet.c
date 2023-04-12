@@ -315,3 +315,21 @@ pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady)
 
     return packet;
 }
+
+pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStartingValue)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_STARTING;
+
+    // Create and fill the content
+    pckt_starting_t content;
+    content.starting = pStartingValue;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

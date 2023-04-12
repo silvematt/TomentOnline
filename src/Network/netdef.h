@@ -43,6 +43,8 @@ typedef struct netplayer
     // Lobby
     playableclasses_e selectedClass;
     bool isReady;
+    bool startingGame;
+    bool gameStated;
 } netplayer_t;
 
 extern netplayer_t thisPlayer;
