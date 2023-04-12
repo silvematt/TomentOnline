@@ -25,6 +25,8 @@ static void CALLBACK_Continue(void);
 static void CALLBACK_HOSTMENU_Abort(void);
 static void CALLBACK_JOINMENU_Abort(void);
 
+static void CALLBACK_LOBBY_Ready(void);
+
 // ----------------------------
 // Define Menus
 // ----------------------------
@@ -83,7 +85,7 @@ menu_t JoinGameMenu = {MENU_JOINGAME, JoinGameMenuElements, 1, &JoinGameMenuElem
 
 menuelement_t InLobbyMenuElements[] =
 {
-    {"Ready",       {650, 550, 400, 40}, NULL},
+    {"Ready",       {650, 550, 400, 40}, CALLBACK_LOBBY_Ready},
     {"Leave",       {50, 550, 200, 40}, NULL},
 };
 menu_t InLobbyMenu = {MENU_INLOBBY, InLobbyMenuElements, 2, &InLobbyMenuElements[0]};
@@ -424,4 +426,9 @@ static void CALLBACK_HOSTMENU_Abort(void)
 static void CALLBACK_JOINMENU_Abort(void)
 {
     wantsToAbortJoining =  TRUE;
+}
+
+static void CALLBACK_LOBBY_Ready(void)
+{
+    O_LobbySetReady(!thisPlayer.isReady);
 }

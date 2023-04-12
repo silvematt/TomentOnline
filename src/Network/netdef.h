@@ -29,16 +29,20 @@ typedef enum netstatus
 // netplayer is used to represent a player on the net (other player)
 typedef struct netplayer
 {
+    // Status
     unsigned int id;
     SOCKET socket;
     struct sockaddr_in address;
     netstatus_e status;
     bool isHost;
 
+    // Host/Join
     char name[NET_MAX_PLAYER_NAME_LENGTH];
     playableclasses_e favoriteClass; // The class contained in the greet packet, used to initialize the lobby state and set in the Options main menu
 
+    // Lobby
     playableclasses_e selectedClass;
+    bool isReady;
 } netplayer_t;
 
 extern netplayer_t thisPlayer;

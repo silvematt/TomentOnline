@@ -154,7 +154,7 @@ int NET_HostGameWaitForGreet(void)
     // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
     pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
 
-    if(receivedPacket->id == PCKT_GREET)
+    if(receivedPacket->id == PCKTID_GREET)
     {
         // Manage packet, if receivedPacket->id == PCKT_GREET:
         pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
@@ -362,7 +362,7 @@ int NET_JoinGameWaitForGreet(void)
     // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
     pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
 
-    if(receivedPacket->id == PCKT_GREET)
+    if(receivedPacket->id == PCKTID_GREET)
     {
         // Manage packet, if receivedPacket->id == PCKT_GREET:
         pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;

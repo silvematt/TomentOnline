@@ -11,8 +11,9 @@
 #define MAX_PCKT_DATA 1300 // sizeof the char buffer inside the packet data
 
 // Packets IDs
-#define PCKT_GREET 1
-#define PCKT_SET_CLASS 2
+#define PCKTID_GREET 1
+#define PCKTID_SET_CLASS 2
+#define PCKTID_READY 3
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -35,6 +36,11 @@ typedef struct pckt_set_class_t
 {
     byte classSet;
 } pckt_set_class_t;
+
+typedef struct pckt_ready_t
+{
+    byte isReady;
+} pckt_ready_t;
 
 #define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
@@ -66,6 +72,7 @@ void PCKT_ZeroBuffer(pckt_buffer_t* pBuf);
 
 pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH], byte pFavClass);
 pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet);
+pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

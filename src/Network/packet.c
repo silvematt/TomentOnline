@@ -267,7 +267,7 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
     
     // Create the packet
     packet->protocol = PROT_ID_TCP;
-    packet->id = PCKT_GREET;
+    packet->id = PCKTID_GREET;
 
     // Create and fill the content
     pckt_greet_t content;
@@ -286,11 +286,29 @@ pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet)
 
     // Create the packet
     packet->protocol = PROT_ID_TCP;
-    packet->id = PCKT_SET_CLASS;
+    packet->id = PCKTID_SET_CLASS;
 
     // Create and fill the content
     pckt_set_class_t content;
     content.classSet = pClassToSet;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_READY;
+
+    // Create and fill the content
+    pckt_ready_t content;
+    content.isReady = pIsReady;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

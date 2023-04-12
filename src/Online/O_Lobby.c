@@ -98,9 +98,37 @@ int O_LobbyDefineClassesJoinerwise(void)
     }
 }
 
-int O_LobbySetReady(void)
-{
+int O_LobbySetReady(bool ready)
+{   
+    thisPlayer.isReady = ready;
 
+    // Send packet to change class
+    pckt_t* readyPacket = PCKT_MakeReadyPacket(&packetToSend, (ready) ? 1 : 0);
+
+    // outputpcktbuffer was already sending something, check if we can append this packet
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Append this packet, it will be sent after the ones already in buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)readyPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+
+        printf("Ready Packet made!\n");
+
+        thisPlayer.isReady = ready;
+
+        // Check if both are ready
+        if(thisPlayer.isReady && otherPlayer.isReady)   
+            printf("BOTH READY, SHOULD START THE GAME\n");
+
+        return 0;
+    }
+    else
+    {
+        // Outputpcktbuffer is full and this packet should be sent, what to do?
+        printf("CRITICAL ERROR: Send buffer was full when trying to send SetClassPacket\n");
+        return 2;
+    }
 }
 
 int O_LobbySetMap(void)
@@ -110,6 +138,9 @@ int O_LobbySetMap(void)
 
 int O_LobbySetClass(playableclasses_e selected)
 {
+    if(selected == thisPlayer.selectedClass || selected == otherPlayer.selectedClass || thisPlayer.isReady)
+        return 1;
+
     // Send packet to change class
     pckt_t* setClassPacket = PCKT_MakeSetClassPacket(&packetToSend, selected);
 
@@ -186,7 +217,7 @@ int O_LobbyRender(void)
     T_DisplayTextScaled(FONT_BLKCRY, "Ready: ", 14, 405, 1.0f);
 
     SDL_Rect readyIcon = {120, 405, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture, &readyIcon);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[thisPlayer.isReady ? G_ASSET_ICON_READY : G_ASSET_ICON_NOTREADY]->texture, &readyIcon);
 
     // Display other player name
     T_DisplayTextScaled(FONT_BLKCRY, otherPlayer.name, 650, 150, 1.0f);
@@ -209,7 +240,7 @@ int O_LobbyRender(void)
     T_DisplayTextScaled(FONT_BLKCRY, "Ready: ", 610, 405, 1.0f);
 
     SDL_Rect otherReadyIcon = {716, 405, SCREEN_WIDTH, SCREEN_HEIGHT};
-    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY]->texture, &otherReadyIcon);
+    R_BlitIntoScreenScaled(&defaultSize, tomentdatapack.uiAssets[otherPlayer.isReady ? G_ASSET_ICON_READY : G_ASSET_ICON_NOTREADY]->texture, &otherReadyIcon);
 }
 
 void O_LobbyInputHandling(SDL_Event* e)
@@ -275,58 +306,77 @@ int O_LobbyOnPacketIsReceived(void)
     pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
 
     printf("Packet received! ID: %d\n", receivedPacket->id);
-    if(receivedPacket->id == PCKT_SET_CLASS)
+
+    switch(receivedPacket->id)
     {
-        // Manage packet, if receivedPacket->id == PCKT_GREET:
-        pckt_set_class_t* setClassPacket = (pckt_set_class_t*)receivedPacket->data;
-
-        printf("Packet received! ID: %d | - Class: %d\n", receivedPacket->id, setClassPacket->classSet);
-
-        // Parse packet, check if it is the same as ours?
-        if(setClassPacket->classSet == thisPlayer.selectedClass)
+        case PCKTID_SET_CLASS:
         {
-            // Class clash, may be caused by delay, if this is the host, keep the class, if this is the client change it
-            printf("Class clash!\n");
-            if(thisPlayer.isHost)
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_set_class_t* setClassPacket = (pckt_set_class_t*)receivedPacket->data;
+
+            printf("Packet received! ID: %d | - Class: %d\n", receivedPacket->id, setClassPacket->classSet);
+
+            // Parse packet, check if it is the same as ours?
+            if(setClassPacket->classSet == thisPlayer.selectedClass)
             {
-                switch(thisPlayer.selectedClass)
+                // Class clash, may be caused by delay, if this is the host, keep the class, if this is the client change it
+                printf("Class clash!\n");
+                if(thisPlayer.isHost)
                 {
-                    case CLASS_TANK:
-                        otherPlayer.selectedClass = CLASS_HEALER;
-                        break;
+                    switch(thisPlayer.selectedClass)
+                    {
+                        case CLASS_TANK:
+                            otherPlayer.selectedClass = CLASS_HEALER;
+                            break;
 
-                    case CLASS_HEALER:
-                        otherPlayer.selectedClass = CLASS_TANK;
-                        break;
+                        case CLASS_HEALER:
+                            otherPlayer.selectedClass = CLASS_TANK;
+                            break;
 
-                    case CLASS_DPS:
-                        otherPlayer.selectedClass = CLASS_TANK;
-                        break;
+                        case CLASS_DPS:
+                            otherPlayer.selectedClass = CLASS_TANK;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch(setClassPacket->classSet)
+                    {
+                        case CLASS_TANK:
+                            thisPlayer.selectedClass = CLASS_HEALER;
+                            break;
+
+                        case CLASS_HEALER:
+                            thisPlayer.selectedClass = CLASS_TANK;
+                            break;
+                        
+                        case CLASS_DPS:
+                            thisPlayer.selectedClass = CLASS_TANK;
+                            break;
+                    }
+
+                    otherPlayer.selectedClass = setClassPacket->classSet;
                 }
             }
             else
-            {
-                switch(setClassPacket->classSet)
-                {
-                    case CLASS_TANK:
-                        thisPlayer.selectedClass = CLASS_HEALER;
-                        break;
-
-                    case CLASS_HEALER:
-                        thisPlayer.selectedClass = CLASS_TANK;
-                        break;
-                    
-                    case CLASS_DPS:
-                        thisPlayer.selectedClass = CLASS_TANK;
-                        break;
-                }
-
                 otherPlayer.selectedClass = setClassPacket->classSet;
-            }
-        }
-        else
-            otherPlayer.selectedClass = setClassPacket->classSet;
 
-        return 0;
+            return 0;
+        }
+
+        case PCKTID_READY:
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_ready_t* readyPacket = (pckt_ready_t*)receivedPacket->data;
+
+            printf("Packet received! ID: %d | - Ready: %d\n", receivedPacket->id, readyPacket->isReady);
+
+            otherPlayer.isReady = (readyPacket->isReady);
+
+            if(thisPlayer.isReady && otherPlayer.isReady)
+                printf("BOTH READY, SHOULD START THE GAME\n");
+
+            break;
+        }
     }
 }
