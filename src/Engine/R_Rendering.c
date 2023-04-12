@@ -45,7 +45,7 @@ bool r_debugPathfinding = false;
 alertMessage_t* alertMessagesHead;
 
 
-GraphicsOptions_e r_CurrentGraphicsSetting = GRAPHICS_MEDIUM;
+GraphicsOptions_e r_CurrentGraphicsSetting = GRAPHICS_LOW;
 
 // Projection Plane
 int PROJECTION_PLANE_WIDTH;     

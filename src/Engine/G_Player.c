@@ -10,6 +10,7 @@
 #include "D_ObjectsCallbacks.h"
 #include "G_AI.h"
 #include "T_TextRendering.h"
+#include "../Network/netdef.h"
 
 player_t player;    // Player
 
@@ -425,18 +426,26 @@ void G_PlayerRender(void)
     R_BlitIntoScreenScaled(&size, curAnim, &screenPos);
 }
 
-// -----------------------------------
-// Renders Player's UI
-// -----------------------------------
-void G_PlayerUIRender(void)
+
+static void G_PlayerUIRender_ThisPlayer()
 {
+     // Player name
+    T_DisplayText(FONT_BLKCRY, thisPlayer.name, 105, 5);
+    
+    // Player potrait
+    // Display this player potrait
+    SDL_Rect thisPotraitScreenPos = {2, 5, 90, 90};
+    SDL_Rect thisPotraitSize = {(0), (0), 128, 128};
+
+    R_BlitIntoScreenScaled(&thisPotraitSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK+thisPlayer.selectedClass]->texture, &thisPotraitScreenPos);
+
     // HEALTH BAR
-    SDL_Rect healthbarEmptyScreenPos = {105, 5, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect healthbarEmptyScreenPos = {105, 37, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect healthbarEmptySize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     R_BlitIntoScreenScaled(&healthbarEmptySize, tomentdatapack.uiAssets[G_ASSET_HEALTHBAR_EMPTY]->texture, &healthbarEmptyScreenPos);
 
-    SDL_Rect healthbarFillScreenPos = {105, 5, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect healthbarFillScreenPos = {105, 37, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect healthbarFillSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     // Fill size.x of 0 means full health
@@ -456,12 +465,12 @@ void G_PlayerUIRender(void)
     R_BlitIntoScreenScaled(&healthbarFillSize, tomentdatapack.uiAssets[G_ASSET_HEALTHBAR_FILL]->texture, &healthbarFillScreenPos);
 
     // MANA BAR
-    SDL_Rect manabarEmptyScreenPos = {105, 34, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect manabarEmptyScreenPos = {105, 66, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect manabarEmptySize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     R_BlitIntoScreenScaled(&manabarEmptySize, tomentdatapack.uiAssets[G_ASSET_MANABAR_EMPTY]->texture, &manabarEmptyScreenPos);
 
-    SDL_Rect manabarFillScreenPos = {105, 34, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect manabarFillScreenPos = {105, 66, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect manabarFillSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     manabarFillSize.x = -160/player.attributes.maxMana* player.attributes.curMana + 160;
@@ -522,18 +531,142 @@ void G_PlayerUIRender(void)
     // Render icons
 
     // Render weapon
-    SDL_Rect weaponIconScreenPos = {105, 63, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect weaponIconScreenPos = {105, 95, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect weaponIconSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     if(curWeapon != NULL)
         R_BlitIntoScreenScaled(&weaponIconSize, curWeapon, &weaponIconScreenPos);
 
     // Render spell icon
-    SDL_Rect spellIconScreenPos = {143, 63, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect spellIconScreenPos = {143, 95, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect spellIconSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     if(curSpell != NULL)
+    R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
+
+}
+
+// Fill needs to account for other player health
+static void G_PlayerUIRender_OtherPlayer()
+{
+     // Player name
+    T_DisplayTextScaled(FONT_BLKCRY, otherPlayer.name, 100, 145, .8f);
+
+    // Player potrait
+    // Display this player potrait
+    SDL_Rect thisPotraitScreenPos = {2, 145, 70, 70};
+    SDL_Rect thisPotraitSize = {(0), (0), 128, 128};
+
+    R_BlitIntoScreenScaled(&thisPotraitSize, tomentdatapack.uiAssets[G_ASSET_CLASS_POTRAIT_TANK+otherPlayer.selectedClass]->texture, &thisPotraitScreenPos);
+
+    // HEALTH BAR
+    SDL_Rect healthbarEmptyScreenPos = {85, 172, 122, 18};
+    SDL_Rect healthbarEmptySize = {(0), (0), 161, 24};
+
+    R_BlitIntoScreenScaled(&healthbarEmptySize, tomentdatapack.uiAssets[G_ASSET_HEALTHBAR_EMPTY]->texture, &healthbarEmptyScreenPos);
+
+    SDL_Rect healthbarFillScreenPos = {85, 172, 122, 18};
+    SDL_Rect healthbarFillSize = {(0), (0), 161, 24};
+
+    healthbarFillSize.x = -122/player.attributes.maxHealth* player.attributes.curHealth + 122;
+
+    // Fix bar border
+    if(healthbarFillSize.x == 2)
+        healthbarFillScreenPos.x+=2;
+
+    if(healthbarFillSize.x >=3)
+        healthbarFillScreenPos.x+=3;
+
+    R_BlitIntoScreenScaled(&healthbarFillSize, tomentdatapack.uiAssets[G_ASSET_HEALTHBAR_FILL]->texture, &healthbarFillScreenPos);
+
+    // MANA BAR
+    SDL_Rect manabarEmptyScreenPos = {85, 195, 122, 18};
+    SDL_Rect manabarEmptySize = {(0), (0), 161, 24};
+
+    R_BlitIntoScreenScaled(&manabarEmptySize, tomentdatapack.uiAssets[G_ASSET_MANABAR_EMPTY]->texture, &manabarEmptyScreenPos);
+
+    SDL_Rect manabarFillScreenPos = {85, 195, 122, 18};
+    SDL_Rect manabarFillSize = {(0), (0), 161, 24};
+
+    manabarFillSize.x = -122/player.attributes.maxMana* player.attributes.curMana + 122;
+
+    // Fix bar border
+    if(manabarFillSize.x == 2)
+        manabarFillScreenPos.x+=2;
+        
+    if(manabarFillSize.x >= 3)
+        manabarFillScreenPos.x+=3;
+
+    R_BlitIntoScreenScaled(&manabarFillSize, tomentdatapack.uiAssets[G_ASSET_MANABAR_FILL]->texture, &manabarFillScreenPos);
+
+    // Render the selected weapon
+    SDL_Surface* curWeapon;
+    SDL_Surface* curSpell;
+
+    // Select the weapon
+    switch(player.curWeapon)
+    {
+        case PLAYER_FP_HANDS:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_FISTS]->texture;
+            break;
+
+        case PLAYER_FP_AXE:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_AXE]->texture;
+            break;
+
+        case PLAYER_FP_GREATSWORD:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD]->texture;
+            break;
+
+        default:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_FISTS]->texture;
+            break;
+    }
+
+    // Select the spell
+    switch(player.curSpell)
+    {
+        case SPELL_NULL:
+            curSpell = NULL;
+            break;
+
+        case SPELL_FIREBALL1:
+            curSpell = tomentdatapack.uiAssets[G_ASSET_ICON_SPELL_FIREBALL1]->texture;
+            break;
+
+        case SPELL_ICEDART1:
+            curSpell = tomentdatapack.uiAssets[G_ASSET_ICON_SPELL_ICEDART1]->texture;
+            break;
+
+        default:
+            curSpell = NULL;
+            break;
+    }
+
+    // Render icons
+
+    // Render weapon
+    SDL_Rect weaponIconScreenPos = {85, 220, 26, 26};
+    SDL_Rect weaponIconSize = {(0), (0), 32, 32};
+
+    if(curWeapon != NULL)
+        R_BlitIntoScreenScaled(&weaponIconSize, curWeapon, &weaponIconScreenPos);
+
+    // Render spell icon
+    SDL_Rect spellIconScreenPos = {120, 220, 26, 26};
+    SDL_Rect spellIconSize =  {(0), (0), 32, 32};
+
+    if(curSpell != NULL)
         R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
+}
+
+// -----------------------------------
+// Renders Player's UI
+// -----------------------------------
+void G_PlayerUIRender(void)
+{
+    G_PlayerUIRender_ThisPlayer();
+    G_PlayerUIRender_OtherPlayer();
 
     // Render crosshair
     SDL_Rect crosshairScreenPos = {(SCREEN_WIDTH / 2) - 6, (SCREEN_HEIGHT / 2) - 6, SCREEN_WIDTH, SCREEN_HEIGHT};
