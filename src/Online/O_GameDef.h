@@ -1,6 +1,8 @@
 #ifndef OGAMEDEF_H_INCLUDED
 #define OGAMEDEF_H_INCLUDED
 
+#include "../Engine/U_DataTypes.h"
+
 // Definitions for the Online game
 typedef enum playableclasses_e
 {

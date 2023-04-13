@@ -51,7 +51,7 @@ int NET_HostGameProcedure(void)
         WSACleanup();
         return 1;
     }
-
+    
     // Set the listen socket to be non-blocking
     u_long iMode = 1;
     ioctlsocket(thisPlayer.socket, FIONBIO, &iMode);
@@ -81,6 +81,17 @@ int NET_HostGameProcedure(void)
         return 3;
     }
 
+    int flag = 1;
+    int result = setsockopt(thisPlayer.socket,            /* socket affected */
+                            IPPROTO_TCP,     /* set option at TCP level */
+                            TCP_NODELAY,     /* name of option */
+                            (char *) &flag,  /* the cast is historical cruft */
+                            sizeof(int));    /* length of option value */
+    if (result < 0) 
+    printf("Error while disabling Nagle's Alg.\n");
+
+    printf("Disable Nagle returned %d\n", result);
+
     // Other player hasn't connected
     otherPlayer.status = NETSTS_NULL;
 
@@ -107,6 +118,17 @@ int NET_HostGameWaitForConnection(void)
             // Set other player's socket to be non blocking
             u_long iMode = 1;
             ioctlsocket(acceptedSocket, FIONBIO, &iMode);
+            int flag = 1;
+            int result = setsockopt(acceptedSocket,            /* socket affected */
+                                    IPPROTO_TCP,     /* set option at TCP level */
+                                    TCP_NODELAY,     /* name of option */
+                                    (char *) &flag,  /* the cast is historical cruft */
+                                    sizeof(int));    /* length of option value */
+            if (result < 0) 
+                printf("Error while disabling Nagle's Alg.\n");
+
+            printf("Disable Nagle returned %d\n", result);
+
 
             otherPlayer.id = 1;
 
@@ -222,6 +244,7 @@ int NET_JoinGameProcedure(void)
     // Set other player's socket to be non blocking
     u_long iMode = 1;
     ioctlsocket(otherPlayer.socket, FIONBIO, &iMode);
+
     
     // Setup address
     memset(otherPlayer.address.sin_zero, 0, sizeof(otherPlayer.address.sin_zero));
@@ -350,6 +373,17 @@ int NET_JoinGameAbortConnection(void)
 int NET_JoinGameOnConnectionEstabilishes(void)
 {
     printf("Connection estabilished!\n");
+
+    int flag = 1;
+    int result = setsockopt(otherPlayer.socket,            /* socket affected */
+                            IPPROTO_TCP,     /* set option at TCP level */
+                            TCP_NODELAY,     /* name of option */
+                            (char *) &flag,  /* the cast is historical cruft */
+                            sizeof(int));    /* length of option value */
+    if (result < 0) 
+        printf("Error while disabling Nagle's Alg.\n");
+
+    printf("Disable Nagle returned %d\n", result);
 
     otherPlayer.status = NETSTS_JUST_CONNECTED;
 

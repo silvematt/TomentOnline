@@ -8,6 +8,8 @@
 #include "G_AI.h"
 #include "G_MainMenu.h"
 
+#include "../Online/O_Game.h"
+
 // Game Timer
 Timer* gameTimer;
 
@@ -75,6 +77,9 @@ void G_InitGame(void)
     G_ChangeMap("devmap");
     
     gameTimer->Start(gameTimer);
+
+    // Send packet to notify other user the game started and initialize other player
+    O_GameInitializeOtherPlayer();
 }
 
 //-------------------------------------
@@ -120,11 +125,19 @@ void G_StateGameLoop(void)
     if(application.gamestate != GSTATE_GAME)
         return;
 
+    // Do Network
+    O_GameReceivePackets();
+    O_GameSendPackets();
+
     // Do stuff
     G_PlayerTick();
     G_UpdateDoors();
     G_AIUpdate();
     G_UpdateProjectiles();
+
+    // Update other player
+    O_GameOtherPlayerLoop();
+
     P_PhysicsEndTick();
 
     // Render

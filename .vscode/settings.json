@@ -4,6 +4,7 @@
         "netdef.h": "c",
         "d_assetsmanager.h": "c",
         "packet.h": "c",
-        "r_rendering.h": "c"
+        "r_rendering.h": "c",
+        "g_player.h": "c"
     }
 }

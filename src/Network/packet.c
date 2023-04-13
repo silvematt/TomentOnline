@@ -184,7 +184,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
                 }
                 else
                 {
-                    // Short received, save what we got so far
+                    // Short send, save what we sent so far
                     outputPcktBuffer.shorted = TRUE;
                     outputPcktBuffer.len = sendVal;
                 }
@@ -327,6 +327,26 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStartingValue)
     // Create and fill the content
     pckt_starting_t content;
     content.starting = pStartingValue;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+
+pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_MOVEMENT;
+
+    // Create and fill the content
+    pckt_movement_t content;
+    content.x = pX;
+    content.y = pY;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

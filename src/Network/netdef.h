@@ -53,6 +53,7 @@ extern netplayer_t otherPlayer;
 extern bool wantsToAbortHosting;
 extern bool wantsToAbortJoining;
 
+
 // Initializes network related stuff
 int NET_InitializeNet(void);
 

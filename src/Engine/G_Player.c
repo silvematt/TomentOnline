@@ -11,6 +11,7 @@
 #include "G_AI.h"
 #include "T_TextRendering.h"
 #include "../Network/netdef.h"
+#include "../Online/O_Game.h"
 
 player_t player;    // Player
 
@@ -45,6 +46,10 @@ void G_InitPlayer(void)
     // Init player
     player.position.x = (currentMap.playerStartingGridX * TILE_SIZE);
     player.position.y = (currentMap.playerStartingGridY * TILE_SIZE);
+    
+    // Move the second player a tile to the right (TODO: may change this in the future)
+    if(!thisPlayer.isHost)
+        player.position.x += TILE_SIZE;
 
     player.collisionCircle.pos.x = player.position.x;
     player.collisionCircle.pos.y = player.position.y;
@@ -53,8 +58,10 @@ void G_InitPlayer(void)
     player.verticalHeadMovement = 0.0f;
     player.z = (HALF_TILE_SIZE) + ((TILE_SIZE) * currentMap.playerStartingLevel);
     player.level = currentMap.playerStartingLevel;
-    player.gridPosition.x = currentMap.playerStartingGridX;
-    player.gridPosition.y = currentMap.playerStartingGridY;
+
+    player.gridPosition.x = ((player.position.x+PLAYER_CENTER_FIX) / TILE_SIZE);
+    player.gridPosition.y = ((player.position.y+PLAYER_CENTER_FIX) / TILE_SIZE);
+
     player.collisionCircle.r = TILE_SIZE / 2;
     player.hasToClimb = false;
 
@@ -272,6 +279,14 @@ void G_PlayerCollisionCheck()
             }
         }
     }
+
+    // Check collision with other player
+    if(P_CheckCircleCollision(&hypoteticalPlayerCircle, &otherPlayerObject.base.collisionCircle) > 0)
+    {
+        player.deltaPos.x = 0;
+        player.deltaPos.y = 0;
+    }
+
 }
 
 
@@ -769,7 +784,7 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                     if(tomentdatapack.sprites[spriteID]->Callback != NULL && U_GetBit(&tomentdatapack.sprites[spriteID]->flags, 3) == 0)
                     {
                         tomentdatapack.sprites[spriteID]->Callback(tomentdatapack.sprites[spriteID]->data);
-                        
+
                         // If the tapped sprite was a pickup, destroy it from the map after the player took it
                         if(tomentdatapack.sprites[spriteID]->Callback == D_CallbackPickup)
                         {
