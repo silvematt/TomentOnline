@@ -130,7 +130,7 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
 
 int PCKT_SendPacket(int (*OnPacketIsSent)(void))
 {
-    if(outputPcktBuffer.hasBegunWriting == FALSE)
+    if(!outputPcktBuffer.hasBegunWriting)
     {
         //printf("There is nothing to write.\n");
         return 1;
@@ -173,14 +173,16 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
                         outputPcktBuffer.packetsToWrite--;
                         outputPcktBuffer.shorted = FALSE;
                         outputPcktBuffer.len = 0;
+
+                        // Move the remaining packets at the beginning of the buffer so that next packets are appended
+                        memmove(outputPcktBuffer.buffer, outputPcktBuffer.buffer+outputPcktBuffer.packetOffset, sizeof(outputPcktBuffer.buffer)-outputPcktBuffer.packetOffset);
+                        outputPcktBuffer.packetOffset -= PCKT_SIZE;
                     }
                     else
                     {
                         // Reset the outuput buffer, it did all it had to do
                         PCKT_ZeroBuffer(&outputPcktBuffer);
                     }
-                    
-                    return 0;
                 }
                 else
                 {
@@ -195,7 +197,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
             // We couldn't send the whole thing, we have to send another fragment
             int avail = PCKT_SIZE - outputPcktBuffer.len;
 
-            int sendValue = send(otherPlayer.socket, outputPcktBuffer.buffer+outputPcktBuffer.len, avail, 0);
+            int sendValue = send(otherPlayer.socket, outputPcktBuffer.buffer+(outputPcktBuffer.packetOffset)+outputPcktBuffer.len, avail, 0);
 
             // If invalid
             if(sendValue < 0)
@@ -232,14 +234,16 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
                         outputPcktBuffer.packetsToWrite--;
                         outputPcktBuffer.shorted = FALSE;
                         outputPcktBuffer.len = 0;
+
+                        // Move the remaining packets at the beginning of the buffer so that next packets are appended
+                        memmove(outputPcktBuffer.buffer, outputPcktBuffer.buffer+outputPcktBuffer.packetOffset, sizeof(outputPcktBuffer.buffer)-outputPcktBuffer.packetOffset);
+                        outputPcktBuffer.packetOffset -= PCKT_SIZE;
                     }
                     else
                     {
                         // Reset the outuput buffer, it did all it had to do
                         PCKT_ZeroBuffer(&outputPcktBuffer);
                     }
-                    
-                    return 0;
                 }
                 else
                 {
@@ -252,10 +256,9 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
             {
                 // We need to send yet another fragment
                 // Short sent, save what we got so far
+                printf("DOUBLE FRAGMENTED\n\n");
                 outputPcktBuffer.shorted = TRUE;
                 outputPcktBuffer.len += sendVal;
-
-                return 1;
             }
         }
     }

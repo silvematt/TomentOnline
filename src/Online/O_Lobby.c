@@ -295,14 +295,26 @@ int O_LobbySendPackets(void)
 
 int O_LobbyOnPacketIsSent(void)
 {
-    printf("Packet just got sent, offset: %d\n", outputPcktBuffer.packetOffset);
+    printf("Packet just got sent, offset: %d ID: ", outputPcktBuffer.packetOffset);
     char thisPcktBuffer[PCKT_SIZE];
     memcpy(thisPcktBuffer, outputPcktBuffer.buffer+(outputPcktBuffer.packetOffset), PCKT_SIZE);
 
     pckt_t* pcktSent = (pckt_t*)thisPcktBuffer;
-
+    
+    printf("%d\n", pcktSent->id);
     switch(pcktSent->id)
     {
+
+        case PCKTID_READY:
+        {
+            pckt_ready_t readyPacket;
+            memcpy(&readyPacket, pcktSent->data, sizeof(readyPacket));
+
+            printf("Ready packet sent value: %d\n", readyPacket.isReady);
+            break;
+        }
+        
+
         case PCKTID_STARTING:
         {
             // Start the game, we warned the other user
