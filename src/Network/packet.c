@@ -29,101 +29,91 @@ void PCKT_ZeroBuffer(pckt_buffer_t* pBuf)
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
 {
     int recvVal = 0;
+    recvVal = recv(otherPlayer.socket, inputPcktBuffer.buffer+inputPcktBuffer.len, (PCKT_SIZE*MAX_PCKTS_PER_BUFFER)-inputPcktBuffer.len, 0);
 
-    // If we are not waiting for a fragment
-    if(!inputPcktBuffer.shorted)
+    // If invalid
+    if(recvVal < 0)
     {
-        // Receive normally
-        recvVal = recv(otherPlayer.socket, inputPcktBuffer.buffer, PCKT_SIZE, 0);
-
-        // If invalid
-        if(recvVal < 0)
+        if(WSAGetLastError() != WSAEWOULDBLOCK)
         {
-            if(WSAGetLastError() != WSAEWOULDBLOCK)
-            {
-                printf("Receive Error. RecvVal = %d | WSAError: %d\n", recvVal, WSAGetLastError());
-                return 2;
-            }
-            else
-                return 1;
+            printf("Receive Error. RecvVal = %d | WSAError: %d\n", recvVal, WSAGetLastError());
+            return 2;
         }
-
-        printf("%d Received!\n", recvVal);
-
-        // If received something
-        if(recvVal > 0)
-        {
-            // Check if the receive value is a packet worth of data
-            if(recvVal >= PCKT_SIZE)
-            {
-                //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
-                //OnPacketArrives must do the conversion, it may use the inputBuffer for its all purpose or allocate a pckt_t and release the inputBuffer for future use  
-                OnPacketArrives();
-
-                // Reset the input buffer when the packet arrived
-                PCKT_ZeroBuffer(&inputPcktBuffer);
-                return 0;
-            }
-            else
-            {
-                // Short received, save what we got so far
-                inputPcktBuffer.shorted = TRUE;
-                inputPcktBuffer.len = recvVal;
-            }
-        }
-    }
-    else
-    {
-        // We are waiting for a fragment
-        int avail = PCKT_SIZE - inputPcktBuffer.len;
-
-        recvVal = recv(otherPlayer.socket, inputPcktBuffer.buffer+(inputPcktBuffer.len), avail, 0);
-        
-        // If invalid
-        if(recvVal < 0)
-        {
-            if(WSAGetLastError() != WSAEWOULDBLOCK)
-            {
-                printf("Receive Error. RecvVal = %d | WSAError: %d\n", recvVal, WSAGetLastError());
-                return 2;
-            }
-            else
-                return 1;
-        }
-
-        printf("Fragment Received! Size: %d\n", recvVal);
-
-        // If we got just what we were waiting for
-        if(recvVal == avail)
-        {
-            inputPcktBuffer.shorted = FALSE;
-            inputPcktBuffer.len += recvVal;
-
-            // Reconstruct the packet
-            if(inputPcktBuffer.len == PCKT_SIZE)
-            {
-                //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
-                //OnPacketArrives must do the conversion, it may use the inputBuffer for its all purpose or allocate a pckt_t and release the inputBuffer for future use                  
-                OnPacketArrives();
-
-                // Reset the input buffer when the packet arrived
-                PCKT_ZeroBuffer(&inputPcktBuffer);
-                return 0;
-            }
-            else
-            {
-                // How?
-                printf("Critical error. CODE-01\n");
-                return 2;
-            }
-        }
-        else // antoher fragment
-        {            
-            // Short received, save what we got so far
-            inputPcktBuffer.shorted = TRUE;
-            inputPcktBuffer.len += recvVal;
-
+        else
             return 1;
+    }
+
+    printf("Receive val: %d\n", recvVal);
+
+    bool allConsumed = false;
+    while(!allConsumed)
+    {
+        if(inputPcktBuffer.shorted)
+        {
+            // We are waiting for a fragment
+            int avail = PCKT_SIZE - inputPcktBuffer.len;
+            printf("Fragment Received! Size: %d\n", recvVal);
+
+            // If we got just what we were waiting for
+            if(recvVal >= avail)
+            {
+                inputPcktBuffer.len += avail;
+
+                // Reconstruct the packet
+                if(inputPcktBuffer.len == PCKT_SIZE)
+                {
+                    //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
+                    //OnPacketArrives must do the conversion, it may use the inputBuffer for its all purpose or allocate a pckt_t and release the inputBuffer for future use                  
+                    printf("Packet recostructed!\n");
+                    OnPacketArrives();
+
+                    inputPcktBuffer.packetOffset += PCKT_SIZE;
+                    inputPcktBuffer.len = 0;
+                    inputPcktBuffer.shorted = FALSE;
+                    recvVal -= avail;
+
+                }
+                else
+                {
+                    // How?
+                    printf("Critical error. CODE-01\n");
+                    return 2;
+                }
+            }
+            else // antoher fragment
+            {            
+                // Short received, save what we got so far
+                printf("Double shorted Val: %d\n", recvVal);
+                inputPcktBuffer.shorted = TRUE;
+                inputPcktBuffer.len += recvVal;
+            }
+        }
+        else if(recvVal >= PCKT_SIZE)
+        {
+            //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
+            //OnPacketArrives must do the conversion, it may use the inputBuffer for its all purpose or allocate a pckt_t and release the inputBuffer for future use  
+            OnPacketArrives();
+            inputPcktBuffer.packetOffset += PCKT_SIZE;
+            recvVal -= PCKT_SIZE;
+        }
+        else
+        {
+            if(recvVal == 0)
+            {
+                allConsumed = true;
+                PCKT_ZeroBuffer(&inputPcktBuffer);
+            }
+            else
+            {
+                // Short receive
+                printf("Short received value of %d\n", recvVal);
+                inputPcktBuffer.shorted = true;
+                inputPcktBuffer.len = recvVal;
+                allConsumed = true;
+
+                memmove(inputPcktBuffer.buffer, inputPcktBuffer.buffer+inputPcktBuffer.packetOffset, recvVal);
+                inputPcktBuffer.packetOffset = 0;
+            }
         }
     }
 }

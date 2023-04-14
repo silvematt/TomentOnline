@@ -218,7 +218,7 @@ int O_GameOnPacketIsReceived(void)
     // When this function gets called, the packet arrived on the PCKT_ReceivePacket call and was saved inside the inputPacketBuffer->buffer
     // At this point, receivedPacket points at the inputPacketBuffer->buffer that contains the packet that arrived
     char thisPcktBuffer[PCKT_SIZE];
-    memcpy(thisPcktBuffer, inputPcktBuffer.buffer, PCKT_SIZE);
+    memcpy(thisPcktBuffer, inputPcktBuffer.buffer+inputPcktBuffer.packetOffset, PCKT_SIZE);
 
     pckt_t* receivedPacket = (pckt_t*)thisPcktBuffer;
 
