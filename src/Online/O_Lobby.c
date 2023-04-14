@@ -339,12 +339,13 @@ int O_LobbyOnPacketIsReceived(void)
         case PCKTID_SET_CLASS:
         {
             // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_set_class_t* setClassPacket = (pckt_set_class_t*)receivedPacket->data;
+            pckt_set_class_t setClassPacket;
+            memcpy(&setClassPacket, receivedPacket->data, sizeof(setClassPacket));
 
-            printf("Packet received! ID: %d | - Class: %d\n", receivedPacket->id, setClassPacket->classSet);
+            printf("Packet received! ID: %d | - Class: %d\n", receivedPacket->id, setClassPacket.classSet);
 
             // Parse packet, check if it is the same as ours?
-            if(setClassPacket->classSet == thisPlayer.selectedClass)
+            if(setClassPacket.classSet == thisPlayer.selectedClass)
             {
                 // Class clash, may be caused by delay, if this is the host, keep the class, if this is the client change it
                 printf("Class clash!\n");
@@ -367,7 +368,7 @@ int O_LobbyOnPacketIsReceived(void)
                 }
                 else
                 {
-                    switch(setClassPacket->classSet)
+                    switch(setClassPacket.classSet)
                     {
                         case CLASS_TANK:
                             thisPlayer.selectedClass = CLASS_HEALER;
@@ -382,11 +383,11 @@ int O_LobbyOnPacketIsReceived(void)
                             break;
                     }
 
-                    otherPlayer.selectedClass = setClassPacket->classSet;
+                    otherPlayer.selectedClass = setClassPacket.classSet;
                 }
             }
             else
-                otherPlayer.selectedClass = setClassPacket->classSet;
+                otherPlayer.selectedClass = setClassPacket.classSet;
 
             return 0;
         }
@@ -394,11 +395,12 @@ int O_LobbyOnPacketIsReceived(void)
         case PCKTID_READY:
         {
             // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_ready_t* readyPacket = (pckt_ready_t*)receivedPacket->data;
+            pckt_ready_t readyPacket;
+            memcpy(&readyPacket, receivedPacket->data, sizeof(readyPacket));
 
-            printf("Packet received! ID: %d | - Ready: %d\n", receivedPacket->id, readyPacket->isReady);
+            printf("Packet received! ID: %d | - Ready: %d\n", receivedPacket->id, readyPacket.isReady);
 
-            otherPlayer.isReady = (readyPacket->isReady);
+            otherPlayer.isReady = (readyPacket.isReady);
 
             if(thisPlayer.isReady && otherPlayer.isReady && !thisPlayer.startingGame)
             {
@@ -411,12 +413,13 @@ int O_LobbyOnPacketIsReceived(void)
 
         case PCKTID_STARTING:
         {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_starting_t* startingPacket = (pckt_starting_t*)receivedPacket->data;
+            // Manage packet, if startingPacket->id == PCKTID_STARTING:
+            pckt_starting_t startingPacket;
+            memcpy(&startingPacket, receivedPacket->data, sizeof(startingPacket));
 
-            printf("Packet received! ID: %d | - Starting value: %d\n", receivedPacket->id, startingPacket->starting);
+            printf("Packet received! ID: %d | - Starting value: %d\n", receivedPacket->id, startingPacket.starting);
             
-            if(startingPacket->starting == 1)
+            if(startingPacket.starting == 1)
             {
                 otherPlayer.startingGame = true;
 

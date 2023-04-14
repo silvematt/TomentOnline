@@ -98,17 +98,17 @@ int O_GameOtherPlayerLoop()
     int oldGridPosX = otherPlayerObject.base.gridPos.x;
     int oldGridPosY = otherPlayerObject.base.gridPos.y;
 
-    // Calculate centered pos
-    otherPlayerObject.base.centeredPos.x = otherPlayerObject.base.pos.x + (HALF_TILE_SIZE);
-    otherPlayerObject.base.centeredPos.y = otherPlayerObject.base.pos.y + (HALF_TILE_SIZE);
+    // Compute centered pos for calculations
+    otherPlayerObject.base.centeredPos.x = otherPlayerObject.base.pos.x + PLAYER_CENTER_FIX;
+    otherPlayerObject.base.centeredPos.y = otherPlayerObject.base.pos.y + PLAYER_CENTER_FIX;
 
+    otherPlayerObject.base.gridPos.x = ((otherPlayerObject.base.pos.x+PLAYER_CENTER_FIX) / TILE_SIZE);
+    otherPlayerObject.base.gridPos.y = ((otherPlayerObject.base.pos.y+PLAYER_CENTER_FIX) / TILE_SIZE);
+    
     // Calculate runtime stuff
     // Get Player Space pos
     otherPlayerObject.base.pSpacePos.x = otherPlayerObject.base.centeredPos.x - player.centeredPos.x;
     otherPlayerObject.base.pSpacePos.y = otherPlayerObject.base.centeredPos.y - player.centeredPos.y;
-
-    otherPlayerObject.base.gridPos.x = otherPlayerObject.base.centeredPos.x / TILE_SIZE;
-    otherPlayerObject.base.gridPos.y = otherPlayerObject.base.centeredPos.y / TILE_SIZE;
 
     // Determine AI's level
     otherPlayerObject.base.level = (int)floor(otherPlayerObject.base.z / TILE_SIZE);
@@ -229,13 +229,14 @@ int O_GameOnPacketIsReceived(void)
         case PCKTID_MOVEMENT:
         {
             // Manage packet, if receivedPacket->id == PCKT_GREET:
-            pckt_movement_t* movementPacket = (pckt_movement_t*)receivedPacket->data;
+            pckt_movement_t movementPacket;
+            memcpy(&movementPacket, receivedPacket->data, sizeof(movementPacket));
 
-            printf("Packet received! ID: %d | - Values (%f,%f)\n", receivedPacket->id, movementPacket->x, movementPacket->y);
+            printf("Packet received! ID: %d | - Values (%f,%f)\n", receivedPacket->id, movementPacket.x, movementPacket.y);
 
             // Update other player position
-            otherPlayerObject.base.pos.x = movementPacket->x;
-            otherPlayerObject.base.pos.y = movementPacket->y;
+            otherPlayerObject.base.pos.x = movementPacket.x;
+            otherPlayerObject.base.pos.y = movementPacket.y;
 
             break;
         }

@@ -179,13 +179,14 @@ int NET_HostGameWaitForGreet(void)
     if(receivedPacket->id == PCKTID_GREET)
     {
         // Manage packet, if receivedPacket->id == PCKT_GREET:
-        pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
+        pckt_greet_t greetPacket;
+        memcpy(&greetPacket, receivedPacket->data, sizeof(greetPacket));
 
-        printf("Packet received! ID: %d | Greet value: %s | Class: %d\n", receivedPacket->id, greetPacket->name, greetPacket->favoriteClass);
+        printf("Packet received! ID: %d | Greet value: %s | Class: %d\n", receivedPacket->id, greetPacket.name, greetPacket.favoriteClass);
 
         // Parse packet
-        strcpy(otherPlayer.name, greetPacket->name);
-        otherPlayer.favoriteClass = greetPacket->favoriteClass;
+        strcpy(otherPlayer.name, greetPacket.name);
+        otherPlayer.favoriteClass = greetPacket.favoriteClass;
 
         otherPlayer.status = NETSTS_HAVE_TO_GREET;
         return 0;
@@ -399,13 +400,14 @@ int NET_JoinGameWaitForGreet(void)
     if(receivedPacket->id == PCKTID_GREET)
     {
         // Manage packet, if receivedPacket->id == PCKT_GREET:
-        pckt_greet_t* greetPacket = (pckt_greet_t*)receivedPacket->data;
+        pckt_greet_t greetPacket;
+        memcpy(&greetPacket, receivedPacket->data, sizeof(greetPacket));
 
-        printf("Packet received! ID: %d | Greet value: %s - Class: %d\n", receivedPacket->id, greetPacket->name, greetPacket->favoriteClass);
-
+        printf("Packet received! ID: %d | Greet value: %s - Class: %d\n", receivedPacket->id, greetPacket.name, greetPacket.favoriteClass);
+        
         // Parse packet
-        strcpy(otherPlayer.name, greetPacket->name);
-        otherPlayer.favoriteClass = greetPacket->favoriteClass;
+        strcpy(otherPlayer.name, greetPacket.name);
+        otherPlayer.favoriteClass = greetPacket.favoriteClass;
 
         O_LobbyDefineClassesJoinerwise();
 

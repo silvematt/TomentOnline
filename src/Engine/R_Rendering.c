@@ -2546,7 +2546,7 @@ void R_SetValueFromCollisionMap(int level, int y, int x, int value)
 //-------------------------------------
 Uint32 R_GetPixelFromSurface(SDL_Surface *surface, int x, int y)
 {
-    Uint32* target_pixel = (Uint32 *)((Uint8 *)surface->pixels + (y * surface->pitch) + (x << 2));
+    Uint32* target_pixel = (Uint32 *)((Uint8 *)surface->pixels + (y * surface->pitch) + (x * 4));
     return *target_pixel;
 }
 
