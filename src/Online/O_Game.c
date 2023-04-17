@@ -32,8 +32,8 @@ int O_GameInitializeOtherPlayer(void)
 
     otherPlayerObject.base.collisionCircle.r = TILE_SIZE / 2;
 
-    otherPlayerObject.base.spriteID = DS_PlayerTank;
-    otherPlayerObject.base.sheetLength = tomentdatapack.spritesSheetsLenghtTable[DS_PlayerTank];
+    otherPlayerObject.base.spriteID = DS_PlayerTank+otherPlayer.selectedClass;
+    otherPlayerObject.base.sheetLength = tomentdatapack.spritesSheetsLenghtTable[DS_PlayerTank+otherPlayer.selectedClass];
 
     otherPlayerObject.type = DS_TYPE_OTHERPLAYER;
     
