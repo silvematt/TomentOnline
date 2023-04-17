@@ -225,6 +225,7 @@ typedef struct uiAssets_s
 typedef enum fontsID_e
 {
     FONT_BLKCRY = 0,
+    FONT_BLKCRY_GREEN,
 } fontsID_t;
 
 // Menu Assets IDS
@@ -411,7 +412,9 @@ typedef enum imgIDs_e
     IMG_ID_CLASS_ICON_SELECTION,
     IMG_ID_CLASS_ICON_SELECTION_DISABLED,
     IMG_ID_ICON_READY,
-    IMG_ID_ICON_NOTREADY
+    IMG_ID_ICON_NOTREADY,
+    IMG_ID_BLKCRY_GREEN_TEXT_SHEET,
+
 } imgIDs_e;
 
 // Archt Data

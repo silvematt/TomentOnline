@@ -168,6 +168,8 @@ typedef struct dynamicSprite_s
 
     // How muc this dynamic needs to move each tick on the z axis
     float verticalMovementDelta;
+
+    vector2_t overheadPos;
 } dynamicSprite_t;
 
 // -------------------------------

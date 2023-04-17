@@ -15,6 +15,9 @@
 #include "G_AI.h"
 #include "G_Game.h"
 
+#include "../Online/O_Game.h"
+
+
 uint32_t r_blankColor;           // Color shown when nothing else is in the renderer
 uint32_t r_transparencyColor;    // Color marked as "transparency", rendering of this color will be skipped for surfaces
 uint32_t r_debugColor;
@@ -140,6 +143,8 @@ void R_RenderDev(void)
     R_DrawBackground();
     R_Raycast();
     
+    O_GameOtherPlayerRender();
+    
     // Render Player
     G_PlayerRender();
 
@@ -263,7 +268,7 @@ void R_DrawBackground(void)
         // DRAW CEILING
         for(int x = 0; x < PROJECTION_PLANE_WIDTH; x++)
         {
-            R_DrawColumn(x, 0, (SCREEN_HEIGHT-1) / 2, SDL_MapRGB(raycast_surface->format, 64, 64, 64));
+            R_DrawColumn(x, 0, (PROJECTION_PLANE_HEIGHT-1) / 2, SDL_MapRGB(raycast_surface->format, 64, 64, 64));
         }
 
         // DRAW FLOOR
@@ -2398,6 +2403,9 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
         if(sprite->curAnim != NULL)
             R_DrawStripeTexturedShaded(drawX, drawYStart, drawYEnd, sprite->curAnim, offset, yOffsetValue, sprite->base.height, lighting, dist, hasFog, fogFactor);
     }
+
+    sprite->overheadPos.x = PROJECTION_PLANE_WIDTH-spriteX-(sprite->base.height / 4);
+    sprite->overheadPos.y = (PROJECTION_PLANE_CENTER + player.verticalHeadMovement) - (sprite->base.height / 2) + screenZ;
 
     // Draws the center of the sprite
     //R_DrawPixel(PROJECTION_PLANE_WIDTH-spriteX, spriteY, SDL_MapRGB(win_surface->format, 255, 0, 0));

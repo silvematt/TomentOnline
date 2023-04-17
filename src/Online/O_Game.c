@@ -4,12 +4,12 @@
 #include "../Engine/P_Physics.h"
 #include "../Engine/G_Player.h"
 #include "../Engine/G_Pathfinding.h"
-
+#include "../Engine/T_TextRendering.h"
 
 dynamicSprite_t otherPlayerObject;
 
 // Initializes the other player's sprite rapresentation
-int O_GameInitializeOtherPlayer()
+int O_GameInitializeOtherPlayer(void)
 {
     // Init player
     otherPlayerObject.base.active = TRUE;
@@ -93,7 +93,7 @@ int O_GameInitializeOtherPlayer()
     printf("Other player gird %d | %d\n", otherPlayerObject.base.gridPos.x, otherPlayerObject.base.gridPos.y);
 }
 
-int O_GameOtherPlayerLoop()
+int O_GameOtherPlayerLoop(void)
 {
     int oldGridPosX = otherPlayerObject.base.gridPos.x;
     int oldGridPosY = otherPlayerObject.base.gridPos.y;
@@ -169,13 +169,21 @@ int O_GameOtherPlayerLoop()
     otherPlayerObject.base.collisionCircle.pos.y = otherPlayerObject.base.centeredPos.y;
 }
 
-int O_GameReceivePackets()
+void O_GameOtherPlayerRender(void)
+{
+    float scaleFactor = max(1 - (otherPlayerObject.base.dist - 50) / 950, 0.35);
+    float ratio = ((float)SCREEN_WIDTH/PROJECTION_PLANE_WIDTH);
+    printf("%f\n", ratio);
+    T_DisplayTextScaled(FONT_BLKCRY_GREEN, otherPlayer.name, otherPlayerObject.overheadPos.x*ratio, otherPlayerObject.overheadPos.y*ratio, scaleFactor);
+}
+
+int O_GameReceivePackets(void)
 {
     return PCKT_ReceivePacket(O_GameOnPacketIsReceived);
 }
 
 static float lastSentX, lastSentY;
-int O_GameSendPackets()
+int O_GameSendPackets(void)
 {
     if(lastSentX != player.position.x || lastSentY != player.position.y)
     {
