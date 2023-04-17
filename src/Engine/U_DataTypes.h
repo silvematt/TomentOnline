@@ -111,7 +111,8 @@ typedef enum dynamicSpriteState_e
 typedef enum dynamicSpriteType_e
 {
     DS_TYPE_AI = 0,
-    DS_TYPE_PROJECTILE
+    DS_TYPE_PROJECTILE,
+    DS_TYPE_OTHERPLAYER
 } dynamicSpriteType_e;
 
 // Max number of spell an AI can have (Used to create Timers with which create spell logic)

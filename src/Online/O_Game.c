@@ -32,10 +32,10 @@ int O_GameInitializeOtherPlayer(void)
 
     otherPlayerObject.base.collisionCircle.r = TILE_SIZE / 2;
 
-    otherPlayerObject.base.spriteID = DS_Skeleton;
-    otherPlayerObject.base.sheetLength = tomentdatapack.spritesSheetsLenghtTable[DS_Skeleton];
+    otherPlayerObject.base.spriteID = DS_PlayerTank;
+    otherPlayerObject.base.sheetLength = tomentdatapack.spritesSheetsLenghtTable[DS_PlayerTank];
 
-    otherPlayerObject.type = DS_TYPE_AI;
+    otherPlayerObject.type = DS_TYPE_OTHERPLAYER;
     
     otherPlayerObject.base.active = true;
     otherPlayerObject.base.level = 0;
@@ -116,8 +116,6 @@ int O_GameOtherPlayerLoop(void)
 
     // Calculate the distance to player
     otherPlayerObject.base.dist = sqrt(otherPlayerObject.base.pSpacePos.x*otherPlayerObject.base.pSpacePos.x + otherPlayerObject.base.pSpacePos.y*otherPlayerObject.base.pSpacePos.y);
-    otherPlayerObject.base.angle = ((atan2(-otherPlayerObject.base.pSpacePos.y, otherPlayerObject.base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
-    FIX_ANGLES_DEGREES(otherPlayerObject.base.angle);
 
     float deltaX = 0.0f;
     float deltaY = 0.0f;
@@ -171,10 +169,12 @@ int O_GameOtherPlayerLoop(void)
 
 void O_GameOtherPlayerRender(void)
 {
-    float scaleFactor = max(1 - (otherPlayerObject.base.dist - 50) / 950, 0.35);
-    float ratio = ((float)SCREEN_WIDTH/PROJECTION_PLANE_WIDTH);
-    printf("%f\n", ratio);
-    T_DisplayTextScaled(FONT_BLKCRY_GREEN, otherPlayer.name, otherPlayerObject.overheadPos.x*ratio, otherPlayerObject.overheadPos.y*ratio, scaleFactor);
+    if(visibleTiles[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x])
+    {
+        float scaleFactor = max(1 - (otherPlayerObject.base.dist - 50) / 950, 0.35);
+        float ratio = ((float)SCREEN_WIDTH/PROJECTION_PLANE_WIDTH);
+        T_DisplayTextScaled(FONT_BLKCRY_GREEN, otherPlayer.name, otherPlayerObject.overheadPos.x*ratio, otherPlayerObject.overheadPos.y*ratio, scaleFactor);
+    }
 }
 
 int O_GameReceivePackets(void)
@@ -182,14 +182,14 @@ int O_GameReceivePackets(void)
     return PCKT_ReceivePacket(O_GameOnPacketIsReceived);
 }
 
-static float lastSentX, lastSentY;
+static float lastSentX, lastSentY, lastSentRot;
 int O_GameSendPackets(void)
 {
-    if(lastSentX != player.position.x || lastSentY != player.position.y)
+    if(lastSentX != player.position.x || lastSentY != player.position.y || lastSentRot != player.angle)
     {
         // Make movement packet and send it to the other player
         // Send packet to notice other player that we are starting the game, he will start as soon as this packet is received
-        pckt_t* movementPacket = PCKT_MakeMovementPacket(&packetToSend, player.position.x, player.position.y);
+        pckt_t* movementPacket = PCKT_MakeMovementPacket(&packetToSend, player.position.x, player.position.y, player.angle);
 
         // outputpcktbuffer was already sending something, check if we can append this packet
         if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
@@ -201,6 +201,7 @@ int O_GameSendPackets(void)
 
             lastSentX = player.position.x;
             lastSentY = player.position.y;
+            lastSentRot = player.angle;
 
 
             printf("Movement packet made!\n");
@@ -240,12 +241,12 @@ int O_GameOnPacketIsReceived(void)
             pckt_movement_t movementPacket;
             memcpy(&movementPacket, receivedPacket->data, sizeof(movementPacket));
 
-            printf("Packet received! ID: %d | - Values (%f,%f)\n", receivedPacket->id, movementPacket.x, movementPacket.y);
+            printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, movementPacket.x, movementPacket.y, movementPacket.angle);
 
             // Update other player position
             otherPlayerObject.base.pos.x = movementPacket.x;
             otherPlayerObject.base.pos.y = movementPacket.y;
-
+            otherPlayerObject.base.angle = movementPacket.angle;
             break;
         }
     }

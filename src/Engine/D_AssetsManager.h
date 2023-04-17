@@ -76,7 +76,8 @@ typedef enum spritesObjectID_e
     DS_SkeletonBurnt,
     S_PickupGreatsword,
     DS_SkeletonLord,
-    S_Achtung
+    S_Achtung,
+    DS_PlayerTank
 } spritesObjectID_t;
 
 // All skies textures
@@ -414,7 +415,7 @@ typedef enum imgIDs_e
     IMG_ID_ICON_READY,
     IMG_ID_ICON_NOTREADY,
     IMG_ID_BLKCRY_GREEN_TEXT_SHEET,
-
+    IMG_ID_PLAYER_TANK_CHARACTER
 } imgIDs_e;
 
 // Archt Data

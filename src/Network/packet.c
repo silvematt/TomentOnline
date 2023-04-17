@@ -328,7 +328,7 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStartingValue)
 }
 
 
-pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY)
+pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle)
 {
     PCKT_Zero(packet);
 
@@ -340,6 +340,7 @@ pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY)
     pckt_movement_t content;
     content.x = pX;
     content.y = pY;
+    content.angle = pAngle;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

@@ -52,6 +52,7 @@ typedef struct pckt_starting_t
 typedef struct pckt_movement_t
 {
     float x,y;
+    float angle;
 } pckt_movement_t;
 
 
@@ -89,7 +90,7 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
 pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet);
 pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
-pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY);
+pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

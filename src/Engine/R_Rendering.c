@@ -2269,7 +2269,6 @@ void R_DrawSprite(sprite_t* sprite, bool angled)
     float dist = (sprite->dist * cos(fixedAngle));
 
     sprite->height = DISTANCE_TO_PROJECTION * TILE_SIZE / sprite->dist;
-
     float screenZ = round(DISTANCE_TO_PROJECTION / dist*(player.z-(HALF_TILE_SIZE)));
 
     if(sprite->height <= 0)
@@ -2385,7 +2384,15 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
     int yOffsetValue = 0;
     if(angled)
     {
-        float angle2 = atan2(sprite->base.centeredPos.x - player.centeredPos.x, sprite->base.centeredPos.y - player.centeredPos.y) / (2 * M_PI) + 0.5f - sprite->base.angle / (2 * M_PI);
+        float adjustedAngle = sprite->base.angle; 
+        if(sprite->type == DS_TYPE_OTHERPLAYER) // to match screen/rotation
+        {
+            adjustedAngle*=-1;
+            adjustedAngle+=1.5708f;
+        }
+
+        FIX_ANGLES(adjustedAngle);
+        float angle2 = atan2(sprite->base.centeredPos.x - player.centeredPos.x, sprite->base.centeredPos.y - player.centeredPos.y) / (2 * M_PI) + 0.5f - adjustedAngle / (2 * M_PI);
         int angleFrame = (int)(round(angle2 * MAX_VIEWEABLE_SPRITE_ANGLES)) % MAX_VIEWEABLE_SPRITE_ANGLES;
         if (angleFrame < 0) {
             angleFrame += MAX_VIEWEABLE_SPRITE_ANGLES;
