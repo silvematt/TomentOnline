@@ -969,6 +969,9 @@ int G_SetDoorState(int level, int y, int x, doorstate_e state)
             doorstateLevel2[y][x] = state;
             break;
     }
+
+    // Update online
+    O_GameSetDoorState(level, x, y, state);
 }
 
 //-------------------------------------

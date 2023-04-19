@@ -16,6 +16,7 @@
 #define PCKTID_READY        3
 #define PCKTID_STARTING     4
 #define PCKTID_MOVEMENT     5
+#define PCKTID_DOOR_CHANGE  6
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -55,6 +56,13 @@ typedef struct pckt_movement_t
     float angle;
 } pckt_movement_t;
 
+typedef struct pckt_door_change_t
+{
+    int level;
+    int x,y;
+    int state;
+} pckt_door_change_t;
+
 
 #define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
@@ -91,6 +99,7 @@ pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet);
 pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
 pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle);
+pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

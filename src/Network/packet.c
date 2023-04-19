@@ -347,3 +347,24 @@ pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle
 
     return packet;
 }
+
+pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_DOOR_CHANGE;
+
+    // Create and fill the content
+    pckt_door_change_t content;
+    content.level = pLevel;
+    content.x = pX;
+    content.y = pY;
+    content.state = pState;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

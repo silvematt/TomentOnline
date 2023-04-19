@@ -249,5 +249,42 @@ int O_GameOnPacketIsReceived(void)
             otherPlayerObject.base.angle = movementPacket.angle;
             break;
         }
+
+        case PCKTID_DOOR_CHANGE:
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_door_change_t doorPacket;
+            memcpy(&doorPacket, receivedPacket->data, sizeof(doorPacket));
+
+            printf("Packet received! ID: %d | - Values (%d,%d,%d,%d)\n", receivedPacket->id, doorPacket.level, doorPacket.x, doorPacket.y, doorPacket.state);
+
+            // Update doors
+            switch(doorPacket.level)
+            {
+                case 0:
+                    doorstateLevel0[doorPacket.y][doorPacket.x] = doorPacket.state;
+                    break;
+
+                case 1:
+                    doorstateLevel1[doorPacket.y][doorPacket.x] = doorPacket.state;
+                    break;
+
+                case 2:
+                    doorstateLevel2[doorPacket.y][doorPacket.x] = doorPacket.state;
+                    break;
+            }
+            break;
+        }
     }
+}
+
+void O_GameSetDoorState(int level, int dX, int dY, doorstate_e state)
+{
+    // Make greet packet
+    pckt_t* doorPacket = PCKT_MakeDoorChangePacket(&packetToSend, level, dX, dY, (int)state);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)doorPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
 }
