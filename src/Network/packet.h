@@ -11,12 +11,13 @@
 #define MAX_PCKT_DATA 1300 // sizeof the char buffer inside the packet data
 
 // Packets IDs
-#define PCKTID_GREET        1
-#define PCKTID_SET_CLASS    2
-#define PCKTID_READY        3
-#define PCKTID_STARTING     4
-#define PCKTID_MOVEMENT     5
-#define PCKTID_DOOR_CHANGE  6
+#define PCKTID_GREET            1
+#define PCKTID_SET_CLASS        2
+#define PCKTID_READY            3
+#define PCKTID_STARTING         4
+#define PCKTID_MOVEMENT         5
+#define PCKTID_DOOR_CHANGE      6
+#define PCKTID_PICKUP_PICKED    7
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -63,6 +64,12 @@ typedef struct pckt_door_change_t
     int state;
 } pckt_door_change_t;
 
+typedef struct pckt_pickup_picked_t
+{
+    int level;
+    int x,y;
+} pckt_pickup_picked_t;
+
 
 #define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
@@ -100,6 +107,7 @@ pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
 pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle);
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
+pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

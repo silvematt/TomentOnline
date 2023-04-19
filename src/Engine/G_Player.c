@@ -192,6 +192,7 @@ void G_PlayerTick(void)
                 R_SetValueFromSpritesMap(player.level, player.gridPosition.y, player.gridPosition.x, 0);
                 R_SetValueFromCollisionMap(player.level, player.gridPosition.y, player.gridPosition.x, 0);
                 G_SetObjectTMap(player.level, player.gridPosition.y, player.gridPosition.x, ObjT_Empty);
+                O_GamePickPickup(player.level, player.gridPosition.x, player.gridPosition.y);
             }
         }
 

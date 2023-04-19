@@ -23,5 +23,6 @@ int O_GameOnPacketIsReceived(void);
 void O_GameOtherPlayerRender(void);
 
 void O_GameSetDoorState(int level, int dX, int dY, doorstate_e state);
+void O_GamePickPickup(int level, int dX, int dY);
 
 #endif

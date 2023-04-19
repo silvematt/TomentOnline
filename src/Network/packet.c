@@ -368,3 +368,23 @@ pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, in
 
     return packet;
 }
+
+pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_PICKUP_PICKED;
+
+    // Create and fill the content
+    pckt_pickup_picked_t content;
+    content.level = pLevel;
+    content.x = pX;
+    content.y = pY;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

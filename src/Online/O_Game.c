@@ -275,6 +275,20 @@ int O_GameOnPacketIsReceived(void)
             }
             break;
         }
+
+        case PCKTID_PICKUP_PICKED:
+        {
+            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            pckt_pickup_picked_t pickupPacket;
+            memcpy(&pickupPacket, receivedPacket->data, sizeof(pickupPacket));
+
+            printf("Packet received! ID: %d | - Values (%d,%d,%d)\n", receivedPacket->id, pickupPacket.level, pickupPacket.x, pickupPacket.y);
+
+            R_SetValueFromSpritesMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
+            R_SetValueFromCollisionMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
+            G_SetObjectTMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, ObjT_Empty);
+            break;
+        }
     }
 }
 
@@ -286,5 +300,16 @@ void O_GameSetDoorState(int level, int dX, int dY, doorstate_e state)
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
     memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)doorPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GamePickPickup(int level, int dX, int dY)
+{
+    // Make greet packet
+    pckt_t* pickupPacket = PCKT_MakePickupPickedPacket(&packetToSend, level, dX, dY);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)pickupPacket, PCKT_SIZE);
     outputPcktBuffer.packetsToWrite++;
 }
