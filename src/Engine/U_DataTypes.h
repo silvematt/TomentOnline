@@ -171,6 +171,10 @@ typedef struct dynamicSprite_s
     float verticalMovementDelta;
 
     vector2_t overheadPos;
+
+    // Aggro variables to determine which player this AI should follow and attack
+    int hostAggro;
+    int joinerAggro;
 } dynamicSprite_t;
 
 // -------------------------------

@@ -7,6 +7,8 @@
 #include "P_Physics.h"
 #include "G_AIBehaviour.h"
 
+#include "../Online/O_Game.h"
+
 // Enemy-Specific Behaviours
 
 void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
@@ -36,26 +38,66 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
     cur->base.angle = ((atan2(-cur->base.pSpacePos.y, cur->base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
     FIX_ANGLES_DEGREES(cur->base.angle);
     
-    // Set the target as the player
-    cur->targetPos = &player.centeredPos;
-    cur->targetGridPos = &player.gridPosition;
-    cur->targetColl = &player.collisionCircle;
-
     // Calculate the distance to player
     cur->base.dist = sqrt(cur->base.pSpacePos.x*cur->base.pSpacePos.x + cur->base.pSpacePos.y*cur->base.pSpacePos.y);
 
     // Movements
     if(cur->isAlive && G_AICanAttack(cur))
     {
-        path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, *(cur->targetGridPos), cur);
-        cur->path = &path;
+        // Calculate paths for both the player and the otherPlayer
 
+        // Calculate player path
+        path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, player.gridPosition, cur);
+
+        // Calculate other player path
+        path_t otherPath = G_PerformPathfinding(cur->base.level, cur->base.gridPos, otherPlayerObject.base.gridPos, cur);
+
+        // Select path
+        printf("(%d | %d)\n", path.nodesLength, otherPath.nodesLength);
+        if(path.isValid && otherPath.isValid)
+        {
+            if(path.nodesLength <= otherPath.nodesLength)
+            {
+                // Set the target as the this player
+                cur->targetPos = &player.centeredPos;
+                cur->targetGridPos = &player.gridPosition;
+                cur->targetColl = &player.collisionCircle;
+                cur->path = &path;
+            }
+            else
+            {
+                // Set the target as the other player
+                cur->targetPos = &otherPlayerObject.base.centeredPos;
+                cur->targetGridPos = &otherPlayerObject.base.gridPos;
+                cur->targetColl = &otherPlayerObject.base.collisionCircle;
+                cur->path = &otherPath;
+            }
+        }
+        else if(path.isValid && !otherPath.isValid)
+        {
+            cur->targetPos = &player.centeredPos;
+            cur->targetGridPos = &player.gridPosition;
+            cur->targetColl = &player.collisionCircle;
+            cur->path = &path;        
+        }
+        else if(!path.isValid && otherPath.isValid)
+        {
+            cur->targetPos = &otherPlayerObject.base.centeredPos;
+            cur->targetGridPos = &otherPlayerObject.base.gridPos;
+            cur->targetColl = &otherPlayerObject.base.collisionCircle;
+            cur->path = &otherPath;        
+        }
+        else
+            cur->path = &path; // not gonna happen anyway
+            
         float deltaX = 0.0f;
         float deltaY = 0.0f; 
 
+        // Shortcut for cur->path
+        path = *cur->path;
         // Check if path is valid and if there's space to follow it
         if(path.isValid && path.nodesLength-1 >= 0 && path.nodes[path.nodesLength-1] != NULL &&
-            G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false)
+            (G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false || G_GetFromDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == &otherPlayerObject))
         {
             // From here on, the AI is chasing the player so it is safe to say that they're fighting
             if(player.hasBeenInitialized)

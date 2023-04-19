@@ -2,6 +2,7 @@
 #include "R_Rendering.h"
 #include "SDL.h"
 #include "G_Player.h"
+#include "../Online/O_Game.h"
 
 pathnode_t frontier[MAP_HEIGHT*MAP_WIDTH+2];
 unsigned int frontierLength = 0;
@@ -68,7 +69,7 @@ path_t G_PerformPathfinding(int level, vector2Int_t gridPos, vector2Int_t gridTa
             path.nodes[path.nodesLength] = cur;
             path.nodesLength++;
         }
-        
+
         // Return it
         return path;
     }
@@ -193,7 +194,7 @@ void I_InsertNode(int level, pathnode_t* node, int gridx, int gridy, int f, int 
 {
     dynamicSprite_t* entityAtNode = G_GetFromDynamicSpriteMap(level, gridy, gridx);
 
-    if(visited[gridy][gridx] || G_CheckCollisionMap(level, gridy, gridx) > 0 || G_CheckDynamicSpriteMap(level, gridy, gridx) && G_GetFromDynamicSpriteMap(level, gridy, gridx) != entity)
+    if(visited[gridy][gridx] || G_CheckCollisionMap(level, gridy, gridx) > 0 || G_CheckDynamicSpriteMap(level, gridy, gridx) && G_GetFromDynamicSpriteMap(level, gridy, gridx) != entity && G_GetFromDynamicSpriteMap(level, gridy, gridx) != &otherPlayerObject)
         return;
 
     node->gridPos.x = gridx;
