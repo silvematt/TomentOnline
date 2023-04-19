@@ -4,7 +4,10 @@
 #include "../Engine/P_Physics.h"
 #include "../Engine/G_Player.h"
 #include "../Engine/G_Pathfinding.h"
+#include "../Engine/G_AI.h"
 #include "../Engine/T_TextRendering.h"
+
+#include "../Network/replication.h"
 
 dynamicSprite_t otherPlayerObject;
 
@@ -237,7 +240,7 @@ int O_GameOnPacketIsReceived(void)
     {
         case PCKTID_MOVEMENT:
         {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            // Manage packet
             pckt_movement_t movementPacket;
             memcpy(&movementPacket, receivedPacket->data, sizeof(movementPacket));
 
@@ -252,7 +255,7 @@ int O_GameOnPacketIsReceived(void)
 
         case PCKTID_DOOR_CHANGE:
         {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            // Manage packet
             pckt_door_change_t doorPacket;
             memcpy(&doorPacket, receivedPacket->data, sizeof(doorPacket));
 
@@ -278,7 +281,7 @@ int O_GameOnPacketIsReceived(void)
 
         case PCKTID_PICKUP_PICKED:
         {
-            // Manage packet, if receivedPacket->id == PCKT_GREET:
+            // Manage packet
             pckt_pickup_picked_t pickupPacket;
             memcpy(&pickupPacket, receivedPacket->data, sizeof(pickupPacket));
 
@@ -287,6 +290,44 @@ int O_GameOnPacketIsReceived(void)
             R_SetValueFromSpritesMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
             R_SetValueFromCollisionMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
             G_SetObjectTMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, ObjT_Empty);
+            break;
+        }
+
+        case PCKTID_PROJECTILE_SPAWN:
+        {
+            // Manage packet
+            pckt_projectile_spawn_t projectilePacket;
+            memcpy(&projectilePacket, receivedPacket->data, sizeof(projectilePacket));
+
+            printf("Packet received! ID: %d\n", receivedPacket->id);
+
+            G_SpawnProjectile(projectilePacket.networkID, projectilePacket.spriteID, projectilePacket.angle, projectilePacket.level, projectilePacket.posX, projectilePacket.posY, projectilePacket.posZ, projectilePacket.verticalAngle, projectilePacket.isOfPlayer, NULL, true);
+            break;
+        }
+
+        case PCKTID_PROJECTILE_DESTR:
+        {
+            // Manage packet
+            pckt_projectile_destr_t projectilePacket;
+            memcpy(&projectilePacket, receivedPacket->data, sizeof(projectilePacket));
+
+            printf("Packet received! ID: %d\n", receivedPacket->id);
+
+            projectileNode_t* cur = projectilesHead;
+            int i = 0;
+            while(cur != NULL)
+            {
+                if(cur->isNetworkInstance && cur->networkID == projectilePacket.networkID)
+                {
+                    cur->this.isBeingDestroyed = true;
+                    G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                    break;
+                }
+
+                i++;
+                cur = cur->next;
+            }
+
             break;
         }
     }
@@ -311,5 +352,27 @@ void O_GamePickPickup(int level, int dX, int dY)
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
     memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)pickupPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID)
+{
+    // Make greet packet
+    pckt_t* spawnProjectilePacket = PCKT_MakeProjectileSpawnPacket(&packetToSend, pNetworkID, pSpriteID, pAngle, pLevel, pPosX, pPosY, pPosZ, pVerticalAngle, pIsOfPlayer, pAiOwnerID);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameDestroyProjectile(int pNetworkID, int pSpriteID)
+{
+    // Make greet packet
+    pckt_t* destrProjectilePacket = PCKT_MakeProjectileDestrPacket(&packetToSend, pNetworkID, pSpriteID);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)destrProjectilePacket, PCKT_SIZE);
     outputPcktBuffer.packetsToWrite++;
 }

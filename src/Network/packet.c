@@ -388,3 +388,49 @@ pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY)
 
     return packet;
 }
+
+pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_PROJECTILE_SPAWN;
+
+    // Create and fill the content
+    pckt_projectile_spawn_t content;
+    content.networkID = pNetworkID;
+    content.spriteID = pSpriteID;
+    content.angle = pAngle;
+    content.level = pLevel;
+    content.posX = pPosX;
+    content.posY = pPosY;
+    content.posZ = pPosZ;
+    content.verticalAngle = pVerticalAngle;
+    content.isOfPlayer = pIsOfPlayer;
+    content.aiOwnerID = pAiOwnerID;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_PROJECTILE_DESTR;
+
+    // Create and fill the content
+    pckt_projectile_destr_t content;
+    content.networkID = pNetworkID;
+    content.spriteID = pSpriteID;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

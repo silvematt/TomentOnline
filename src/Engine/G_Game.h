@@ -71,6 +71,6 @@ void G_UpdateProjectiles(void);
 //-------------------------------------
 // Spawns a new projectile
 //-------------------------------------
-void G_SpawnProjectile(int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner);
+void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner, bool isNetworkInstance);
 
 #endif

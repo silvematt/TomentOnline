@@ -18,6 +18,8 @@
 #define PCKTID_MOVEMENT         5
 #define PCKTID_DOOR_CHANGE      6
 #define PCKTID_PICKUP_PICKED    7
+#define PCKTID_PROJECTILE_SPAWN 8
+#define PCKTID_PROJECTILE_DESTR 9
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -70,6 +72,23 @@ typedef struct pckt_pickup_picked_t
     int x,y;
 } pckt_pickup_picked_t;
 
+typedef struct pckt_projectile_spawn_t
+{
+    int networkID;
+    int spriteID;
+    float angle;
+    int level;
+    float posX, posY, posZ;
+    float verticalAngle;
+    bool isOfPlayer;
+    int aiOwnerID;
+} pckt_projectile_spawn_t;
+
+typedef struct pckt_projectile_destr_t
+{
+    int networkID;
+    int spriteID;
+} pckt_projectile_destr_t;
 
 #define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
@@ -108,6 +127,8 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
 pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle);
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
+pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
+pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

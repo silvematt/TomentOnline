@@ -357,82 +357,90 @@ void G_UpdateProjectiles(void)
             if(cur->this.verticalMovementDelta > 0 || cur->this.verticalMovementDelta < 0)
                 cur->this.base.z += cur->this.verticalMovementDelta * deltaTime;
 
-            // Check if projectile is not out of map
-            bool insideMap = cur->this.base.gridPos.x >= 0 && cur->this.base.gridPos.y >= 0 && cur->this.base.gridPos.x < MAP_WIDTH && cur->this.base.gridPos.y < MAP_HEIGHT && cur->this.base.z > -TILE_SIZE && cur->this.base.z < TILE_SIZE*(MAX_N_LEVELS);
 
-            // Destroy condition
-            if(G_CheckCollisionMap(cur->this.base.level, cur->this.base.gridPos.y, cur->this.base.gridPos.x) == 1 || !insideMap)
+            // If this projectile is a network instance, let the other player do the collision checking
+            if(!cur->isNetworkInstance)
             {
-                cur->this.isBeingDestroyed = true;
-                G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                return;
-            }
+                // Check if projectile is not out of map
+                bool insideMap = cur->this.base.gridPos.x >= 0 && cur->this.base.gridPos.y >= 0 && cur->this.base.gridPos.x < MAP_WIDTH && cur->this.base.gridPos.y < MAP_HEIGHT && cur->this.base.z > -TILE_SIZE && cur->this.base.z < TILE_SIZE*(MAX_N_LEVELS);
 
-            // AI hit
-            dynamicSprite_t* sprite = NULL;
-            if((sprite = G_GetFromDynamicSpriteMap(cur->this.base.level, cur->this.base.gridPos.y, cur->this.base.gridPos.x)) != NULL &&
-                cur->this.aiOwner != sprite && sprite->canBeHit)
-            {
-                float damage = 0.0f;
-
-                // Damage sprite
-                switch(cur->this.base.spriteID)
+                // Destroy condition
+                if(G_CheckCollisionMap(cur->this.base.level, cur->this.base.gridPos.y, cur->this.base.gridPos.x) == 1 || !insideMap)
                 {
-                    case S_Fireball1:
-                        damage = 55.65f;
-                        break;
-
-                    case S_IceDart1:
-                        damage = 15.0f;
-                        break;
-
-                    default:
-                        damage = 0.0f;
-                        break;
+                    cur->this.isBeingDestroyed = true;
+                    G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    return;
                 }
 
-                if(cur->this.isOfPlayer)
+                // AI hit
+                dynamicSprite_t* sprite = NULL;
+                if((sprite = G_GetFromDynamicSpriteMap(cur->this.base.level, cur->this.base.gridPos.y, cur->this.base.gridPos.x)) != NULL &&
+                    cur->this.aiOwner != sprite && sprite->canBeHit)
                 {
-                    player.crosshairHit = true;
-                    player.crosshairTimer->Start(player.crosshairTimer);
+                    float damage = 0.0f;
+
+                    // Damage sprite
+                    switch(cur->this.base.spriteID)
+                    {
+                        case S_Fireball1:
+                            damage = 55.65f;
+                            break;
+
+                        case S_IceDart1:
+                            damage = 15.0f;
+                            break;
+
+                        default:
+                            damage = 0.0f;
+                            break;
+                    }
+
+                    if(cur->this.isOfPlayer)
+                    {
+                        player.crosshairHit = true;
+                        player.crosshairTimer->Start(player.crosshairTimer);
+                    }
+
+                    G_AITakeDamage(sprite, damage);
+
+                    cur->this.isBeingDestroyed = true;
+                    G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    return;
                 }
 
-                G_AITakeDamage(sprite, damage);
-
-                cur->this.isBeingDestroyed = true;
-                G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                return;
-            }
-
-            // Player hit
-            // Add distance checking for being more precise
-            float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
-            if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
-            {
-                printf("%f\n", playerDist);
-                float damage = 0.0f;
-
-                // Damage sprite
-                switch(cur->this.base.spriteID)
+                // Player hit
+                // Add distance checking for being more precise
+                float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
+                if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
                 {
-                    case S_Fireball1:
-                        damage = 55.65f;
-                        break;
+                    printf("%f\n", playerDist);
+                    float damage = 0.0f;
 
-                    case S_IceDart1:
-                        damage = 15.0f;
-                        break;
+                    // Damage sprite
+                    switch(cur->this.base.spriteID)
+                    {
+                        case S_Fireball1:
+                            damage = 55.65f;
+                            break;
 
-                    default:
-                        damage = 0.0f;
-                        break;
+                        case S_IceDart1:
+                            damage = 15.0f;
+                            break;
+
+                        default:
+                            damage = 0.0f;
+                            break;
+                    }
+
+                    G_PlayerTakeDamage(damage);
+
+                    cur->this.isBeingDestroyed = true;
+                    G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    return;
                 }
-
-                G_PlayerTakeDamage(damage);
-
-                cur->this.isBeingDestroyed = true;
-                G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                return;
             }
         }
         // The projectile has hit, wait for the death animation to play
@@ -515,10 +523,13 @@ void G_UpdateProjectiles(void)
 }
 
 
-void G_SpawnProjectile(int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner)
+void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner, bool isNetworkInstance)
 {
     // Allocate a node
     projectileNode_t* newNode = (projectileNode_t*)malloc(sizeof(projectileNode_t));
+
+    newNode->isNetworkInstance = isNetworkInstance;
+    newNode->networkID = networkID;
 
     // Set initial data like pos, dir and speed
     newNode->this.type = DS_TYPE_PROJECTILE;

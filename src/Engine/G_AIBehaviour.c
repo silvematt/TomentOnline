@@ -402,7 +402,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
                     {
                         float projAngle = cur->base.angle + 180;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur);
+                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                     }
 
                     G_AIPlayAnimationLoop(cur, ANIM_IDLE);
@@ -753,7 +753,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                         for(int i = 0; i < 36; i++)
                         {
                             FIX_ANGLES_DEGREES(projAngle);
-                            G_SpawnProjectile(cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur);
+                            G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             projAngle += 10;
                         }
 
@@ -1033,13 +1033,13 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     {
                         float projAngle = cur->base.angle + 180;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur);
+                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                         projAngle += 10;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur);
+                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                         projAngle -= 20;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur);
+                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
 
                     }
                     cur->cooldowns[1]->Start(cur->cooldowns[1]);

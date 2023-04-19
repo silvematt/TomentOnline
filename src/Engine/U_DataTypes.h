@@ -234,7 +234,11 @@ typedef struct drawabledata_s
 typedef struct projectileNode_s
 {
     dynamicSprite_t this;
-
+    
+    // If a projectile is a network instance, no collision checking should happen on this player, the other player will send a message to update us when the projectile hit something 
+    bool isNetworkInstance; 
+    uint32_t networkID;
+    
     struct projectileNode_s* next;
     struct projectileNode_s* previous;
 } projectileNode_t;

@@ -11,6 +11,7 @@
 #include "G_AI.h"
 #include "T_TextRendering.h"
 #include "../Network/netdef.h"
+#include "../Network/replication.h"
 #include "../Online/O_Game.h"
 
 player_t player;    // Player
@@ -401,9 +402,13 @@ void G_PlayerRender(void)
                 // Spawn a projectile   
                 // Angle must be the same for each resolution
                 float angle = (player.verticalHeadMovement / MAX_VERTICAL_HEAD_MOV) * 75.0f;
-                G_SpawnProjectile(player.curSpell, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL);
+                uint32_t networkID = REPL_GenerateNetworkID();
+                G_SpawnProjectile(networkID, player.curSpell, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL, false);
                 player.hasCasted = true;
                 player.hasToCast = false;
+
+                // Spawn it online
+                O_GameSpawnProjectile(networkID, player.curSpell, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
             }
 
             // Attack
