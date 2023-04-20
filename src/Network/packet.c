@@ -434,3 +434,21 @@ pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpri
 
     return packet;
 }
+
+pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_AI_MOVEMENTS;
+    
+    // Content and fill is done where this function is called
+    // Create and fill the content
+    pckt_aimovementupdate_t content;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

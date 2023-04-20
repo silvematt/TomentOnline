@@ -125,6 +125,10 @@ typedef struct dynamicSprite_s
 {
     sprite_t base;
 
+    // Network
+    uint32_t networkID;
+    bool hasChanged;
+
     // Dnyamic-Specific
     dynamicSpriteType_e type;
     dynamicSpriteState_e state;

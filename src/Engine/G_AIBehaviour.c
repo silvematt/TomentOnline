@@ -41,8 +41,9 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
     // Calculate the distance to player
     cur->base.dist = sqrt(cur->base.pSpacePos.x*cur->base.pSpacePos.x + cur->base.pSpacePos.y*cur->base.pSpacePos.y);
 
-    // Movements
-    if(cur->isAlive && G_AICanAttack(cur))
+    cur->hasChanged = false;
+    // Movements, done only for the host
+    if(cur->isAlive && G_AICanAttack(cur) && thisPlayer.isHost)
     {
         // Calculate paths for both the player and the otherPlayer
 
@@ -53,7 +54,6 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
         path_t otherPath = G_PerformPathfinding(cur->base.level, cur->base.gridPos, otherPlayerObject.base.gridPos, cur);
 
         // Select path
-        printf("(%d | %d)\n", path.nodesLength, otherPath.nodesLength);
         if(path.isValid && otherPath.isValid)
         {
             if(path.nodesLength <= otherPath.nodesLength)
@@ -63,6 +63,9 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 cur->targetGridPos = &player.gridPosition;
                 cur->targetColl = &player.collisionCircle;
                 cur->path = &path;
+                
+                cur->hostAggro = 10;
+                cur->joinerAggro = 0;
             }
             else
             {
@@ -71,6 +74,9 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 cur->targetGridPos = &otherPlayerObject.base.gridPos;
                 cur->targetColl = &otherPlayerObject.base.collisionCircle;
                 cur->path = &otherPath;
+
+                cur->hostAggro = 0;
+                cur->joinerAggro = 10;
             }
         }
         else if(path.isValid && !otherPath.isValid)
@@ -79,13 +85,19 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
             cur->targetGridPos = &player.gridPosition;
             cur->targetColl = &player.collisionCircle;
             cur->path = &path;        
+
+            cur->hostAggro = 10;
+            cur->joinerAggro = 0;
         }
         else if(!path.isValid && otherPath.isValid)
         {
             cur->targetPos = &otherPlayerObject.base.centeredPos;
             cur->targetGridPos = &otherPlayerObject.base.gridPos;
             cur->targetColl = &otherPlayerObject.base.collisionCircle;
-            cur->path = &otherPath;        
+            cur->path = &otherPath;     
+
+            cur->hostAggro = 0;
+            cur->joinerAggro = 10;   
         }
         else
             cur->path = &path; // not gonna happen anyway
@@ -95,10 +107,11 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
 
         // Shortcut for cur->path
         path = *cur->path;
+
         // Check if path is valid and if there's space to follow it
         if(path.isValid && path.nodesLength-1 >= 0 && path.nodes[path.nodesLength-1] != NULL &&
             (G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false || G_GetFromDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == &otherPlayerObject))
-        {
+        {            
             // From here on, the AI is chasing the player so it is safe to say that they're fighting
             if(player.hasBeenInitialized)
                 cur->aggroedPlayer = true;
@@ -117,6 +130,8 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
             if(P_CheckCircleCollision(&cur->base.collisionCircle, cur->targetColl) < 0 && 
                 P_GetDistance((*cur->targetPos).x, (*cur->targetPos).y, cur->base.centeredPos.x + ((deltaX * cur->speed) * deltaTime), cur->base.centeredPos.y + ((deltaX * cur->speed) * deltaTime)) > AI_STOP_DISTANCE)
                 {
+                    cur->hasChanged = true;
+
                     cur->base.pos.x += (deltaX * cur->speed) * deltaTime;
                     cur->base.pos.y += (deltaY * cur->speed) * deltaTime; 
 
@@ -188,13 +203,62 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
         cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
 
         // Check Attack
-        if(cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level)
+        if(cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level && cur->hostAggro > cur->joinerAggro)
         {
             // In range for attacking
             G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
             G_AIAttackPlayer(cur);
             cur->aggroedPlayer = true;
         }
+    }
+    else if(!thisPlayer.isHost)
+    {
+        // Position is updated by packets
+         // Check if this AI changed grid pos
+        if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
+        {
+            // If the tile the AI ended up in is not occupied
+
+            if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
+            {
+                // Update the dynamic map
+                switch(cur->base.level)
+                {
+                    case 0:
+                        currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+                    
+                    case 1:
+                        currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    case 2:
+                        currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    default:
+                    break;
+                }
+            }
+            else
+            {
+                // Move back
+                cur->base.gridPos.x = oldGridPosX;
+                cur->base.gridPos.y = oldGridPosY;
+
+                cur->base.pos.x = cur->base.gridPos.x*TILE_SIZE;
+                cur->base.pos.y = cur->base.gridPos.y*TILE_SIZE;
+
+                cur->state = DS_STATE_MOVING;
+            }
+        }
+        
+        // Update collision circle
+        cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
+        cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
     }
 
     // Select Animation & Play it
@@ -444,7 +508,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
                     {
                         float projAngle = cur->base.angle + 180;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                     }
 
                     G_AIPlayAnimationLoop(cur, ANIM_IDLE);
@@ -795,7 +859,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                         for(int i = 0; i < 36; i++)
                         {
                             FIX_ANGLES_DEGREES(projAngle);
-                            G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             projAngle += 10;
                         }
 
@@ -1075,13 +1139,13 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     {
                         float projAngle = cur->base.angle + 180;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                         projAngle += 10;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                         projAngle -= 20;
                         FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(-1, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
 
                     }
                     cur->cooldowns[1]->Start(cur->cooldowns[1]);

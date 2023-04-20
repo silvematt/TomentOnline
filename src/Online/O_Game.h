@@ -27,4 +27,6 @@ void O_GamePickPickup(int level, int dX, int dY);
 void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
 void O_GameDestroyProjectile(int pNetworkID, int pSpriteID);
 
+void O_GameSendAIUpdate(void);
+
 #endif

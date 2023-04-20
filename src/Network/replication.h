@@ -4,6 +4,13 @@
 #include "stdio.h"
 #include "stdint.h"
 
+typedef struct aireplicated_t
+{
+    uint32_t networkID;
+    float x,y,z;
+    char hostAggro, joinerAggro;
+} aireplicated_t;
+
 extern uint32_t lastUsedNetworkID;
 
 uint32_t REPL_GenerateNetworkID();

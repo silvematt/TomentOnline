@@ -177,9 +177,11 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->aggroedPlayer = false;
     cur->hostAggro = 0;
     cur->joinerAggro = 0;
+    cur->hasChanged = false;
 
     // Add it to the dynamic sprite list
     allDynamicSprites[allDynamicSpritesLength] = cur;
+    cur->networkID = allDynamicSpritesLength;
     allDynamicSpritesLength++;
 }
 

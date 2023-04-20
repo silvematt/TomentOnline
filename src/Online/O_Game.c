@@ -188,6 +188,7 @@ int O_GameReceivePackets(void)
 static float lastSentX, lastSentY, lastSentRot;
 int O_GameSendPackets(void)
 {
+    // Send our position
     if(lastSentX != player.position.x || lastSentY != player.position.y || lastSentRot != player.angle)
     {
         // Make movement packet and send it to the other player
@@ -215,6 +216,9 @@ int O_GameSendPackets(void)
             printf("CRITICAL ERROR: Send buffer was full when in O_GameSendPackets\n");
         }
     }
+
+    if(thisPlayer.isHost)
+        O_GameSendAIUpdate();
 
     return PCKT_SendPacket(O_GameOnPacketIsSent);
 }
@@ -330,6 +334,31 @@ int O_GameOnPacketIsReceived(void)
 
             break;
         }
+
+        case PCKTID_AI_MOVEMENTS:
+        {
+            // The host shall discard these packets
+            if(thisPlayer.isHost)
+                break;
+
+             // Manage packet
+            pckt_aimovementupdate_t aiPacket;
+            memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
+
+            printf("Packet received! ID: %d - Length: %d\n", receivedPacket->id, aiPacket.length);
+
+            for(int i = 0; i < aiPacket.length; i++)
+            {
+                aireplicated_t* cur = &aiPacket.ais[i];
+                allDynamicSprites[cur->networkID]->base.pos.x = cur->x;
+                allDynamicSprites[cur->networkID]->base.pos.y = cur->y;
+                allDynamicSprites[cur->networkID]->base.z = cur->z;
+                allDynamicSprites[cur->networkID]->hostAggro = cur->hostAggro;
+                allDynamicSprites[cur->networkID]->joinerAggro = cur->joinerAggro;
+            }
+
+            break;
+        }
     }
 }
 
@@ -375,4 +404,44 @@ void O_GameDestroyProjectile(int pNetworkID, int pSpriteID)
     outputPcktBuffer.hasBegunWriting = TRUE;
     memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)destrProjectilePacket, PCKT_SIZE);
     outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameSendAIUpdate(void)
+{
+    // Make greet packet
+    pckt_t* aiMovementPacket = PCKT_MakeAIMovementUpdatePacket(&packetToSend);
+
+    // Create and fill the content
+    pckt_aimovementupdate_t content;
+
+    int counter = 0;
+    content.length = 0;
+    for(int i = 0; i < allDynamicSpritesLength; i++)
+    {
+        if(allDynamicSprites[i]->hasChanged && counter < MAX_AIREPLICATIONT_PER_PACKET)
+        {
+            // This ai needs to be updated on the other side
+            content.ais[counter].networkID = allDynamicSprites[i]->networkID;
+            content.ais[counter].x = allDynamicSprites[i]->base.pos.x;
+            content.ais[counter].y = allDynamicSprites[i]->base.pos.y;
+            content.ais[counter].z = allDynamicSprites[i]->base.z;
+            content.ais[counter].hostAggro = allDynamicSprites[i]->hostAggro;
+            content.ais[counter].joinerAggro = allDynamicSprites[i]->joinerAggro;
+
+            counter++;
+            content.length++;
+        }
+    }
+
+    if(counter > 0)
+    {
+        // Convert content as packet.data
+        memcpy(aiMovementPacket->data, &content, sizeof(content));
+
+        printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", counter);
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
 }
