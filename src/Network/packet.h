@@ -22,6 +22,7 @@
 #define PCKTID_PROJECTILE_SPAWN 8
 #define PCKTID_PROJECTILE_DESTR 9
 #define PCKTID_AI_MOVEMENTS     10
+#define PCKTID_AI_ATTACKED      11
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -99,6 +100,13 @@ typedef struct pckt_aimovementupdate_t
     aireplicated_t ais[MAX_AIREPLICATIONT_PER_PACKET];
 } pckt_aimovementupdate_t;
 
+typedef struct pckt_aiattacked_t
+{
+    int networkID;
+    float damage;
+    bool died;
+} pckt_aiattacked_t;
+
 #define MAX_PCKTS_PER_BUFFER 20
 typedef struct pckt_buffer_t
 {
@@ -139,6 +147,7 @@ pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
 pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
 pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID);
 pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
+pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

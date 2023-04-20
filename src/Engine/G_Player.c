@@ -1366,7 +1366,13 @@ static bool I_PlayerAttack(int attackType)
         player.crosshairHit = true;
         player.crosshairTimer->Start(player.crosshairTimer);
 
-        G_AITakeDamage(ai, damage);
+        if(ai->isAlive)
+        {
+            G_AITakeDamage(ai, damage);
+            bool died = (ai->attributes.curHealth <= 0.0f);
+            O_GameAITakeDamage(ai->networkID, damage, died);
+        }
+        
         return true;
     }
     else

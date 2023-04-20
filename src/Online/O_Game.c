@@ -359,6 +359,22 @@ int O_GameOnPacketIsReceived(void)
 
             break;
         }
+
+        case PCKTID_AI_ATTACKED:
+        {
+            // Manage packet
+            pckt_aiattacked_t aiPacket;
+            memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
+
+            printf("Packet received! ID: %d | - Values (%d,%f,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.damage, aiPacket.died);
+
+            if(allDynamicSprites[aiPacket.networkID]->isAlive)
+                G_AITakeDamage(allDynamicSprites[aiPacket.networkID], aiPacket.damage);
+
+            // Check our died with other players
+            
+            break;
+        }
     }
 }
 
@@ -397,7 +413,6 @@ void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLev
 
 void O_GameDestroyProjectile(int pNetworkID, int pSpriteID)
 {
-    // Make greet packet
     pckt_t* destrProjectilePacket = PCKT_MakeProjectileDestrPacket(&packetToSend, pNetworkID, pSpriteID);
     
     // Store the packet in the output buffer
@@ -444,4 +459,14 @@ void O_GameSendAIUpdate(void)
         memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
         outputPcktBuffer.packetsToWrite++;
     }
+}
+
+void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied)
+{
+    pckt_t* aiPacket = PCKT_MakeAIAttackPacket(&packetToSend, pNetworkID, pDamage, pDied);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
 }

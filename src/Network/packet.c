@@ -452,3 +452,23 @@ pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet)
 
     return packet;
 }
+
+pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_AI_ATTACKED;
+
+    // Create and fill the content
+    pckt_aiattacked_t content;
+    content.networkID = pNetworkID;
+    content.damage = pDamage;
+    content.died = pDied;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

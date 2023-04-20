@@ -28,5 +28,6 @@ void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLev
 void O_GameDestroyProjectile(int pNetworkID, int pSpriteID);
 
 void O_GameSendAIUpdate(void);
+void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied);
 
 #endif
