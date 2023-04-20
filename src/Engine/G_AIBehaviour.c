@@ -64,6 +64,10 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 cur->targetColl = &player.collisionCircle;
                 cur->path = &path;
                 
+                // Check if aggro changed
+                if(cur->hostAggro < cur->joinerAggro)
+                    cur->hasChanged = true;
+
                 cur->hostAggro = 10;
                 cur->joinerAggro = 0;
             }
@@ -74,6 +78,10 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 cur->targetGridPos = &otherPlayerObject.base.gridPos;
                 cur->targetColl = &otherPlayerObject.base.collisionCircle;
                 cur->path = &otherPath;
+
+                // Check if aggro changed
+                if(cur->joinerAggro < cur->hostAggro)
+                    cur->hasChanged = true;
 
                 cur->hostAggro = 0;
                 cur->joinerAggro = 10;
@@ -86,6 +94,10 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
             cur->targetColl = &player.collisionCircle;
             cur->path = &path;        
 
+            // Check if aggro changed
+            if(cur->hostAggro < cur->joinerAggro)
+                cur->hasChanged = true;
+
             cur->hostAggro = 10;
             cur->joinerAggro = 0;
         }
@@ -95,6 +107,10 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
             cur->targetGridPos = &otherPlayerObject.base.gridPos;
             cur->targetColl = &otherPlayerObject.base.collisionCircle;
             cur->path = &otherPath;     
+
+            // Check if aggro changed
+            if(cur->joinerAggro < cur->hostAggro)
+                cur->hasChanged = true;
 
             cur->hostAggro = 0;
             cur->joinerAggro = 10;   
@@ -259,6 +275,15 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
         // Update collision circle
         cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
         cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
+
+        // Check Attack
+        if(G_AICanAttack(cur) && cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level && cur->hostAggro < cur->joinerAggro)
+        {
+            // In range for attacking
+            G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
+            G_AIAttackPlayer(cur);
+            cur->aggroedPlayer = true;
+        }
     }
 
     // Select Animation & Play it
