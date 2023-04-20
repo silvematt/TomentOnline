@@ -13,6 +13,8 @@
 // Game Timer
 Timer* gameTimer;
 
+Timer* playerUpdatePacketsTimer;    // times the send of player's updates
+
 // Current Game Time
 double curTime = 0;
 
@@ -43,7 +45,11 @@ void G_InitGame(void)
     if(gameTimer == NULL)
         gameTimer = U_TimerCreateNew();
 
+    playerUpdatePacketsTimer = U_TimerCreateNew();
+
     gameTimer->Init(gameTimer);
+
+    playerUpdatePacketsTimer->Init(playerUpdatePacketsTimer);
 
     // Initialize Doors //
     memset(doorstateLevel0, 0, MAP_HEIGHT*MAP_WIDTH*sizeof(int));
@@ -77,6 +83,7 @@ void G_InitGame(void)
     G_ChangeMap("devmap");
     
     gameTimer->Start(gameTimer);
+    playerUpdatePacketsTimer->Start(playerUpdatePacketsTimer);
 
     // Send packet to notify other user the game started and initialize other player
     O_GameInitializeOtherPlayer();
@@ -403,6 +410,7 @@ void G_UpdateProjectiles(void)
                     }
 
                     G_AITakeDamage(sprite, damage);
+                    O_GameAITakeDamage(sprite->networkID, damage, sprite->isAlive != true);
 
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);

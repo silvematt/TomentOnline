@@ -185,36 +185,31 @@ int O_GameReceivePackets(void)
     return PCKT_ReceivePacket(O_GameOnPacketIsReceived);
 }
 
-static float lastSentX, lastSentY, lastSentRot;
 int O_GameSendPackets(void)
 {
     // Send our position
-    if(lastSentX != player.position.x || lastSentY != player.position.y || lastSentRot != player.angle)
+    // Update is sent 20 times per seconds
+    if(playerUpdatePacketsTimer->GetTicks(playerUpdatePacketsTimer) > 50)
     {
         // Make movement packet and send it to the other player
         // Send packet to notice other player that we are starting the game, he will start as soon as this packet is received
-        pckt_t* movementPacket = PCKT_MakeMovementPacket(&packetToSend, player.position.x, player.position.y, player.angle);
+        pckt_t* playerPacket = PCKT_MakePlayerUpdatePacket(&packetToSend, player.position.x, player.position.y, player.angle, player.attributes.curHealth, player.attributes.maxHealth, player.attributes.curMana, player.attributes.maxMana, player.curWeapon, player.curSpell);
 
         // outputpcktbuffer was already sending something, check if we can append this packet
         if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
         {
             // Append this packet, it will be sent after the ones already in buffer
             outputPcktBuffer.hasBegunWriting = TRUE;
-            memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)movementPacket, PCKT_SIZE);
+            memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)playerPacket, PCKT_SIZE);
             outputPcktBuffer.packetsToWrite++;
-
-            lastSentX = player.position.x;
-            lastSentY = player.position.y;
-            lastSentRot = player.angle;
-
-
-            printf("Movement packet made!\n");
         }
         else
         {
             // Outputpcktbuffer is full and this packet should be sent, what to do?
             printf("CRITICAL ERROR: Send buffer was full when in O_GameSendPackets\n");
         }
+
+        playerUpdatePacketsTimer->Start(playerUpdatePacketsTimer);
     }
 
     if(thisPlayer.isHost)
@@ -242,18 +237,26 @@ int O_GameOnPacketIsReceived(void)
 
     switch(receivedPacket->id)
     {
-        case PCKTID_MOVEMENT:
+        case PCKTID_PLAYERUPDATE:
         {
             // Manage packet
-            pckt_movement_t movementPacket;
-            memcpy(&movementPacket, receivedPacket->data, sizeof(movementPacket));
+            pckt_playerupdate_t playerPacket;
+            memcpy(&playerPacket, receivedPacket->data, sizeof(playerPacket));
 
-            printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, movementPacket.x, movementPacket.y, movementPacket.angle);
+            printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, playerPacket.x, playerPacket.y, playerPacket.angle);
 
             // Update other player position
-            otherPlayerObject.base.pos.x = movementPacket.x;
-            otherPlayerObject.base.pos.y = movementPacket.y;
-            otherPlayerObject.base.angle = movementPacket.angle;
+            otherPlayerObject.base.pos.x = playerPacket.x;
+            otherPlayerObject.base.pos.y = playerPacket.y;
+            otherPlayerObject.base.angle = playerPacket.angle;
+
+            otherPlayerObject.attributes.curHealth = playerPacket.curHealth;
+            otherPlayerObject.attributes.maxHealth = playerPacket.maxHealth;
+            otherPlayerObject.attributes.curMana = playerPacket.curMana;
+            otherPlayerObject.attributes.maxMana = playerPacket.maxMana;
+
+            otherPlayer.curWeapon = playerPacket.curWeapon;
+            otherPlayer.curSpell = playerPacket.curSpell;
             break;
         }
 

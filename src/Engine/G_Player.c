@@ -589,7 +589,7 @@ static void G_PlayerUIRender_OtherPlayer()
     SDL_Rect healthbarFillScreenPos = {85, 172, 122, 18};
     SDL_Rect healthbarFillSize = {(0), (0), 161, 24};
 
-    healthbarFillSize.x = -122/player.attributes.maxHealth* player.attributes.curHealth + 122;
+    healthbarFillSize.x = -160/otherPlayerObject.attributes.maxHealth* otherPlayerObject.attributes.curHealth + 160;
 
     // Fix bar border
     if(healthbarFillSize.x == 2)
@@ -609,7 +609,7 @@ static void G_PlayerUIRender_OtherPlayer()
     SDL_Rect manabarFillScreenPos = {85, 195, 122, 18};
     SDL_Rect manabarFillSize = {(0), (0), 161, 24};
 
-    manabarFillSize.x = -122/player.attributes.maxMana* player.attributes.curMana + 122;
+    manabarFillSize.x = -160/otherPlayerObject.attributes.maxMana* otherPlayerObject.attributes.curMana + 160;
 
     // Fix bar border
     if(manabarFillSize.x == 2)
@@ -625,7 +625,7 @@ static void G_PlayerUIRender_OtherPlayer()
     SDL_Surface* curSpell;
 
     // Select the weapon
-    switch(player.curWeapon)
+    switch(otherPlayer.curWeapon)
     {
         case PLAYER_FP_HANDS:
             curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_FISTS]->texture;
@@ -645,7 +645,7 @@ static void G_PlayerUIRender_OtherPlayer()
     }
 
     // Select the spell
-    switch(player.curSpell)
+    switch(otherPlayer.curSpell)
     {
         case SPELL_NULL:
             curSpell = NULL;

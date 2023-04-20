@@ -45,6 +45,11 @@ typedef struct netplayer
     bool isReady;
     bool startingGame;
     bool gameStated;
+
+    // Game
+    // Object specific details like health and mana are in otherPlayerObject
+    int curWeapon;
+    int curSpell;
 } netplayer_t;
 
 extern netplayer_t thisPlayer;

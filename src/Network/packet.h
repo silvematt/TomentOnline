@@ -16,7 +16,7 @@
 #define PCKTID_SET_CLASS        2
 #define PCKTID_READY            3
 #define PCKTID_STARTING         4
-#define PCKTID_MOVEMENT         5
+#define PCKTID_PLAYERUPDATE     5
 #define PCKTID_DOOR_CHANGE      6
 #define PCKTID_PICKUP_PICKED    7
 #define PCKTID_PROJECTILE_SPAWN 8
@@ -56,11 +56,20 @@ typedef struct pckt_starting_t
     byte starting;  // 0 = not starting - 1 = starting - 2 = playing
 } pckt_starting_t;
 
-typedef struct pckt_movement_t
+typedef struct pckt_playerupdate_t
 {
     float x,y;
     float angle;
-} pckt_movement_t;
+
+    float curHealth;
+    float maxHealth;
+
+    float curMana;
+    float maxMana;
+
+    int curWeapon;
+    int curSpell;
+} pckt_playerupdate_t;
 
 typedef struct pckt_door_change_t
 {
@@ -141,7 +150,7 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
 pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet);
 pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
-pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle);
+pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell);
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
 pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);

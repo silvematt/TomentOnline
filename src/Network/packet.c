@@ -328,19 +328,25 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStartingValue)
 }
 
 
-pckt_t* PCKT_MakeMovementPacket(pckt_t* packet, float pX, float pY, float pAngle)
+pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell)
 {
     PCKT_Zero(packet);
 
     // Create the packet
     packet->protocol = PROT_ID_TCP;
-    packet->id = PCKTID_MOVEMENT;
+    packet->id = PCKTID_PLAYERUPDATE;
 
     // Create and fill the content
-    pckt_movement_t content;
+    pckt_playerupdate_t content;
     content.x = pX;
     content.y = pY;
     content.angle = pAngle;
+    content.curHealth = pCurHealth;
+    content.maxHealth = pMaxHealth;
+    content.curMana = pCurMana;
+    content.maxMana = pMaxMana;
+    content.curWeapon = pCurWeapon;
+    content.curSpell = pCurSpell;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

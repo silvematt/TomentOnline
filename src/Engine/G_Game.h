@@ -14,6 +14,8 @@
 // Game Timer
 extern Timer* gameTimer;
 
+extern Timer* playerUpdatePacketsTimer;    // times the send of player's updates
+
 // Current Game Time
 extern double curTime;
 
