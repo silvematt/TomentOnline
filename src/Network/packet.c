@@ -422,7 +422,7 @@ pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpri
     return packet;
 }
 
-pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID)
+pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID, bool pForceDestroy)
 {
     PCKT_Zero(packet);
 
@@ -434,6 +434,7 @@ pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpri
     pckt_projectile_destr_t content;
     content.networkID = pNetworkID;
     content.spriteID = pSpriteID;
+    content.forceDestroy = pForceDestroy;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

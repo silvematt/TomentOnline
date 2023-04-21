@@ -25,7 +25,7 @@ void O_GameOtherPlayerRender(void);
 void O_GameSetDoorState(int level, int dX, int dY, doorstate_e state);
 void O_GamePickPickup(int level, int dX, int dY);
 void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
-void O_GameDestroyProjectile(int pNetworkID, int pSpriteID);
+void O_GameDestroyProjectile(int pNetworkID, int pSpriteID, bool pForceDestroy);
 
 void O_GameSendAIUpdate(void);
 void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied);

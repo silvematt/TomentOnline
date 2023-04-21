@@ -13,6 +13,7 @@ typedef struct aireplicated_t
 
 extern uint32_t lastUsedNetworkID;
 
+void REPL_InitializeNetworkIDs();
 uint32_t REPL_GenerateNetworkID();
 
 

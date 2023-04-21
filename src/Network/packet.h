@@ -100,6 +100,7 @@ typedef struct pckt_projectile_destr_t
 {
     int networkID;
     int spriteID;
+    bool forceDestroy;  // forces the destroy by skipping the isNetworkInstance check
 } pckt_projectile_destr_t;
 
 #define MAX_AIREPLICATIONT_PER_PACKET 64 // 64*sizeof(aireplicated_t)+content must be < 1300
@@ -154,7 +155,7 @@ pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pA
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
 pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
-pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID);
+pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID, bool pForceDestroy);
 pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);
 

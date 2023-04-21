@@ -324,7 +324,7 @@ int O_GameOnPacketIsReceived(void)
             int i = 0;
             while(cur != NULL)
             {
-                if(cur->isNetworkInstance && cur->networkID == projectilePacket.networkID)
+                if((cur->isNetworkInstance || projectilePacket.forceDestroy) && cur->networkID == projectilePacket.networkID)
                 {
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
@@ -414,9 +414,9 @@ void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLev
     outputPcktBuffer.packetsToWrite++;
 }
 
-void O_GameDestroyProjectile(int pNetworkID, int pSpriteID)
+void O_GameDestroyProjectile(int pNetworkID, int pSpriteID, bool pForceDestroy)
 {
-    pckt_t* destrProjectilePacket = PCKT_MakeProjectileDestrPacket(&packetToSend, pNetworkID, pSpriteID);
+    pckt_t* destrProjectilePacket = PCKT_MakeProjectileDestrPacket(&packetToSend, pNetworkID, pSpriteID, pForceDestroy);
     
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
@@ -445,7 +445,7 @@ void O_GameSendAIUpdate(void)
             content.ais[counter].z = allDynamicSprites[i]->base.z;
             content.ais[counter].hostAggro = allDynamicSprites[i]->hostAggro;
             content.ais[counter].joinerAggro = allDynamicSprites[i]->joinerAggro;
-
+            
             counter++;
             content.length++;
         }

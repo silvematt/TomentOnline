@@ -84,6 +84,8 @@ void G_InitGame(void)
     
     gameTimer->Start(gameTimer);
     playerUpdatePacketsTimer->Start(playerUpdatePacketsTimer);
+    
+    REPL_InitializeNetworkIDs();
 
     // Send packet to notify other user the game started and initialize other player
     O_GameInitializeOtherPlayer();
@@ -376,7 +378,7 @@ void G_UpdateProjectiles(void)
                 {
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
                     return;
                 }
 
@@ -414,7 +416,7 @@ void G_UpdateProjectiles(void)
 
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
                     return;
                 }
 
@@ -446,7 +448,45 @@ void G_UpdateProjectiles(void)
 
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
-                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID);
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
+                    return;
+                }
+            }
+            // Check client side collision
+            else if(cur->isNetworkInstance)
+            {
+                printf("checking player client side...\n\n\n");
+                // Player hit
+                // Add distance checking for being more precise
+                float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
+                if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
+                {
+                    printf("%f\n", playerDist);
+                    float damage = 0.0f;
+
+                    // Damage sprite
+                    switch(cur->this.base.spriteID)
+                    {
+                        case S_Fireball1:
+                            damage = 55.65f;
+                            break;
+
+                        case S_IceDart1:
+                            damage = 15.0f;
+                            break;
+
+                        default:
+                            damage = 0.0f;
+                            break;
+                    }
+
+                    G_PlayerTakeDamage(damage);
+
+                    cur->this.isBeingDestroyed = true;
+                    G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                    
+                    // Force destroy is true because we've requested the destroyment of an instance that on this side is networked but on the other side is local
+                    O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, true);
                     return;
                 }
             }

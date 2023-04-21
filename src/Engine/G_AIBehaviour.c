@@ -377,19 +377,104 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
 
     // Calculate the distance to player
     cur->base.dist = sqrt(cur->base.pSpacePos.x*cur->base.pSpacePos.x + cur->base.pSpacePos.y*cur->base.pSpacePos.y);
+    float otherDist = sqrt((cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)*(cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x) + (cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y)*(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y));
 
+    // Use the correct distance between
+    float correctDist = 0;
+
+    cur->hasChanged = false;
     // Movements
-    if(cur->isAlive && G_AICanAttack(cur))
+    if(cur->isAlive && G_AICanAttack(cur) && thisPlayer.isHost)
     {
-        path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, *(cur->targetGridPos), cur);
-        cur->path = &path;
+        // Calculate paths for both the player and the otherPlayer
 
+        // Calculate player path
+        path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, player.gridPosition, cur);
+
+        // Calculate other player path
+        path_t otherPath = G_PerformPathfinding(cur->base.level, cur->base.gridPos, otherPlayerObject.base.gridPos, cur);
+
+        // Select path
+        if(path.isValid && otherPath.isValid)
+        {
+            if(path.nodesLength <= otherPath.nodesLength)
+            {
+                // Set the target as the this player
+                cur->targetPos = &player.centeredPos;
+                cur->targetGridPos = &player.gridPosition;
+                cur->targetColl = &player.collisionCircle;
+                cur->path = &path;
+                
+                // Check if aggro changed
+                if(cur->hostAggro < cur->joinerAggro)
+                    cur->hasChanged = true;
+
+                cur->hostAggro = 10;
+                cur->joinerAggro = 0;
+
+                correctDist = cur->base.dist;
+            }
+            else
+            {
+                // Set the target as the other player
+                cur->targetPos = &otherPlayerObject.base.centeredPos;
+                cur->targetGridPos = &otherPlayerObject.base.gridPos;
+                cur->targetColl = &otherPlayerObject.base.collisionCircle;
+                cur->path = &otherPath;
+
+                // Check if aggro changed
+                if(cur->joinerAggro < cur->hostAggro)
+                    cur->hasChanged = true;
+
+                cur->hostAggro = 0;
+                cur->joinerAggro = 10;
+
+                correctDist = otherDist;
+            }
+        }
+        else if(path.isValid && !otherPath.isValid)
+        {
+            cur->targetPos = &player.centeredPos;
+            cur->targetGridPos = &player.gridPosition;
+            cur->targetColl = &player.collisionCircle;
+            cur->path = &path;        
+
+            // Check if aggro changed
+            if(cur->hostAggro < cur->joinerAggro)
+                cur->hasChanged = true;
+
+            cur->hostAggro = 10;
+            cur->joinerAggro = 0;
+
+            correctDist = cur->base.dist;
+        }
+        else if(!path.isValid && otherPath.isValid)
+        {
+            cur->targetPos = &otherPlayerObject.base.centeredPos;
+            cur->targetGridPos = &otherPlayerObject.base.gridPos;
+            cur->targetColl = &otherPlayerObject.base.collisionCircle;
+            cur->path = &otherPath;     
+
+            // Check if aggro changed
+            if(cur->joinerAggro < cur->hostAggro)
+                cur->hasChanged = true;
+
+            cur->hostAggro = 0;
+            cur->joinerAggro = 10;   
+
+            correctDist = otherDist;
+        }
+        else
+            cur->path = &path; // not gonna happen anyway
+            
         float deltaX = 0.0f;
         float deltaY = 0.0f; 
 
+        // Shortcut for cur->path
+        path = *cur->path;
         // Check if path is valid and if there's space to follow it
         if(path.isValid && path.nodesLength-1 >= 0 && path.nodes[path.nodesLength-1] != NULL &&
-            G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false)
+            (G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false || G_GetFromDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == &otherPlayerObject))
         {
             // From here on, the AI is chasing the player so it is safe to say that they're fighting
 
@@ -407,6 +492,8 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             if(P_CheckCircleCollision(&cur->base.collisionCircle, cur->targetColl) < 0 && 
                 P_GetDistance((*cur->targetPos).x, (*cur->targetPos).y, cur->base.centeredPos.x + ((deltaX * cur->speed) * deltaTime), cur->base.centeredPos.y + ((deltaX * cur->speed) * deltaTime)) > AI_STOP_DISTANCE)
                 {
+                    cur->hasChanged = true;
+
                     cur->base.pos.x += (deltaX * cur->speed) * deltaTime;
                     cur->base.pos.y += (deltaY * cur->speed) * deltaTime; 
 
@@ -479,7 +566,65 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
 
         // Check Attack
         // If the player is at attack distance OR if he was in combat before but the AI can't reach him to close up the distance (example: casters on towers)
-        if(cur->base.dist < AI_SPELL_ATTACK_DISTANCE || (cur->aggroedPlayer && !path.isValid))
+        if(correctDist < AI_SPELL_ATTACK_DISTANCE || (cur->aggroedPlayer && !path.isValid))
+        {
+            // In range for attacking (casting spell)
+            G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
+            cur->aggroedPlayer = true;
+        }
+    }
+    else if(!thisPlayer.isHost)
+    {
+        // Check if this AI changed grid pos
+        if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
+        {
+            // If the tile the AI ended up in is not occupied
+
+            if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
+            {
+                // Update the dynamic map
+                switch(cur->base.level)
+                {
+                    case 0:
+                        currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+                    
+                    case 1:
+                        currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    case 2:
+                        currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // Move back
+                cur->base.gridPos.x = oldGridPosX;
+                cur->base.gridPos.y = oldGridPosY;
+
+                cur->base.pos.x = cur->base.gridPos.x*TILE_SIZE;
+                cur->base.pos.y = cur->base.gridPos.y*TILE_SIZE;
+
+                cur->state = DS_STATE_MOVING;
+            }
+        }
+        
+        // Update collision circle
+        cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
+        cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
+
+        // Check Attack
+        // If the player is at attack distance OR if he was in combat before but the AI can't reach him to close up the distance (example: casters on towers)
+        correctDist = (cur->hostAggro >= cur->joinerAggro) ? otherDist : cur->base.dist; 
+        if(G_AICanAttack(cur) &&  correctDist < AI_SPELL_ATTACK_DISTANCE) //|| (cur->aggroedPlayer && !cur->path->isValid))
         {
             // In range for attacking (casting spell)
             G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
@@ -526,14 +671,32 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
                 // Spawn the spell and go back to idle
                 if(cur->state == DS_STATE_ATTACKING)
                 {
-                    // Attack chance, casters may fail spell
-                    int attack      =  (rand() % (100)) + 1;
-
-                    if(attack <= cur->attributes.attackChance)
+                    // Let only the host instance the projectile
+                    if(thisPlayer.isHost)
                     {
-                        float projAngle = cur->base.angle + 180;
-                        FIX_ANGLES_DEGREES(projAngle);
-                        G_SpawnProjectile(0, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        // Attack chance, casters may fail spell
+                        int attack      =  (rand() % (100)) + 1;
+
+                        if(attack <= cur->attributes.attackChance)
+                        {
+                            float projAngle = cur->base.angle + 180;
+
+                            if(cur->joinerAggro > cur->hostAggro)
+                            {
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y), (cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)))* RADIAN_TO_DEGREE)*-1 + 180;
+                                FIX_ANGLES_DEGREES(projAngle);
+                            }
+
+                            FIX_ANGLES_DEGREES(projAngle);
+
+                            uint32_t networkID = REPL_GenerateNetworkID();
+
+                            G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+
+                        }
                     }
 
                     G_AIPlayAnimationLoop(cur, ANIM_IDLE);
