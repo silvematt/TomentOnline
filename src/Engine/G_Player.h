@@ -5,6 +5,7 @@
 #include "G_Game.h"
 #include "U_DataTypes.h"
 #include "D_AssetsManager.h"
+#include "G_Skills.h"
 
 // Minimap Player
 #define PLAYER_WIDTH 16
@@ -50,7 +51,10 @@ typedef enum playerState_e
     PSTATE_IDLE = 0,
     PSTATE_ATTACKING1,
     PSTATE_CASTSPELL,
-    PSTATE_CLIMBING_LADDER
+    PSTATE_CLIMBING_LADDER,
+    PSTATE_DOINGSKILL1,
+    PSTATE_DOINGSKILL2,
+    PSTATE_DOINGSKILL3
 } playerState_e;
 
 // Attacks the player can perform
@@ -140,6 +144,9 @@ typedef struct player_s
 
     bool isFightingBoss;
     dynamicSprite_t* bossFighting;
+
+    // Skills
+    skill_t skills[MAX_SKILLS_PER_CLASS];
 } player_t;
 
 

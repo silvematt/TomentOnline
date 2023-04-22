@@ -135,6 +135,8 @@ void G_InitPlayer(void)
                 break;
             }
         }
+
+        G_InitializeSkills();
     }
     // Rect for minimap
     SDL_Rect_Set(&player.surfaceRect, (int)player.position.x, (int)player.position.y, PLAYER_WIDTH, PLAYER_HEIGHT);
@@ -426,6 +428,12 @@ void G_PlayerRender(void)
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animCastSpellActionFrame;
             break;
 
+        case PSTATE_DOINGSKILL1:
+            curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1;
+            curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SheetLength;
+            curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1ActionFrame;
+            break;
+        
         default:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animIdle;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleSheetLength;
@@ -463,6 +471,24 @@ void G_PlayerRender(void)
                 player.hasToCast = false;
             }
 
+            if(player.state == PSTATE_DOINGSKILL1)
+            {
+                switch(thisPlayer.selectedClass)
+                {
+                    case CLASS_TANK:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            I_PlayerAttack(1);
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                        break;
+                    }
+                }
+            }
+
             // Prevent loop
             if(player.animFrame >= curAnimLength-1)
             {
@@ -470,7 +496,8 @@ void G_PlayerRender(void)
                 
                 // Go back to idle
                 if(player.state == PSTATE_ATTACKING1 ||
-                   player.state == PSTATE_CASTSPELL)
+                   player.state == PSTATE_CASTSPELL ||
+                   player.state == PSTATE_DOINGSKILL1)
                    {
                         player.state = PSTATE_IDLE;
                         player.hasToCast = false;
@@ -607,9 +634,24 @@ static void G_PlayerUIRender_ThisPlayer()
     SDL_Rect spellIconSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     if(curSpell != NULL)
-    R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
+        R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
 
-}
+    // Render skills
+    SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    //R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
+
+    SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    //R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+
+    SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    //R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+}   
 
 // Fill needs to account for other player health
 static void G_PlayerUIRender_OtherPlayer()
@@ -919,7 +961,18 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
 
             // Change Weapons
             else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_1)
-                G_PlayerSetWeapon(PLAYER_FP_HANDS);
+            {
+                // Check cooldown
+                if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+                {
+                    // DO SKILL
+                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL1);
+                    player.hasToCast = true;
+                    player.hasCasted = false;
+
+                    player.skills[0].timer->Start(player.skills[0].timer);
+                }
+            }
             else if(G_PlayerCanAttack() && player.hasAxe && e->key.keysym.sym == SDLK_2)
                 G_PlayerSetWeapon(PLAYER_FP_AXE);
             else if(G_PlayerCanAttack() && player.hasGreatsword && e->key.keysym.sym == SDLK_3)
@@ -1345,6 +1398,10 @@ void G_PlayerPlayAnimationOnce(objectanimationsID_e animID)
         case ANIM_CAST_SPELL:
             player.state = PSTATE_CASTSPELL;
             break;
+
+        case ANIM_SPECIAL1:
+            player.state = PSTATE_DOINGSKILL1;
+            break;
     }
 
     player.animPlay = true;
@@ -1384,28 +1441,38 @@ static bool I_PlayerAttack(int attackType)
 
     float damage = 15.0f;
 
-    switch(player.curWeapon)
+    if(attackType == 0)
     {
-        case PLAYER_FP_HANDS:
-            damage = 15.0f;
-            break;
+        switch(player.curWeapon)
+        {
+            case PLAYER_FP_HANDS:
+                damage = 15.0f;
+                break;
 
-        case PLAYER_FP_AXE:
-            damage = 33.5f;
-            break;
+            case PLAYER_FP_AXE:
+                damage = 33.5f;
+                break;
 
-        case PLAYER_FP_MACE:
-            damage = 55.5f;
-            break;
+            case PLAYER_FP_MACE:
+                damage = 55.5f;
+                break;
 
-        case PLAYER_FP_GREATSWORD:
-            damage = 100.0f;
-            break;
+            case PLAYER_FP_GREATSWORD:
+                damage = 100.0f;
+                break;
 
-        default:
-            damage = 15.0f;
-            break;
+            default:
+                damage = 15.0f;
+                break;
+        }
     }
+    else
+    {
+        // Tank shield slam
+        if(attackType == 1)
+            damage = 80.0f;
+    }
+    
 
     if(ai != NULL && ai->canBeHit)
     {
@@ -1491,7 +1558,7 @@ static void I_SetAttackCone(int id, int x, int y)
 
 bool G_PlayerCanAttack(void)
 {
-    return (player.state != PSTATE_ATTACKING1 && player.state != PSTATE_CASTSPELL && player.state != PSTATE_CLIMBING_LADDER);
+    return (player.state != PSTATE_ATTACKING1 && player.state != PSTATE_DOINGSKILL1 && player.state != PSTATE_DOINGSKILL2 && player.state != PSTATE_DOINGSKILL3 && player.state != PSTATE_CASTSPELL && player.state != PSTATE_CLIMBING_LADDER);
 }
 
 void G_PlayerSetWeapon(playerFPID_e weaponID)

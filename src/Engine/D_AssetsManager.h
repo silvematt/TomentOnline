@@ -130,6 +130,10 @@ typedef struct objectAnimations_s
     SDL_Surface* animSpecial2;
     unsigned animSpecial2SheetLength;
     unsigned animSpecial2ActionFrame;
+
+    SDL_Surface* animSpecial3;
+    unsigned animSpecial3SheetLength;
+    unsigned animSpecial3ActionFrame;
 } objectanimations_t;
 
 
@@ -260,7 +264,9 @@ typedef enum uiAssetsID_e
     G_ASSET_ICON_READY,
     G_ASSET_ICON_NOTREADY,
     G_ASSET_ICON_MACE,
-
+    G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM,
+    G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK,
+    G_ASSET_SKILL_ICON_TANK_CONSACRATION
 } uiAssetsID_e;
 
 // FP Player IDs
@@ -424,7 +430,11 @@ typedef enum imgIDs_e
     IMG_ID_PLAYER_DPS_CHARACTER,
     IMG_ID_P_MACE_IDLE,
     IMG_ID_P_MACE_ATTACK1,
-    IMG_ID_ICON_MACE
+    IMG_ID_ICON_MACE,
+    IMG_ID_SKILL_ICON_TANK_SHIELD_SLAM,
+    IMG_ID_SKILL_ICON_TANK_SHIELD_BLOCK,
+    IMG_ID_SKILL_ICON_TANK_CONSACRATION,
+    IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM
 } imgIDs_e;
 
 // Archt Data

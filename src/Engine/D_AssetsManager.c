@@ -152,6 +152,9 @@ void D_InitUIAssets(void)
     uiAssets_t* iconReady = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* iconNotReady = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* iconMace = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconTankShieldSlam = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconTankShieldBlock = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconTankConsacration = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -179,8 +182,11 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_ICON_READY] = iconReady;
     tomentdatapack.uiAssets[G_ASSET_ICON_NOTREADY] = iconNotReady;
     tomentdatapack.uiAssets[G_ASSET_ICON_MACE] = iconMace;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM] = skillIconTankShieldSlam;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK] = skillIconTankShieldBlock;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION] = skillIconTankConsacration;
 
-    tomentdatapack.uiAssetsLenght = 26;
+    tomentdatapack.uiAssetsLenght = 29;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -513,6 +519,45 @@ void D_InitUIAssets(void)
     {
         tomentdatapack.uiAssets[G_ASSET_ICON_MACE]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
         SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_ICON_MACE]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // IMG_ID_SKILL_ICON_TANK_SHIELD_SLAM
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_SHIELD_SLAM].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_SHIELD_SLAM].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_TANK_SHIELD_SLAM))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // IMG_ID_SKILL_ICON_TANK_SHIELD_BLOCK
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_SHIELD_BLOCK].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_SHIELD_BLOCK].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_TANK_SHIELD_BLOCK))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // IMG_ID_SKILL_ICON_TANK_CONSACRATION
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_CONSACRATION].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_TANK_CONSACRATION].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_TANK_CONSACRATION))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
     }
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
@@ -2025,7 +2070,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
     SDL_FreeSurface(temp1);
 
-    // FP Axe
+    // FP Mace
     offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_P_MACE_IDLE].startingOffset);
     sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_P_MACE_IDLE].size);
     temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
@@ -2062,6 +2107,16 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpellActionFrame = 4;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // Tank skill 1 - Shield Slam
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1SheetLength = 7;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1ActionFrame = 4;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
     }

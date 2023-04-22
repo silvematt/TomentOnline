@@ -6,6 +6,7 @@
         "packet.h": "c",
         "r_rendering.h": "c",
         "g_player.h": "c",
-        "o_game.h": "c"
+        "o_game.h": "c",
+        "replication.h": "c"
     }
 }
