@@ -378,6 +378,62 @@ int O_GameOnPacketIsReceived(void)
             
             break;
         }
+
+        case PCKTID_AI_PLAY_ANIM:
+        {
+            // Manage packet
+            pckt_aiplayanim_t aiPacket;
+            memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
+
+            printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.anim);
+
+            if(allDynamicSprites[aiPacket.networkID]->isAlive)
+            {
+                if(aiPacket.loop)
+                    G_AIPlayAnimationLoop(allDynamicSprites[aiPacket.networkID], aiPacket.anim);
+                else
+                    G_AIPlayAnimationOnce(allDynamicSprites[aiPacket.networkID], aiPacket.anim);
+            }
+
+            // Check our died with other players
+            
+            break;
+        }
+
+        case PCKTID_AI_INSTANTIATE:
+        {
+            // Manage packet
+            pckt_aiinstantiate_t aiPacket;
+            memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
+
+            printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.spriteID);
+
+            // Spawn AI
+            if(currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] != NULL)
+            {
+                printf("Couldn't be able instantiate... game may be out of sync\n");
+                scanf("%d");
+            }
+
+            currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX];
+            G_AIInitialize(spawned, aiPacket.level, aiPacket.spriteID, aiPacket.gridX, aiPacket.gridY);
+
+            if(aiPacket.playAnimation)
+            {
+                if(aiPacket.loop)
+                    G_AIPlayAnimationLoop(spawned, aiPacket.animID);
+                else
+                    G_AIPlayAnimationOnce(spawned, aiPacket.animID);
+            }
+
+            if(spawned->networkID != aiPacket.networkID)
+            {
+                printf("Instantiated AI had a different network ID than the other part\n");
+                scanf("%d");
+            }
+            break;
+        }
     }
 }
 
@@ -467,6 +523,27 @@ void O_GameSendAIUpdate(void)
 void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied)
 {
     pckt_t* aiPacket = PCKT_MakeAIAttackPacket(&packetToSend, pNetworkID, pDamage, pDied);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+
+void O_GameAIPlayAnim(int networkID, int anim, bool loop)
+{
+    pckt_t* aiPacket = PCKT_MakeAIPlayAnimPacket(&packetToSend, networkID, anim, loop);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop)
+{
+    pckt_t* aiPacket = PCKT_MakeAIInstantiatePacket(&packetToSend, pNetworkID, pLevel, pGridX, pGridY, pSpriteID, pPlayAnim, pAnimID, pLoop);
     
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;

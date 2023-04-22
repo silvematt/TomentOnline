@@ -425,7 +425,6 @@ void G_UpdateProjectiles(void)
                 float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
                 if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
                 {
-                    printf("%f\n", playerDist);
                     float damage = 0.0f;
 
                     // Damage sprite
@@ -455,13 +454,11 @@ void G_UpdateProjectiles(void)
             // Check client side collision
             else if(cur->isNetworkInstance)
             {
-                printf("checking player client side...\n\n\n");
                 // Player hit
                 // Add distance checking for being more precise
                 float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);
                 if(!cur->this.isOfPlayer && cur->this.base.level == player.level && cur->this.base.gridPos.x == player.gridPosition.x && cur->this.base.gridPos.y == player.gridPosition.y && playerDist < TILE_SIZE-12)
                 {
-                    printf("%f\n", playerDist);
                     float damage = 0.0f;
 
                     // Damage sprite

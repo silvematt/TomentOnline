@@ -23,6 +23,9 @@
 #define PCKTID_PROJECTILE_DESTR 9
 #define PCKTID_AI_MOVEMENTS     10
 #define PCKTID_AI_ATTACKED      11
+#define PCKTID_AI_PLAY_ANIM     12
+#define PCKTID_AI_INSTANTIATE   13
+
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -117,7 +120,27 @@ typedef struct pckt_aiattacked_t
     bool died;
 } pckt_aiattacked_t;
 
-#define MAX_PCKTS_PER_BUFFER 20
+typedef struct pckt_aiplayanim_t
+{
+    int networkID;
+    int anim;
+    bool loop;
+} pckt_aiplayanim_t;
+
+typedef struct pckt_aiinstantiate_t
+{
+    int networkID;
+    
+    int level;
+    int gridX, gridY;
+    int spriteID;
+
+    bool playAnimation;
+    int animID;
+    bool loop;
+} pckt_aiinstantiate_t;
+
+#define MAX_PCKTS_PER_BUFFER 50
 typedef struct pckt_buffer_t
 {
     char buffer [PCKT_SIZE*MAX_PCKTS_PER_BUFFER];
@@ -158,6 +181,8 @@ pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpri
 pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID, bool pForceDestroy);
 pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);
+pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, bool pLoop);
+pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

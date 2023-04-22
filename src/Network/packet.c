@@ -479,3 +479,48 @@ pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, b
 
     return packet;
 }
+
+pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, bool pLoop)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_AI_PLAY_ANIM;
+
+    // Create and fill the content
+    pckt_aiplayanim_t content;
+    content.networkID = pNetworkID;
+    content.anim = pAnimID;
+    content.loop = pLoop;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop)
+{
+    PCKT_Zero(packet);
+
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_AI_INSTANTIATE;
+
+    // Create and fill the content
+    pckt_aiinstantiate_t content;
+    content.networkID = pNetworkID;
+    content.level = pLevel;
+    content.gridX = pGridX;
+    content.gridY = pGridY;
+    content.spriteID = pSpriteID;
+    content.playAnimation = pPlayAnim;
+    content.animID = pAnimID;
+    content.loop = pLoop;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
