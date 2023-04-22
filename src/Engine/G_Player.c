@@ -407,6 +407,7 @@ void G_PlayerRender(void)
     SDL_Surface* curAnim;
     int curAnimLength = 0;
     int curAnimActionFrame = 0;
+    float curAnimSpeedModifier = 0;
 
     switch(player.state)
     {
@@ -414,30 +415,42 @@ void G_PlayerRender(void)
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animIdle;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleSheetLength;
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleSpeedModifier;
             break;
 
         case PSTATE_ATTACKING1:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animAttack;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animAttackSheetLength;
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animAttackActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animAttackSpeedModifier;
             break;
 
         case PSTATE_CASTSPELL:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animCastSpell;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animCastSpellSheetLength;
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animCastSpellActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animCastSpellkSpeedModifier;
             break;
 
         case PSTATE_DOINGSKILL1:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SheetLength;
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1ActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SpeedModifier;
+            break;
+
+        case PSTATE_DOINGSKILL2:
+            curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2;
+            curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2SheetLength;
+            curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2ActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2SpeedModifier;
             break;
         
         default:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animIdle;
             curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleSheetLength;
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animIdleActionFrame;
+            curAnimSpeedModifier = 0;
             break;
     }
 
@@ -446,7 +459,7 @@ void G_PlayerRender(void)
         if(player.animPlayOnce)
         {
             if(curAnimLength > 0)
-                player.animFrame = ((int)floor(player.animTimer->GetTicks(player.animTimer) / ANIMATION_SPEED_DIVIDER) % curAnimLength);
+                player.animFrame = ((int)floor(player.animTimer->GetTicks(player.animTimer) / (ANIMATION_SPEED_DIVIDER+curAnimSpeedModifier)) % curAnimLength);
 
             // Spawn projectile at the right frame
             if(player.state == PSTATE_CASTSPELL && player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
@@ -489,6 +502,18 @@ void G_PlayerRender(void)
                 }
             }
 
+            if(player.state == PSTATE_DOINGSKILL2)
+            {
+                switch(thisPlayer.selectedClass)
+                {
+                    case CLASS_TANK:
+                    {
+                        // Is invulnerable = true
+                        break;
+                    }
+                }
+            }
+
             // Prevent loop
             if(player.animFrame >= curAnimLength-1)
             {
@@ -497,8 +522,12 @@ void G_PlayerRender(void)
                 // Go back to idle
                 if(player.state == PSTATE_ATTACKING1 ||
                    player.state == PSTATE_CASTSPELL ||
-                   player.state == PSTATE_DOINGSKILL1)
+                   player.state == PSTATE_DOINGSKILL1 ||
+                   player.state == PSTATE_DOINGSKILL2)
                    {
+                    if(player.state == PSTATE_DOINGSKILL2 && thisPlayer.selectedClass == CLASS_TANK)
+                            player.isInvulnerable = false;
+
                         player.state = PSTATE_IDLE;
                         player.hasToCast = false;
                    }
@@ -636,6 +665,9 @@ static void G_PlayerUIRender_ThisPlayer()
     if(curSpell != NULL)
         R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
 
+    // temp check for not crashing
+    if(thisPlayer.selectedClass == CLASS_TANK)
+    {
     // Render skills
     SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -654,12 +686,23 @@ static void G_PlayerUIRender_ThisPlayer()
     SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+    if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+    else
+    {
+        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill2ScreenPos);
+
+        char arr[32];
+        sprintf(arr, "%.1f", (player.skills[1].cooldown-player.skills[1].timer->GetTicks(player.skills[1].timer)) / (float)1000);
+        T_DisplayText(FONT_BLKCRY, arr, 395, 545);
+    }
 
     SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
     R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+    }
+
 }   
 
 // Fill needs to account for other player health
@@ -982,8 +1025,19 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                     player.skills[0].timer->Start(player.skills[0].timer);
                 }
             }
-            else if(G_PlayerCanAttack() && player.hasAxe && e->key.keysym.sym == SDLK_2)
-                G_PlayerSetWeapon(PLAYER_FP_AXE);
+            else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_2)
+            {
+                // Check cooldown
+                if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+                {
+                    // DO SKILL
+                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL2);
+                    player.hasToCast = true;
+                    player.hasCasted = false;
+                    player.isInvulnerable = true;
+                    player.skills[1].timer->Start(player.skills[1].timer);
+                }
+            }
             else if(G_PlayerCanAttack() && player.hasGreatsword && e->key.keysym.sym == SDLK_3)
                 G_PlayerSetWeapon(PLAYER_FP_GREATSWORD);
             else if(G_PlayerCanAttack() && player.hasIceDart && e->key.keysym.sym == SDLK_4)
@@ -997,6 +1051,9 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
 
 void G_PlayerTakeDamage(float dmg)
 {
+    if(player.isInvulnerable)
+        return;
+
     player.attributes.curHealth -= dmg;
 
     if(player.attributes.curHealth <= 0.0f)
@@ -1410,6 +1467,10 @@ void G_PlayerPlayAnimationOnce(objectanimationsID_e animID)
 
         case ANIM_SPECIAL1:
             player.state = PSTATE_DOINGSKILL1;
+            break;
+
+        case ANIM_SPECIAL2:
+            player.state = PSTATE_DOINGSKILL2;
             break;
     }
 

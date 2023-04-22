@@ -109,31 +109,38 @@ typedef struct objectAnimations_s
     SDL_Surface* animIdle;          // The image
     unsigned animIdleSheetLength;   // The sheet lenght
     unsigned animIdleActionFrame;   // The frame that has to be reached in order to perform the animation action (like casting a spell)
+    int animIdleSpeedModifier;
 
     SDL_Surface* animDie;
     unsigned animDieSheetLength;
     unsigned animDieActionFrame;
+    int animDieSpeedModifier;
 
     SDL_Surface* animAttack;
     unsigned animAttackSheetLength;
     unsigned animAttackActionFrame;
+    int animAttackSpeedModifier;
 
     SDL_Surface* animCastSpell;
     unsigned animCastSpellSheetLength;
     unsigned animCastSpellActionFrame;
+    int animCastSpellkSpeedModifier;
 
     // Extra Animations
     SDL_Surface* animSpecial1;
     unsigned animSpecial1SheetLength;
     unsigned animSpecial1ActionFrame;
+    int animSpecial1SpeedModifier;
 
     SDL_Surface* animSpecial2;
     unsigned animSpecial2SheetLength;
     unsigned animSpecial2ActionFrame;
+    int animSpecial2SpeedModifier;
 
     SDL_Surface* animSpecial3;
     unsigned animSpecial3SheetLength;
     unsigned animSpecial3ActionFrame;
+    int animSpecial3SpeedModifier;
 } objectanimations_t;
 
 

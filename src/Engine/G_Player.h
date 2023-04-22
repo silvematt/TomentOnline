@@ -147,6 +147,7 @@ typedef struct player_s
 
     // Skills
     skill_t skills[MAX_SKILLS_PER_CLASS];
+    bool isInvulnerable;    // if true player cannot be damage (tank skill 2)
 } player_t;
 
 

@@ -1970,6 +1970,7 @@ void D_InitLoadPlayersFP(void)
         // Idle = Normal
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animIdleSheetLength = 0;
+        tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animIdleSpeedModifier = 0;
 
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animIdle, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
 
@@ -1980,6 +1981,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animAttackSheetLength = 4;
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animAttackActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animAttackSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animAttack, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -1990,6 +1992,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animCastSpellActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animCastSpellkSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2014,6 +2017,7 @@ void D_InitLoadPlayersFP(void)
         // Idle = Normal
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animIdleSheetLength = 0;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animIdleSpeedModifier = 0;
 
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animIdle, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
 
@@ -2024,6 +2028,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animAttackSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animAttackActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animAttackSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animAttack, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2034,6 +2039,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpellActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpellkSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2058,6 +2064,7 @@ void D_InitLoadPlayersFP(void)
         // Idle = Normal
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animIdleSheetLength = 0;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animIdleSpeedModifier = 0;
 
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animIdle, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
 
@@ -2068,6 +2075,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animAttackSheetLength = 7;
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animAttackActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animAttackSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animAttack, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2078,6 +2086,8 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellkSpeedModifier = 0;
+
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
     }
@@ -2101,6 +2111,7 @@ void D_InitLoadPlayersFP(void)
         // Idle = Normal
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animIdleSheetLength = 0;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animIdleSpeedModifier = 0;
 
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animIdle, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
 
@@ -2111,6 +2122,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animAttackSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animAttackActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animAttackSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animAttack, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2121,6 +2133,7 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpellActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpellkSpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
@@ -2131,7 +2144,19 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1SheetLength = 7;
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1ActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1SpeedModifier = 0;
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial1, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // Tank skill 2 - Shield Block
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_BLOCK].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_BLOCK].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2SheetLength = 7;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2ActionFrame = 0;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2SpeedModifier = 200;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
     }
