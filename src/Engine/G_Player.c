@@ -91,6 +91,50 @@ void G_InitPlayer(void)
         player.hasGreatsword = false;
         player.hasFireball = false;
         player.hasIceDart = false;
+        player.hasMace = false;
+
+        // Set selected class stuff
+        switch(thisPlayer.selectedClass)
+        {
+            case CLASS_TANK:
+            {
+                player.attributes.maxHealth = 250.0f;
+                player.attributes.curHealth = player.attributes.maxHealth;
+                
+                player.attributes.maxMana = 100.0f;
+                player.attributes.curMana = player.attributes.maxMana;
+
+                G_PlayerSetWeapon(PLAYER_FP_MACE);
+                G_PlayerSetSpell(SPELL_NULL);
+                break;
+            }
+
+            case CLASS_HEALER:
+            {
+                player.attributes.maxHealth = 100.0f;
+                player.attributes.curHealth = player.attributes.maxHealth;
+                
+                player.attributes.maxMana = 250.0f;
+                player.attributes.curMana = player.attributes.maxMana;
+
+                G_PlayerSetWeapon(PLAYER_FP_AXE);
+                G_PlayerSetSpell(SPELL_FIREBALL1);
+                break;
+            }
+
+            case CLASS_DPS:
+            {
+                player.attributes.maxHealth = 150.0f;
+                player.attributes.curHealth = player.attributes.maxHealth;
+                
+                player.attributes.maxMana = 150.0f;
+                player.attributes.curMana = player.attributes.maxMana;
+
+                G_PlayerSetWeapon(PLAYER_FP_GREATSWORD);
+                G_PlayerSetSpell(SPELL_ICEDART1);
+                break;
+            }
+        }
     }
     // Rect for minimap
     SDL_Rect_Set(&player.surfaceRect, (int)player.position.x, (int)player.position.y, PLAYER_WIDTH, PLAYER_HEIGHT);
@@ -351,11 +395,11 @@ void G_InGameInputHandling(const uint8_t* keyboardState)
 }
 
 
-// FPS Images size are: PROJECTION_PLANE_WIDTH/2 by PROJECTION_PLANE_HEIGHT/2
+// FPS Images size are: 320x240
 void G_PlayerRender(void)
 {
     SDL_Rect screenPos = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_Rect size = {(0), (0), SCREEN_WIDTH/3, SCREEN_HEIGHT/3};
+    SDL_Rect size = {(0), (0), 320, 240};
 
     // Select Animation
     SDL_Surface* curAnim;
@@ -440,7 +484,7 @@ void G_PlayerRender(void)
                 player.animFrame = ((int)floor(player.animTimer->GetTicks(player.animTimer) / ANIMATION_SPEED_DIVIDER) % curAnimLength);
         }
 
-        size.x = (SCREEN_WIDTH/2) * player.animFrame; 
+        size.x = (320) * player.animFrame; 
     }
 
     // Blit FP
@@ -699,12 +743,12 @@ void G_PlayerUIRender(void)
     if(player.isFightingBoss && player.bossFighting != NULL)
     {
         // HEALTH BAR
-        SDL_Rect bossHealthbarEmptyScreenPos = {80, 410, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect bossHealthbarEmptyScreenPos = {160, 470, SCREEN_WIDTH, SCREEN_HEIGHT};
         SDL_Rect bossHealthbarEmptySize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
         R_BlitIntoScreenScaled(&bossHealthbarEmptySize, tomentdatapack.uiAssets[G_ASSET_BOSS_HEALTHBAR_EMPTY]->texture, &bossHealthbarEmptyScreenPos);
 
-        SDL_Rect bossHealthbarFillScreenPos = {80, 410, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect bossHealthbarFillScreenPos = {160, 470, SCREEN_WIDTH, SCREEN_HEIGHT};
         SDL_Rect bossHealthbarFillSize = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
         // Fill size.x of 0 means full health
@@ -724,7 +768,7 @@ void G_PlayerUIRender(void)
         R_BlitIntoScreenScaled(&bossHealthbarFillSize, tomentdatapack.uiAssets[G_ASSET_BOSS_HEALTHBAR_FILL]->texture, &bossHealthbarFillScreenPos);
 
         // Boss Name
-        T_DisplayText(FONT_BLKCRY, player.bossFighting->base.name, 80, 380);
+        T_DisplayText(FONT_BLKCRY, player.bossFighting->base.name, 160, 440);
     }
 }
 //-------------------------------------
@@ -1350,6 +1394,10 @@ static bool I_PlayerAttack(int attackType)
             damage = 33.5f;
             break;
 
+        case PLAYER_FP_MACE:
+            damage = 55.5f;
+            break;
+
         case PLAYER_FP_GREATSWORD:
             damage = 100.0f;
             break;
@@ -1462,6 +1510,11 @@ void G_PlayerSetWeapon(playerFPID_e weaponID)
 
         case PLAYER_FP_GREATSWORD:
             player.curWeapon = PLAYER_FP_GREATSWORD;
+            player.weaponDistance = 105.0f;
+            break;
+
+        case PLAYER_FP_MACE:
+            player.curWeapon = PLAYER_FP_MACE;
             player.weaponDistance = 105.0f;
             break;
 
