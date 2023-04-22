@@ -155,6 +155,7 @@ void D_InitUIAssets(void)
     uiAssets_t* skillIconTankShieldSlam = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconTankShieldBlock = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconTankConsacration = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconEmpty = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -185,8 +186,9 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM] = skillIconTankShieldSlam;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK] = skillIconTankShieldBlock;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION] = skillIconTankConsacration;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY] = skillIconEmpty;
 
-    tomentdatapack.uiAssetsLenght = 29;
+    tomentdatapack.uiAssetsLenght = 30;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -558,6 +560,19 @@ void D_InitUIAssets(void)
     {
         tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
         SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Skill Icon Empty
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_EMPTY].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_EMPTY].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_EMPTY))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
     }
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);

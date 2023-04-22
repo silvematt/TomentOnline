@@ -640,17 +640,26 @@ static void G_PlayerUIRender_ThisPlayer()
     SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    //R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
+    if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
+    else
+    {
+        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill1ScreenPos);
+
+        char arr[32];
+        sprintf(arr, "%.1f", (player.skills[0].cooldown-player.skills[0].timer->GetTicks(player.skills[0].timer)) / (float)1000);
+        T_DisplayText(FONT_BLKCRY, arr, 245, 545);
+    }
 
     SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    //R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+    R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
 
     SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
     SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    //R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+    R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
 }   
 
 // Fill needs to account for other player health
