@@ -943,7 +943,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 10000)
                 {
                     // Check Attack
-                    if(cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level)
+                    if(cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level && cur->hostAggro >= cur->joinerAggro)
                     {
                         // In range for attacking
                         G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
@@ -1034,6 +1034,14 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 // Update collision circle
                 cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
                 cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
+
+                if(G_AICanAttack(cur) && cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level && cur->joinerAggro > cur->hostAggro)
+                {
+                    // In range for attacking
+                    G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
+                    G_AIAttackPlayer(cur);
+                    cur->aggroedPlayer = true;
+                }
             }
             
             break;
@@ -1590,23 +1598,30 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                         if(attack <= cur->attributes.attackChance)
                         {
                             float projAngle = cur->base.angle + 180;
+
+                            if(cur->joinerAggro > cur->hostAggro)
+                            {
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y), (cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)))* RADIAN_TO_DEGREE)*-1 + 180;
+                                FIX_ANGLES_DEGREES(projAngle);
+                            }
+
                             FIX_ANGLES_DEGREES(projAngle);
                             
                             uint32_t networkID = REPL_GenerateNetworkID();
-                            G_SpawnProjectile(REPL_GenerateNetworkID(), cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
                             projAngle += 10;
                             FIX_ANGLES_DEGREES(projAngle);
                             
                             networkID = REPL_GenerateNetworkID();
-                            G_SpawnProjectile(REPL_GenerateNetworkID(), cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
 
                             projAngle -= 20;
                             FIX_ANGLES_DEGREES(projAngle);
                             
                             networkID = REPL_GenerateNetworkID();
-                            G_SpawnProjectile(REPL_GenerateNetworkID(), cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
                         }
                         cur->cooldowns[1]->Start(cur->cooldowns[1]);
