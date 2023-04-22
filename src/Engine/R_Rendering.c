@@ -325,6 +325,15 @@ void I_Ray(int level, int playersLevel)
         rayAngle += (RADIAN * PLAYER_FOV) / PROJECTION_PLANE_WIDTH;
     }
 
+    if(level == otherPlayerObject.base.level)
+    {
+        // Add other player to drawables
+        allDrawables[allDrawablesLength].type = DRWB_DYNAMIC_SPRITE;
+        allDrawables[allDrawablesLength].dynamicSpritePtr = &otherPlayerObject;
+        allDrawables[allDrawablesLength].dist = otherPlayerObject.base.dist;
+        allDrawablesLength++;
+    }
+
     // Perform post-raycast operations
     R_DrawDrawables();
 }

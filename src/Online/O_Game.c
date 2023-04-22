@@ -90,9 +90,6 @@ int O_GameInitializeOtherPlayer(void)
    
     otherPlayerObject.state = DS_STATE_IDLE;
 
-    // Add other player to the dynamic map
-    currentMap.dynamicSpritesLevel0[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x] = &otherPlayerObject;
-
     printf("Other player gird %d | %d\n", otherPlayerObject.base.gridPos.x, otherPlayerObject.base.gridPos.y);
 }
 
@@ -123,48 +120,6 @@ int O_GameOtherPlayerLoop(void)
     float deltaX = 0.0f;
     float deltaY = 0.0f;
 
-    // Check if it changed grid pos
-    if(!(oldGridPosX == otherPlayerObject.base.gridPos.x && oldGridPosY == otherPlayerObject.base.gridPos.y))
-    {
-        // If the tile the AI ended up in is not occupied
-
-        if(G_CheckDynamicSpriteMap(otherPlayerObject.base.level, otherPlayerObject.base.gridPos.y, otherPlayerObject.base.gridPos.x) == false)
-        {
-            // Update the dynamic map
-            switch(otherPlayerObject.base.level)
-            {
-                case 0:
-                    currentMap.dynamicSpritesLevel0[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
-                    currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
-                    break;
-                
-                case 1:
-                    currentMap.dynamicSpritesLevel1[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
-                    currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
-                    break;
-
-                case 2:
-                    currentMap.dynamicSpritesLevel2[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
-                    currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
-                    break;
-
-                default:
-                    break;
-            }
-        }
-        else
-        {
-            // Move back
-            otherPlayerObject.base.pos.x -= (deltaX * otherPlayerObject.speed) * deltaTime;
-            otherPlayerObject.base.pos.y -= (deltaY * otherPlayerObject.speed) * deltaTime; 
-
-            otherPlayerObject.base.gridPos.x = oldGridPosX;
-            otherPlayerObject.base.gridPos.y = oldGridPosY;
-
-            otherPlayerObject.state = DS_STATE_MOVING;
-        }
-    }
-    
     // Update collision circle
     otherPlayerObject.base.collisionCircle.pos.x = otherPlayerObject.base.centeredPos.x;
     otherPlayerObject.base.collisionCircle.pos.y = otherPlayerObject.base.centeredPos.y;
@@ -172,12 +127,9 @@ int O_GameOtherPlayerLoop(void)
 
 void O_GameOtherPlayerRender(void)
 {
-    if(visibleTiles[otherPlayerObject.base.gridPos.y][otherPlayerObject.base.gridPos.x])
-    {
-        float scaleFactor = max(1 - (otherPlayerObject.base.dist - 50) / 950, 0.35);
-        float ratio = ((float)SCREEN_WIDTH/PROJECTION_PLANE_WIDTH);
-        T_DisplayTextScaled(FONT_BLKCRY_GREEN, otherPlayer.name, otherPlayerObject.overheadPos.x*ratio, otherPlayerObject.overheadPos.y*ratio, scaleFactor);
-    }
+    float scaleFactor = max(1 - (otherPlayerObject.base.dist - 50) / 950, 0.35);
+    float ratio = ((float)SCREEN_WIDTH/PROJECTION_PLANE_WIDTH);
+    T_DisplayTextScaled(FONT_BLKCRY_GREEN, otherPlayer.name, otherPlayerObject.overheadPos.x*ratio, otherPlayerObject.overheadPos.y*ratio, scaleFactor);
 }
 
 int O_GameReceivePackets(void)
