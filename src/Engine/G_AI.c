@@ -195,6 +195,7 @@ void G_AIUpdate(void)
             continue;
 
         cur->BehaviourUpdate(cur);
+        G_AICheckPuddleDamage(cur);
     }
 }
 
@@ -330,4 +331,19 @@ void G_AITakeDamage(dynamicSprite_t* cur, float amount)
 bool G_AICanAttack(dynamicSprite_t* cur)
 {
     return (cur->state != DS_STATE_ATTACKING && cur->state != DS_STATE_DEAD && cur->state != DS_STATE_CASTING && cur->state != DS_STATE_SPECIAL1 && cur->state != DS_STATE_SPECIAL2);
+}
+
+void G_AICheckPuddleDamage(dynamicSprite_t* ai)
+{
+    mappudlle_t* cur = activeMapPuddlesHead;
+    while(cur != NULL)
+    {
+        if(ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
+        {
+            // Take puddle damage
+            G_AITakeDamage(ai, cur->damage * deltaTime);
+        }
+
+        cur = cur->next;
+    }
 }

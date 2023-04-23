@@ -54,4 +54,7 @@ bool G_AICanAttack(dynamicSprite_t* cur);
 //-------------------------------------
 void G_AIAttackPlayer(dynamicSprite_t* cur);
 
+
+void G_AICheckPuddleDamage(dynamicSprite_t* ai);
+
 #endif

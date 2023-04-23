@@ -50,7 +50,9 @@ typedef enum textureID_e
     TEXTURE_CastleDoor,
     TEXTURE_Wall1Ladder,
     TEXTURE_FloorBrick2,
-    TEXTURE_FloorDirt1
+    TEXTURE_FloorDirt1,
+    TEXTURE_Ice,
+    TEXTURE_IceConsacrated
 } textureID_e;
 
 // All sprites
@@ -445,7 +447,9 @@ typedef enum imgIDs_e
     IMG_ID_SKILL_ICON_TANK_CONSACRATION,
     IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM,
     IMG_ID_SKILL_ANIM_TANK_SHIELD_BLOCK,
-    IMG_ID_SKILL_ICON_EMPTY
+    IMG_ID_SKILL_ICON_EMPTY,
+    IMG_ID_ICE,
+    IMG_ID_ICE_CONSACRATED
 } imgIDs_e;
 
 // Archt Data

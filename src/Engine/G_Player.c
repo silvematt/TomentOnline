@@ -530,7 +530,18 @@ void G_PlayerRender(void)
                         // Attack
                         if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
                         {
-                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y, true, false, 10.0f, 5000, player.level, 0);
+                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y  , true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, 13);
+
+                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
+                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
+
+
                             player.hasCasted = true;
                             player.hasToCast = false;
                         }
