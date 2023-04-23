@@ -98,7 +98,8 @@ typedef enum objectanimationsID_e
     ANIM_DIE,
     ANIM_CAST_SPELL,
     ANIM_SPECIAL1,
-    ANIM_SPECIAL2
+    ANIM_SPECIAL2,
+    ANIM_SPECIAL3
 } objectanimationsID_e;
 
 // Specific object data for AI

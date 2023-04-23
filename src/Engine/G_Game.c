@@ -36,6 +36,9 @@ projectileNode_t* projectilesHead = NULL;
 // Projectiles that hit something and are exploding
 projectileNode_t* explodingProjectilesHead = NULL;
 
+// Active puddles
+mappudlle_t* activeMapPuddlesHead = NULL;
+
 //-------------------------------------
 // Initialize game related stuff 
 //-------------------------------------
@@ -143,6 +146,7 @@ void G_StateGameLoop(void)
     G_UpdateDoors();
     G_AIUpdate();
     G_UpdateProjectiles();
+    G_UpdateMapPuddles();
 
     // Update other player
     O_GameOtherPlayerLoop();
@@ -634,4 +638,80 @@ void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float
 
     // Play idle anim
     G_AIPlayAnimationLoop(&newNode->this, ANIM_IDLE);
+}
+
+void G_UpdateMapPuddles(void)
+{
+    mappudlle_t* cur = activeMapPuddlesHead;
+    while(cur != NULL)
+    {
+        if(cur->timer->GetTicks(cur->timer) >= cur->duration)
+        {
+            // Destroy this
+
+            // Restore state
+            currentMap.floorMap[cur->gridY][cur->gridX] = cur->previousFloorID;
+
+            if(activeMapPuddlesHead == cur)
+                activeMapPuddlesHead = cur->next;
+
+            if(cur->next != NULL)
+                cur->next->previous = cur->previous;
+
+            if(cur->previous != NULL)
+                cur->previous->next = cur->next;
+
+            // Restore floor texture
+
+            mappudlle_t* dead = cur;
+            cur = cur->next;
+            free(dead->timer);
+            free(dead);
+            continue;
+        }
+
+        cur = cur->next;
+    }
+}
+
+void G_SpawnMapPuddle(int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID)
+{
+    mappudlle_t* newNode = (mappudlle_t*)malloc(sizeof(mappudlle_t));
+
+    // Set initial data like pos, dir and speed
+    newNode->timer = U_TimerCreateNew();
+    newNode->timer->Start(newNode->timer);
+
+    newNode->gridX = gridX;
+    newNode->gridY = gridY;
+    newNode->level = level;
+    newNode->duration = duration;
+    newNode->damagesAI = damagesAI;
+    newNode->damagesPlayers = damagesPlayer;
+    newNode->damage = damage;
+    newNode->newFloorID = newFloorID;
+    
+    // Modify floor
+    newNode->previousFloorID = currentMap.floorMap[gridY][gridX];
+    currentMap.floorMap[gridY][gridX] = newFloorID;
+
+    newNode->next = NULL;
+    if(activeMapPuddlesHead == NULL)
+    {
+        activeMapPuddlesHead = newNode;
+        activeMapPuddlesHead->next = NULL;
+        activeMapPuddlesHead->previous = NULL;
+    }
+    else
+    {
+        mappudlle_t* current = activeMapPuddlesHead;
+
+        while(current->next != NULL)
+            current = current->next;
+
+        // Now we can add
+        current->next = newNode;
+        current->next->next = NULL;
+        newNode->previous = current;
+    }
 }

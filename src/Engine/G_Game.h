@@ -11,9 +11,9 @@
 #define DOOR_OPEN_SPEED 100.0f
 #define DOOR_CLOSE_SPEED 100.0f
 
+
 // Game Timer
 extern Timer* gameTimer;
-
 extern Timer* playerUpdatePacketsTimer;    // times the send of player's updates
 
 // Current Game Time
@@ -33,6 +33,8 @@ extern float doorpositionsLevel2[MAP_HEIGHT][MAP_WIDTH]; // Timer holding the po
 
 extern projectileNode_t* projectilesHead;
 extern projectileNode_t* explodingProjectilesHead;
+
+extern mappudlle_t* activeMapPuddlesHead;
 
 
 //-------------------------------------
@@ -74,5 +76,8 @@ void G_UpdateProjectiles(void);
 // Spawns a new projectile
 //-------------------------------------
 void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner, bool isNetworkInstance);
+
+void G_UpdateMapPuddles(void);
+void G_SpawnMapPuddle(int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID);
 
 #endif

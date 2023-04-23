@@ -445,6 +445,13 @@ void G_PlayerRender(void)
             curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2ActionFrame;
             curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial2SpeedModifier;
             break;
+
+        case PSTATE_DOINGSKILL3:
+            curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1;
+            curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SheetLength;
+            curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1ActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SpeedModifier;
+            break;
         
         default:
             curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animIdle;
@@ -514,6 +521,24 @@ void G_PlayerRender(void)
                 }
             }
 
+            if(player.state == PSTATE_DOINGSKILL3)
+            {
+                switch(thisPlayer.selectedClass)
+                {
+                    case CLASS_TANK:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y, true, false, 10.0f, 5000, player.level, 0);
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                        break;
+                    }
+                }
+            }
+
             // Prevent loop
             if(player.animFrame >= curAnimLength-1)
             {
@@ -523,7 +548,8 @@ void G_PlayerRender(void)
                 if(player.state == PSTATE_ATTACKING1 ||
                    player.state == PSTATE_CASTSPELL ||
                    player.state == PSTATE_DOINGSKILL1 ||
-                   player.state == PSTATE_DOINGSKILL2)
+                   player.state == PSTATE_DOINGSKILL2 ||
+                   player.state == PSTATE_DOINGSKILL3)
                    {
                     if(player.state == PSTATE_DOINGSKILL2 && thisPlayer.selectedClass == CLASS_TANK)
                             player.isInvulnerable = false;
@@ -668,39 +694,49 @@ static void G_PlayerUIRender_ThisPlayer()
     // temp check for not crashing
     if(thisPlayer.selectedClass == CLASS_TANK)
     {
-    // Render skills
-    SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+        // Render skills
+        SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
-        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
-    else
-    {
-        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill1ScreenPos);
+        if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+            R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
+        else
+        {
+            R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill1ScreenPos);
 
-        char arr[32];
-        sprintf(arr, "%.1f", (player.skills[0].cooldown-player.skills[0].timer->GetTicks(player.skills[0].timer)) / (float)1000);
-        T_DisplayText(FONT_BLKCRY, arr, 245, 545);
-    }
+            char arr[32];
+            sprintf(arr, "%.1f", (player.skills[0].cooldown-player.skills[0].timer->GetTicks(player.skills[0].timer)) / (float)1000);
+            T_DisplayText(FONT_BLKCRY, arr, 245, 545);
+        }
 
-    SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
-        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
-    else
-    {
-        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill2ScreenPos);
+        if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+            R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+        else
+        {
+            R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill2ScreenPos);
 
-        char arr[32];
-        sprintf(arr, "%.1f", (player.skills[1].cooldown-player.skills[1].timer->GetTicks(player.skills[1].timer)) / (float)1000);
-        T_DisplayText(FONT_BLKCRY, arr, 395, 545);
-    }
+            char arr[32];
+            sprintf(arr, "%.1f", (player.skills[1].cooldown-player.skills[1].timer->GetTicks(player.skills[1].timer)) / (float)1000);
+            T_DisplayText(FONT_BLKCRY, arr, 395, 545);
+        }
 
-    SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-    SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+        if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
+            R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+        else
+        {
+            R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill3ScreenPos);
+
+            char arr[32];
+            sprintf(arr, "%.1f", (player.skills[2].cooldown-player.skills[2].timer->GetTicks(player.skills[2].timer)) / (float)1000);
+            T_DisplayText(FONT_BLKCRY, arr, 540, 545);
+        }    
+    
     }
 
 }   
@@ -1038,8 +1074,19 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                     player.skills[1].timer->Start(player.skills[1].timer);
                 }
             }
-            else if(G_PlayerCanAttack() && player.hasGreatsword && e->key.keysym.sym == SDLK_3)
-                G_PlayerSetWeapon(PLAYER_FP_GREATSWORD);
+            else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_3)
+            {
+                // Check cooldown
+                if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
+                {
+                    // DO SKILL
+                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL3);
+                    player.hasToCast = true;
+                    player.hasCasted = false;
+
+                    player.skills[2].timer->Start(player.skills[2].timer);
+                }
+            }
             else if(G_PlayerCanAttack() && player.hasIceDart && e->key.keysym.sym == SDLK_4)
                 G_PlayerSetSpell(SPELL_ICEDART1);
             else if(G_PlayerCanAttack() &&  player.hasFireball && e->key.keysym.sym == SDLK_5)
@@ -1471,6 +1518,10 @@ void G_PlayerPlayAnimationOnce(objectanimationsID_e animID)
 
         case ANIM_SPECIAL2:
             player.state = PSTATE_DOINGSKILL2;
+            break;
+
+        case ANIM_SPECIAL3:
+            player.state = PSTATE_DOINGSKILL3;
             break;
     }
 

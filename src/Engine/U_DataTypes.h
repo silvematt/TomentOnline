@@ -278,4 +278,25 @@ typedef enum orientation_e
     ALL_FOUR_DIR,
 } orientation_e;
 
+typedef struct mappuddle_s
+{
+    int gridX;
+    int gridY;
+
+    bool damagesAI;
+    bool damagesPlayers;
+
+    float damage;
+    int duration; // in ms
+
+    int level;
+    int previousFloorID;
+    int newFloorID;
+
+    Timer* timer;
+
+    struct mappuddle_s* next;
+    struct mappuddle_s* previous;
+} mappudlle_t;
+
 #endif
