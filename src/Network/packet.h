@@ -12,20 +12,20 @@
 #define MAX_PCKT_DATA 1300 // sizeof the char buffer inside the packet data
 
 // Packets IDs
-#define PCKTID_GREET            1
-#define PCKTID_SET_CLASS        2
-#define PCKTID_READY            3
-#define PCKTID_STARTING         4
-#define PCKTID_PLAYERUPDATE     5
-#define PCKTID_DOOR_CHANGE      6
-#define PCKTID_PICKUP_PICKED    7
-#define PCKTID_PROJECTILE_SPAWN 8
-#define PCKTID_PROJECTILE_DESTR 9
-#define PCKTID_AI_MOVEMENTS     10
-#define PCKTID_AI_ATTACKED      11
-#define PCKTID_AI_PLAY_ANIM     12
-#define PCKTID_AI_INSTANTIATE   13
-
+#define PCKTID_GREET                1
+#define PCKTID_SET_CLASS            2
+#define PCKTID_READY                3
+#define PCKTID_STARTING             4
+#define PCKTID_PLAYERUPDATE         5
+#define PCKTID_DOOR_CHANGE          6
+#define PCKTID_PICKUP_PICKED        7
+#define PCKTID_PROJECTILE_SPAWN     8
+#define PCKTID_PROJECTILE_DESTR     9
+#define PCKTID_AI_MOVEMENTS         10
+#define PCKTID_AI_ATTACKED          11
+#define PCKTID_AI_PLAY_ANIM         12
+#define PCKTID_AI_INSTANTIATE       13
+#define PCKTID_PUDDLES_INSTANTIATE  14
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -140,6 +140,29 @@ typedef struct pckt_aiinstantiate_t
     bool loop;
 } pckt_aiinstantiate_t;
 
+
+// Single puddle, used in pckt_puddle_istantiate to embed more than 1 per packet
+typedef struct packedpuddle_t
+{
+    int networkID;
+
+    int gridX, gridY;
+    bool damagesAI;
+    bool damagesPlayer; 
+    float damage; 
+    int duration; 
+    int level; 
+    int newFloorID;
+    int previousFloorID;
+} packedpuddle_t;
+
+#define MAX_PUDDLE_OBJECTS_INSTANTIATE 30   //sizeof(packedpuddle_t) * 30 <= MAX_PCKT_DATA
+typedef struct pckt_puddle_instantiate
+{
+    unsigned length;
+    packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE];
+} pckt_puddle_instantiate;
+
 #define MAX_PCKTS_PER_BUFFER 50
 typedef struct pckt_buffer_t
 {
@@ -183,6 +206,7 @@ pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);
 pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, bool pLoop);
 pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
+pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE]);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

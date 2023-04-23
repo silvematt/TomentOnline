@@ -4,6 +4,7 @@
 #include "G_Player.h"
 #include "R_Rendering.h"
 #include "U_Timer.h"
+#include "../Network/packet.h"
 
 // DOOR DEFINE
 #define DOOR_FULLY_CLOSED 64.0f
@@ -78,6 +79,6 @@ void G_UpdateProjectiles(void);
 void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner, bool isNetworkInstance);
 
 void G_UpdateMapPuddles(void);
-void G_SpawnMapPuddle(int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID);
+packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID, bool isNetworkInstance);
 
 #endif

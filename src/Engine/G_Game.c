@@ -674,25 +674,30 @@ void G_UpdateMapPuddles(void)
     }
 }
 
-void G_SpawnMapPuddle(int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID)
+packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID, bool isNetworkInstance)
 {
+    packedpuddle_t data;    // data to return
+
     mappudlle_t* newNode = (mappudlle_t*)malloc(sizeof(mappudlle_t));
 
     // Set initial data like pos, dir and speed
     newNode->timer = U_TimerCreateNew();
     newNode->timer->Start(newNode->timer);
+    
+    newNode->isNetworkedInstance = isNetworkInstance;
+    data.networkID = newNode->networkID = networkID;
 
-    newNode->gridX = gridX;
-    newNode->gridY = gridY;
-    newNode->level = level;
-    newNode->duration = duration;
-    newNode->damagesAI = damagesAI;
-    newNode->damagesPlayers = damagesPlayer;
-    newNode->damage = damage;
-    newNode->newFloorID = newFloorID;
+    data.gridX = newNode->gridX = gridX;
+    data.gridY = newNode->gridY = gridY;
+    data.level = newNode->level = level;
+    data.duration = newNode->duration = duration;
+    data.damagesAI = newNode->damagesAI = damagesAI;
+    data.damagesPlayer = newNode->damagesPlayers = damagesPlayer;
+    data.damage = newNode->damage = damage;
+    data.newFloorID = newNode->newFloorID = newFloorID;
     
     // Modify floor
-    newNode->previousFloorID = currentMap.floorMap[gridY][gridX];
+    data.previousFloorID = newNode->previousFloorID = currentMap.floorMap[gridY][gridX];
     currentMap.floorMap[gridY][gridX] = newFloorID;
 
     newNode->next = NULL;
@@ -714,4 +719,7 @@ void G_SpawnMapPuddle(int gridX, int gridY, bool damagesAI, bool damagesPlayer, 
         current->next->next = NULL;
         newNode->previous = current;
     }
+
+    // Return packed puddle data
+    return data;
 }

@@ -503,7 +503,7 @@ pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, b
 pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop)
 {
     PCKT_Zero(packet);
-
+    
     // Create the packet
     packet->protocol = PROT_ID_TCP;
     packet->id = PCKTID_AI_INSTANTIATE;
@@ -518,6 +518,29 @@ pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel,
     content.playAnimation = pPlayAnim;
     content.animID = pAnimID;
     content.loop = pLoop;
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE])
+{
+    PCKT_Zero(packet);
+    
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_PUDDLES_INSTANTIATE;
+
+    // Create and fill the content
+    pckt_puddle_instantiate content;
+    content.length = pLength;
+
+    for(int i = 0; i < pLength; i++)
+    {
+        content.puddles[i] = pPuddles[i];
+    }
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

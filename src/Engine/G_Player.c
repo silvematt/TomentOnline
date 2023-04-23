@@ -530,17 +530,21 @@ void G_PlayerRender(void)
                         // Attack
                         if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
                         {
-                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y  , true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, 13);
+                            unsigned puddlesLength = 9;
+                            packedpuddle_t puddles[puddlesLength];
 
-                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x-1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, 13);
-                            G_SpawnMapPuddle(player.gridPosition.x+1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, 13);
+                            puddles[0] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y  , true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[1] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[2] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[3] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[4] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
 
+                            puddles[5] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[6] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[7] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            puddles[8] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+
+                            O_GameSpawnPuddles(puddlesLength, puddles);
 
                             player.hasCasted = true;
                             player.hasToCast = false;

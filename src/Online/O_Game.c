@@ -386,6 +386,23 @@ int O_GameOnPacketIsReceived(void)
             }
             break;
         }
+
+        case PCKTID_PUDDLES_INSTANTIATE:
+        {
+            // Manage packet
+            pckt_puddle_instantiate puddlePacket;
+            memcpy(&puddlePacket, receivedPacket->data, sizeof(puddlePacket));
+
+            printf("Packet received! ID: %d | - Values (%d)\n", receivedPacket->id, puddlePacket.length);
+
+            for(int i = 0; i < puddlePacket.length; i++)
+            {
+                packedpuddle_t* cur = &puddlePacket.puddles[i];
+                G_SpawnMapPuddle(cur->networkID, cur->gridX, cur->gridY, cur->damagesAI, cur->damagesPlayer, cur->damage, cur->duration, cur->level, cur->newFloorID, true);
+            }
+            
+            break;
+        }
     }
 }
 
@@ -500,5 +517,15 @@ void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
     memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE])
+{
+    pckt_t* puddlePacket = PCKT_MakePuddlesInstantiatePacket(&packetToSend, length, puddles);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
     outputPcktBuffer.packetsToWrite++;
 }

@@ -280,6 +280,9 @@ typedef enum orientation_e
 
 typedef struct mappuddle_s
 {
+    int networkID;
+    bool isNetworkedInstance;
+    
     int gridX;
     int gridY;
 

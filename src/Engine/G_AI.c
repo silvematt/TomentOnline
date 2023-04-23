@@ -6,6 +6,8 @@
 #include "P_Physics.h"
 #include "G_AIBehaviour.h"
 
+#include "../Online/O_Game.h"
+
 // Dynamic AI list
 dynamicSprite_t* allDynamicSprites[OBJECTARRAY_DEFAULT_SIZE_HIGH];
 unsigned int allDynamicSpritesLength = 0;
@@ -337,11 +339,16 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
 {
     mappudlle_t* cur = activeMapPuddlesHead;
     while(cur != NULL)
-    {
-        if(ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
+    {   
+        // If it is a networked instance, the damage needs to be dealt from the other player
+        if(!cur->isNetworkedInstance)
         {
-            // Take puddle damage
-            G_AITakeDamage(ai, cur->damage * deltaTime);
+            if(ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
+            {
+                // Take puddle damage
+                G_AITakeDamage(ai, cur->damage * deltaTime);
+                O_GameAITakeDamage(ai->networkID, cur->damage * deltaTime, ai->isAlive != true);
+            }
         }
 
         cur = cur->next;
