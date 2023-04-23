@@ -341,7 +341,7 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
     while(cur != NULL)
     {   
         // If it is a networked instance, the damage needs to be dealt from the other player
-        if(!cur->isNetworkedInstance)
+        if(!cur->isNetworkedInstance && ai->isAlive)
         {
             if(ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
             {

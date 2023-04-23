@@ -63,6 +63,7 @@ typedef struct pckt_playerupdate_t
 {
     float x,y;
     float angle;
+    float z;
 
     float curHealth;
     float maxHealth;
@@ -197,7 +198,7 @@ pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENG
 pckt_t* PCKT_MakeSetClassPacket(pckt_t* packet, byte pClassToSet);
 pckt_t* PCKT_MakeReadyPacket(pckt_t* packet, byte pIsReady);
 pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
-pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell);
+pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pZ, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell);
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
 pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);

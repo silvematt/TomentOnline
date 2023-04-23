@@ -650,7 +650,19 @@ void G_UpdateMapPuddles(void)
             // Destroy this
 
             // Restore state
-            currentMap.floorMap[cur->gridY][cur->gridX] = cur->previousFloorID;
+            // Modify floor
+            if(cur->level == 0)
+            {
+                currentMap.floorMap[cur->gridY][cur->gridX] = cur->previousFloorID;
+            }
+            else if(cur->level == 1)
+            {
+                currentMap.level0[cur->gridY][cur->gridX].texturesArray[TEXTURE_ARRAY_TOP] = cur->previousFloorID;
+            }
+            else if (cur->level == 2)
+            {
+                currentMap.level1[cur->gridY][cur->gridX].texturesArray[TEXTURE_ARRAY_TOP] = cur->previousFloorID;
+            }
 
             if(activeMapPuddlesHead == cur)
                 activeMapPuddlesHead = cur->next;
@@ -697,8 +709,21 @@ packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damage
     data.newFloorID = newNode->newFloorID = newFloorID;
     
     // Modify floor
-    data.previousFloorID = newNode->previousFloorID = currentMap.floorMap[gridY][gridX];
-    currentMap.floorMap[gridY][gridX] = newFloorID;
+    if(level == 0)
+    {
+        data.previousFloorID = newNode->previousFloorID = currentMap.floorMap[gridY][gridX];
+        currentMap.floorMap[gridY][gridX] = newFloorID;
+    }
+    else if(level == 1)
+    {
+        data.previousFloorID = newNode->previousFloorID = currentMap.level0[gridY][gridX].texturesArray[TEXTURE_ARRAY_TOP];
+        currentMap.level0[gridY][gridX].texturesArray[TEXTURE_ARRAY_TOP] = newFloorID;
+    }
+    else if (level == 2)
+    {
+        data.previousFloorID = newNode->previousFloorID = currentMap.level1[gridY][gridX].texturesArray[TEXTURE_ARRAY_TOP];
+        currentMap.level1[gridY][gridX].texturesArray[TEXTURE_ARRAY_TOP] = newFloorID;
+    }
 
     newNode->next = NULL;
     if(activeMapPuddlesHead == NULL)

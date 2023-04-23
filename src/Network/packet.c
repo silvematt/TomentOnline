@@ -328,7 +328,7 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStartingValue)
 }
 
 
-pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell)
+pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pZ, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell)
 {
     PCKT_Zero(packet);
 
@@ -340,6 +340,7 @@ pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pA
     pckt_playerupdate_t content;
     content.x = pX;
     content.y = pY;
+    content.z = pZ;
     content.angle = pAngle;
     content.curHealth = pCurHealth;
     content.maxHealth = pMaxHealth;

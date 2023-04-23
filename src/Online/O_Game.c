@@ -145,7 +145,7 @@ int O_GameSendPackets(void)
     {
         // Make movement packet and send it to the other player
         // Send packet to notice other player that we are starting the game, he will start as soon as this packet is received
-        pckt_t* playerPacket = PCKT_MakePlayerUpdatePacket(&packetToSend, player.position.x, player.position.y, player.angle, player.attributes.curHealth, player.attributes.maxHealth, player.attributes.curMana, player.attributes.maxMana, player.curWeapon, player.curSpell);
+        pckt_t* playerPacket = PCKT_MakePlayerUpdatePacket(&packetToSend, player.position.x, player.position.y, player.z-HALF_TILE_SIZE, player.angle, player.attributes.curHealth, player.attributes.maxHealth, player.attributes.curMana, player.attributes.maxMana, player.curWeapon, player.curSpell);
 
         // outputpcktbuffer was already sending something, check if we can append this packet
         if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
@@ -200,6 +200,7 @@ int O_GameOnPacketIsReceived(void)
             // Update other player position
             otherPlayerObject.base.pos.x = playerPacket.x;
             otherPlayerObject.base.pos.y = playerPacket.y;
+            otherPlayerObject.base.z = playerPacket.z;
             otherPlayerObject.base.angle = playerPacket.angle;
 
             otherPlayerObject.attributes.curHealth = playerPacket.curHealth;
