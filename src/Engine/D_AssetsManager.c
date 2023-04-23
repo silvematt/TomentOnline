@@ -156,6 +156,9 @@ void D_InitUIAssets(void)
     uiAssets_t* skillIconTankShieldBlock = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconTankConsacration = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconEmpty = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconHealerSelfHeal = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconHealerConcentratedHeal = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconHealerDivineIntervention = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -187,8 +190,11 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_BLOCK] = skillIconTankShieldBlock;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_CONSACRATION] = skillIconTankConsacration;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY] = skillIconEmpty;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_SELF_HEAL] = skillIconHealerSelfHeal;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_CONCENTRATED_HEAL] = skillIconHealerConcentratedHeal;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION] = skillIconHealerDivineIntervention;
 
-    tomentdatapack.uiAssetsLenght = 30;
+    tomentdatapack.uiAssetsLenght = 33;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -577,6 +583,45 @@ void D_InitUIAssets(void)
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
     SDL_FreeSurface(temp1);
+
+    // Self heal icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_SELF_HEAL].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_SELF_HEAL].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_HEALER_SELF_HEAL))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_SELF_HEAL]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_SELF_HEAL]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Concentrated heal icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_CONCENTRATED_HEAL].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_CONCENTRATED_HEAL].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_HEALER_CONCENTRATED_HEAL))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_CONCENTRATED_HEAL]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_CONCENTRATED_HEAL]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Divine intervention icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_DIVINE_INTERVENTION].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_HEALER_DIVINE_INTERVENTION].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_HEALER_DIVINE_INTERVENTION))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
 }
 
 
@@ -936,8 +981,9 @@ void D_InitLoadSprites(void)
     object_t* playerCharacterTank = (object_t*)malloc(sizeof(object_t));
     object_t* playerCharacterHealer = (object_t*)malloc(sizeof(object_t));
     object_t* playerCharacterDPS = (object_t*)malloc(sizeof(object_t));
+    object_t* spellConcentratedHeal = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 23; // Set length
+    tomentdatapack.spritesLength = 24; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -962,6 +1008,7 @@ void D_InitLoadSprites(void)
     D_InitObject(playerCharacterTank);
     D_InitObject(playerCharacterHealer);
     D_InitObject(playerCharacterDPS);
+    D_InitObject(spellConcentratedHeal);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -987,6 +1034,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_PlayerTank] = playerCharacterTank;
     tomentdatapack.sprites[DS_PlayerHealer] = playerCharacterHealer;
     tomentdatapack.sprites[DS_PlayerDPS] = playerCharacterDPS;
+    tomentdatapack.sprites[S_ConcentratedHeal] = spellConcentratedHeal;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1717,6 +1765,42 @@ void D_InitLoadSprites(void)
     tomentdatapack.spritesSheetsLenghtTable[DS_PlayerDPS] = 0;
     SDL_FreeSurface(temp1);
 
+    // Spell Concentrated Heal
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_CONCENTRATED_HEAL].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_CONCENTRATED_HEAL].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SPELL_CONCENTRATED_HEAL))
+    {
+        tomentdatapack.sprites[S_ConcentratedHeal]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations->belongsTo = tomentdatapack.sprites[S_ConcentratedHeal];
+
+        // Idle = Normal
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations->animIdleSheetLength = 6;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_CONCENTRATED_HEAL_EXPLOSION].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_CONCENTRATED_HEAL_EXPLOSION].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_ConcentratedHeal]->animations->animDieSheetLength = 5;
+
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[S_ConcentratedHeal]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_ConcentratedHeal]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[S_ConcentratedHeal]->flags, 1); // Set animated sprite bit flag to 1
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_ConcentratedHeal] = 6;
+
+    // Callback
+    tomentdatapack.sprites[S_ConcentratedHeal]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -2074,6 +2158,39 @@ void D_InitLoadPlayersFP(void)
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
+        // Healer skill 1 -  SelfHeal
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_HEALER_SELF_HEAL].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_HEALER_SELF_HEAL].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial1SheetLength = 6;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial1ActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial1SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial1, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // Cast Spell
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_P_HANDS_CASTSPELL].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_P_HANDS_CASTSPELL].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial2SheetLength = 6;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial2ActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial2SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial2, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // Healer skill 1 -  SelfHeal
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_HEALER_SELF_HEAL].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_HEALER_SELF_HEAL].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial3 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial3SheetLength = 6;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial3ActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial3SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->animSpecial3, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
     }
     else
         tomentdatapack.playersFP[PLAYER_FP_AXE]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
@@ -2190,6 +2307,16 @@ void D_InitLoadPlayersFP(void)
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial2, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
 
+        // Tank skill 3 - Consacration
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_TANK_SHIELD_SLAM].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial3 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial3SheetLength = 7;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial3ActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial3SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->animSpecial3, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
     }
     else
         tomentdatapack.playersFP[PLAYER_FP_MACE]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;

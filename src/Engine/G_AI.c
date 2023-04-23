@@ -141,13 +141,13 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
             
             cur->speed = 4.25f;
-            cur->attributes.maxHealth = 2250.0f;
+            cur->attributes.maxHealth = 4250.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 2250.0f;
+            cur->attributes.maxMana = 4250.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 20.0f;
+            cur->attributes.baseDamage = 25.0f;
             cur->attributes.attackChance = 100;
             cur->attributes.criticalChance = 10;
             cur->attributes.criticalModifier = 1.5f;

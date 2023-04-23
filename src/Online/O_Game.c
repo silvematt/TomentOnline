@@ -391,7 +391,7 @@ int O_GameOnPacketIsReceived(void)
         case PCKTID_PUDDLES_INSTANTIATE:
         {
             // Manage packet
-            pckt_puddle_instantiate puddlePacket;
+            pckt_puddle_instantiate_t puddlePacket;
             memcpy(&puddlePacket, receivedPacket->data, sizeof(puddlePacket));
 
             printf("Packet received! ID: %d | - Values (%d)\n", receivedPacket->id, puddlePacket.length);
@@ -402,6 +402,18 @@ int O_GameOnPacketIsReceived(void)
                 G_SpawnMapPuddle(cur->networkID, cur->gridX, cur->gridY, cur->damagesAI, cur->damagesPlayer, cur->damage, cur->duration, cur->level, cur->newFloorID, true);
             }
             
+            break;
+        }
+
+        case PCKTID_HEAL_OTHER:
+        {
+            // Manage packet
+            pckt_heal_other_t healPacket;
+            memcpy(&healPacket, receivedPacket->data, sizeof(healPacket));
+
+            printf("Packet received! ID: %d | - Values (%f)\n", receivedPacket->id, healPacket.healAmount);
+
+            G_PlayerGainHealth(healPacket.healAmount);
             break;
         }
     }
@@ -528,5 +540,15 @@ void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_IN
     // Store the packet in the output buffer
     outputPcktBuffer.hasBegunWriting = TRUE;
     memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
+    outputPcktBuffer.packetsToWrite++;
+}
+
+void O_GameHealOther(float amount)
+{
+    pckt_t* healPacket = PCKT_MakeHealOtherPacket(&packetToSend, amount);
+    
+    // Store the packet in the output buffer
+    outputPcktBuffer.hasBegunWriting = TRUE;
+    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)healPacket, PCKT_SIZE);
     outputPcktBuffer.packetsToWrite++;
 }

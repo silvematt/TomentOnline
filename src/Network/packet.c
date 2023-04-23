@@ -535,13 +535,31 @@ pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpud
     packet->id = PCKTID_PUDDLES_INSTANTIATE;
 
     // Create and fill the content
-    pckt_puddle_instantiate content;
+    pckt_puddle_instantiate_t content;
     content.length = pLength;
 
     for(int i = 0; i < pLength; i++)
     {
         content.puddles[i] = pPuddles[i];
     }
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount)
+{
+    PCKT_Zero(packet);
+    
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_HEAL_OTHER;
+
+    // Create and fill the content
+    pckt_heal_other_t content;
+    content.healAmount = pAmount;
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

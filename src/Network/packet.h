@@ -26,6 +26,7 @@
 #define PCKTID_AI_PLAY_ANIM         12
 #define PCKTID_AI_INSTANTIATE       13
 #define PCKTID_PUDDLES_INSTANTIATE  14
+#define PCKTID_HEAL_OTHER           15
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -158,11 +159,16 @@ typedef struct packedpuddle_t
 } packedpuddle_t;
 
 #define MAX_PUDDLE_OBJECTS_INSTANTIATE 30   //sizeof(packedpuddle_t) * 30 <= MAX_PCKT_DATA
-typedef struct pckt_puddle_instantiate
+typedef struct pckt_puddle_instantiate_t
 {
     unsigned length;
     packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE];
-} pckt_puddle_instantiate;
+} pckt_puddle_instantiate_t;
+
+typedef struct pckt_heal_other_t
+{
+    float healAmount;
+} pckt_heal_other_t;
 
 #define MAX_PCKTS_PER_BUFFER 50
 typedef struct pckt_buffer_t
@@ -208,6 +214,7 @@ pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, b
 pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, bool pLoop);
 pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
 pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE]);
+pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

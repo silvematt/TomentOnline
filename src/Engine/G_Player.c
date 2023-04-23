@@ -447,10 +447,10 @@ void G_PlayerRender(void)
             break;
 
         case PSTATE_DOINGSKILL3:
-            curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1;
-            curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SheetLength;
-            curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1ActionFrame;
-            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial1SpeedModifier;
+            curAnim = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial3;
+            curAnimLength = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial3SheetLength;
+            curAnimActionFrame = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial3ActionFrame;
+            curAnimSpeedModifier = tomentdatapack.playersFP[player.curWeapon]->animations->animSpecial3SpeedModifier;
             break;
         
         default:
@@ -506,6 +506,17 @@ void G_PlayerRender(void)
                         }
                         break;
                     }
+
+                    case CLASS_HEALER:
+                    {
+                        // Gain health
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            G_PlayerGainHealth(20.0f);
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                    }
                 }
             }
 
@@ -515,7 +526,26 @@ void G_PlayerRender(void)
                 {
                     case CLASS_TANK:
                     {
-                        // Is invulnerable = true
+                        player.isInvulnerable = true;
+                        break;
+                    }
+
+                    case CLASS_HEALER:
+                    {
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            // Spawn a projectile   
+                            // Angle must be the same for each resolution
+                            float angle = (player.verticalHeadMovement / MAX_VERTICAL_HEAD_MOV) * 75.0f;
+                            uint32_t networkID = REPL_GenerateNetworkID();
+                            G_SpawnProjectile(networkID, SPELL_CONCENTRATED_HEAL, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL, false);
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, SPELL_CONCENTRATED_HEAL, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
+                        }
+
                         break;
                     }
                 }
@@ -545,6 +575,20 @@ void G_PlayerRender(void)
                             puddles[8] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
 
                             O_GameSpawnPuddles(puddlesLength, puddles);
+
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                        break;
+                    }
+
+                    case CLASS_HEALER:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            G_PlayerGainHealth(100.0f);
+                            O_GameHealOther(100.0f);
 
                             player.hasCasted = true;
                             player.hasToCast = false;
@@ -706,53 +750,49 @@ static void G_PlayerUIRender_ThisPlayer()
     if(curSpell != NULL)
         R_BlitIntoScreenScaled(&spellIconSize, curSpell, &spellIconScreenPos);
 
-    // temp check for not crashing
-    if(thisPlayer.selectedClass == CLASS_TANK)
+    // Render skills
+    SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
+    else
     {
-        // Render skills
-        SDL_Rect skill1ScreenPos = {240, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_Rect skill1Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+        R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill1ScreenPos);
 
-        if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
-            R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[0].skillID]->texture, &skill1ScreenPos);
-        else
-        {
-            R_BlitIntoScreenScaled(&skill1Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill1ScreenPos);
-
-            char arr[32];
-            sprintf(arr, "%.1f", (player.skills[0].cooldown-player.skills[0].timer->GetTicks(player.skills[0].timer)) / (float)1000);
-            T_DisplayText(FONT_BLKCRY, arr, 245, 545);
-        }
-
-        SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
-
-        if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
-            R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
-        else
-        {
-            R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill2ScreenPos);
-
-            char arr[32];
-            sprintf(arr, "%.1f", (player.skills[1].cooldown-player.skills[1].timer->GetTicks(player.skills[1].timer)) / (float)1000);
-            T_DisplayText(FONT_BLKCRY, arr, 395, 545);
-        }
-
-        SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
-
-        if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
-            R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
-        else
-        {
-            R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill3ScreenPos);
-
-            char arr[32];
-            sprintf(arr, "%.1f", (player.skills[2].cooldown-player.skills[2].timer->GetTicks(player.skills[2].timer)) / (float)1000);
-            T_DisplayText(FONT_BLKCRY, arr, 540, 545);
-        }    
-    
+        char arr[32];
+        sprintf(arr, "%.1f", (player.skills[0].cooldown-player.skills[0].timer->GetTicks(player.skills[0].timer)) / (float)1000);
+        T_DisplayText(FONT_BLKCRY, arr, 245, 545);
     }
+
+    SDL_Rect skill2ScreenPos = {390, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill2Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[1].skillID]->texture, &skill2ScreenPos);
+    else
+    {
+        R_BlitIntoScreenScaled(&skill2Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill2ScreenPos);
+
+        char arr[32];
+        sprintf(arr, "%.1f", (player.skills[1].cooldown-player.skills[1].timer->GetTicks(player.skills[1].timer)) / (float)1000);
+        T_DisplayText(FONT_BLKCRY, arr, 395, 545);
+    }
+
+    SDL_Rect skill3ScreenPos = {535, 530, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_Rect skill3Size = {(0), (0), SCREEN_WIDTH, SCREEN_HEIGHT};
+
+    if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
+        R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_TANK_SHIELD_SLAM+player.skills[2].skillID]->texture, &skill3ScreenPos);
+    else
+    {
+        R_BlitIntoScreenScaled(&skill3Size, tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_EMPTY]->texture, &skill3ScreenPos);
+
+        char arr[32];
+        sprintf(arr, "%.1f", (player.skills[2].cooldown-player.skills[2].timer->GetTicks(player.skills[2].timer)) / (float)1000);
+        T_DisplayText(FONT_BLKCRY, arr, 540, 545);
+    }    
+    
 
 }   
 
@@ -1085,7 +1125,6 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                     G_PlayerPlayAnimationOnce(ANIM_SPECIAL2);
                     player.hasToCast = true;
                     player.hasCasted = false;
-                    player.isInvulnerable = true;
                     player.skills[1].timer->Start(player.skills[1].timer);
                 }
             }

@@ -424,6 +424,19 @@ void G_UpdateProjectiles(void)
                     return;
                 }
 
+                // Check other player heal
+                if(cur->this.base.spriteID == SPELL_CONCENTRATED_HEAL)
+                {
+                    float otherplayerDist = sqrt((cur->this.base.centeredPos.x - otherPlayerObject.base.centeredPos.x)*(cur->this.base.centeredPos.x - otherPlayerObject.base.centeredPos.x) + (cur->this.base.centeredPos.y - otherPlayerObject.base.centeredPos.y)*(cur->this.base.centeredPos.y - otherPlayerObject.base.centeredPos.y));
+                    if(cur->this.base.level == otherPlayerObject.base.level && cur->this.base.gridPos.x == otherPlayerObject.base.gridPos.x && cur->this.base.gridPos.y == otherPlayerObject.base.gridPos.y && otherplayerDist < TILE_SIZE-12)
+                    {
+                        // Heal other player
+                        O_GameHealOther(50.0f);
+                        cur->this.isBeingDestroyed = true;
+                        G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
+                        O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
+                    }
+                }
                 // Player hit
                 // Add distance checking for being more precise
                 float playerDist = sqrt(cur->this.base.pSpacePos.x*cur->this.base.pSpacePos.x + cur->this.base.pSpacePos.y*cur->this.base.pSpacePos.y);

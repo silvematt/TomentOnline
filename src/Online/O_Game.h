@@ -32,4 +32,6 @@ void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied);
 void O_GameAIPlayAnim(int networkID, int anim, bool loop);
 void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
 void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE]);
+void O_GameHealOther(float amount);
+
 #endif
