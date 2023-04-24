@@ -563,50 +563,66 @@ void O_GameDestroyProjectile(int pNetworkID, int pSpriteID, bool pForceDestroy)
 
 void O_GameSendAIUpdate(void)
 {
-    // Make greet packet
-    pckt_t* aiMovementPacket = PCKT_MakeAIMovementUpdatePacket(&packetToSend);
-
-    // Create and fill the content
-    pckt_aimovementupdate_t content;
-
-    int counter = 0;
-    content.length = 0;
-    for(int i = 0; i < allDynamicSpritesLength; i++)
+    bool done = false;
+    int indx = 0;
+    while(!done)
     {
-        if(allDynamicSprites[i]->hasChanged && counter < MAX_AIREPLICATIONT_PER_PACKET)
-        {
-            // This ai needs to be updated on the other side
-            content.ais[counter].networkID = allDynamicSprites[i]->networkID;
-            content.ais[counter].x = allDynamicSprites[i]->base.pos.x;
-            content.ais[counter].y = allDynamicSprites[i]->base.pos.y;
-            content.ais[counter].z = allDynamicSprites[i]->base.z;
-            content.ais[counter].hostAggro = allDynamicSprites[i]->hostAggro;
-            content.ais[counter].joinerAggro = allDynamicSprites[i]->joinerAggro;
-            
-            counter++;
-            content.length++;
-        }
-    }
+        // Make greet packet
+        pckt_t* aiMovementPacket = PCKT_MakeAIMovementUpdatePacket(&packetToSend);
 
-    if(counter > 0)
-    {
-        // Convert content as packet.data
-        memcpy(aiMovementPacket->data, &content, sizeof(content));
+        // Create and fill the content
+        pckt_aimovementupdate_t content;
 
-        printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", counter);
+        bool needsToContinue = false;
+        int counter = 0;
+        content.length = 0;
+        for(int i = indx; i < allDynamicSpritesLength; i++)
+        {
+            if(allDynamicSprites[i]->hasChanged && counter < MAX_AIREPLICATIONT_PER_PACKET)
+            {
+                // This ai needs to be updated on the other side
+                content.ais[counter].networkID = allDynamicSprites[i]->networkID;
+                content.ais[counter].x = allDynamicSprites[i]->base.pos.x;
+                content.ais[counter].y = allDynamicSprites[i]->base.pos.y;
+                content.ais[counter].z = allDynamicSprites[i]->base.z;
+                content.ais[counter].hostAggro = allDynamicSprites[i]->hostAggro;
+                content.ais[counter].joinerAggro = allDynamicSprites[i]->joinerAggro;
 
-        if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
-        {
-            // Store the packet in the output buffer
-            outputPcktBuffer.hasBegunWriting = TRUE;
-            memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
-            outputPcktBuffer.packetsToWrite++;
+                counter++;
+                content.length++;
+            }
+            else if(counter >= MAX_AIREPLICATIONT_PER_PACKET)
+            {
+                needsToContinue = true;
+                counter = 0;
+                break;
+            }
+
+            indx++;
         }
-        else
+
+        if(content.length > 0)
         {
-            printf("CRITICAL ERROR: Send buffer was full when in O_GameSendAIUpdate\n");
+            // Convert content as packet.data
+            memcpy(aiMovementPacket->data, &content, sizeof(content));
+
+            printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", content.length);
+
+            if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+            {
+                // Store the packet in the output buffer
+                outputPcktBuffer.hasBegunWriting = TRUE;
+                memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
+                outputPcktBuffer.packetsToWrite++;
+            }
+            else
+            {
+                printf("CRITICAL ERROR: Send buffer was full when in O_GameSendAIUpdate\n");
+            }
         }
-        
+
+        if(!needsToContinue)
+            done = true;
     }
 }
 
