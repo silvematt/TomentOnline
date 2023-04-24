@@ -396,7 +396,7 @@ pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY)
     return packet;
 }
 
-pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID)
+pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, unsigned pLength, packedprojectilespawn_t pProjectiles[MAX_PROJECTILES_TO_SEND_SIZE])
 {
     PCKT_Zero(packet);
 
@@ -406,16 +406,12 @@ pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpri
 
     // Create and fill the content
     pckt_projectile_spawn_t content;
-    content.networkID = pNetworkID;
-    content.spriteID = pSpriteID;
-    content.angle = pAngle;
-    content.level = pLevel;
-    content.posX = pPosX;
-    content.posY = pPosY;
-    content.posZ = pPosZ;
-    content.verticalAngle = pVerticalAngle;
-    content.isOfPlayer = pIsOfPlayer;
-    content.aiOwnerID = pAiOwnerID;
+    content.length = pLength;
+    
+    for(int i = 0; i < content.length; i++)
+    {
+        content.projectiles[i] = pProjectiles[i];
+    }
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));

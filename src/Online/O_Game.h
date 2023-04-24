@@ -10,6 +10,9 @@
 
 extern dynamicSprite_t otherPlayerObject;
 
+extern packedprojectilespawn_t projectilesToSend[MAX_PROJECTILES_TO_SEND_SIZE];
+extern unsigned projectilesToSendLength;
+
 int O_GameInitializeOtherPlayer(void);
 
 int O_GameOtherPlayerLoop(void);

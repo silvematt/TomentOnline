@@ -89,7 +89,8 @@ typedef struct pckt_pickup_picked_t
     int x,y;
 } pckt_pickup_picked_t;
 
-typedef struct pckt_projectile_spawn_t
+
+typedef struct packedprojectilespawn_t
 {
     int networkID;
     int spriteID;
@@ -99,6 +100,14 @@ typedef struct pckt_projectile_spawn_t
     float verticalAngle;
     bool isOfPlayer;
     int aiOwnerID;
+} packedprojectilespawn_t;
+
+#define MAX_PROJECTILES_TO_SEND_SIZE 256    // max amounts of projectiles that can be saved to be sent this frame
+#define MAX_PROJECTILESPAWN_PER_PACKET 32   // max amounts of projectiles per packet
+typedef struct pckt_projectile_spawn_t
+{
+    uint32_t length;
+    packedprojectilespawn_t projectiles[MAX_PROJECTILESPAWN_PER_PACKET];
 } pckt_projectile_spawn_t;
 
 typedef struct pckt_projectile_destr_t
@@ -207,7 +216,7 @@ pckt_t* PCKT_MakeStartingPacket(pckt_t* packet, byte pStarting);
 pckt_t* PCKT_MakePlayerUpdatePacket(pckt_t* packet, float pX, float pY, float pZ, float pAngle, float pCurHealth, float pMaxHealth, float pCurMana, float pMaxMana, int pCurWeapon, int pCurSpell);
 pckt_t* PCKT_MakeDoorChangePacket(pckt_t* packet, int pLevel, int pX, int pY, int pState);
 pckt_t* PCKT_MakePickupPickedPacket(pckt_t* packet, int pLevel, int pX, int pY);
-pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID);
+pckt_t* PCKT_MakeProjectileSpawnPacket(pckt_t* packet, unsigned pLength, packedprojectilespawn_t pProjectiles[MAX_PROJECTILES_TO_SEND_SIZE]);
 pckt_t* PCKT_MakeProjectileDestrPacket(pckt_t* packet, int pNetworkID, int pSpriteID, bool pForceDestroy);
 pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);

@@ -11,6 +11,9 @@
 
 dynamicSprite_t otherPlayerObject;
 
+packedprojectilespawn_t projectilesToSend[MAX_PROJECTILES_TO_SEND_SIZE];
+unsigned projectilesToSendLength = 0;
+
 // Initializes the other player's sprite rapresentation
 int O_GameInitializeOtherPlayer(void)
 {
@@ -167,6 +170,64 @@ int O_GameSendPackets(void)
     if(thisPlayer.isHost)
         O_GameSendAIUpdate();
 
+
+    // Send projectiles
+    bool done = false;
+    int projectilesSent = 0;
+    int offset = 0;
+    while(!done)
+    {
+        int projectilesToSendCount = projectilesToSendLength - projectilesSent; 
+
+        if(projectilesToSendCount >= MAX_PROJECTILESPAWN_PER_PACKET)
+        {
+            // Make greet packet
+            pckt_t* spawnProjectilePacket = PCKT_MakeProjectileSpawnPacket(&packetToSend, MAX_PROJECTILESPAWN_PER_PACKET, projectilesToSend);
+            
+            if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+            {
+                // Store the packet in the output buffer
+                outputPcktBuffer.hasBegunWriting = TRUE;
+                memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
+                outputPcktBuffer.packetsToWrite++;
+            }
+            else
+            {
+                printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnProjectile\n");
+            }
+
+            projectilesSent += MAX_PROJECTILESPAWN_PER_PACKET;
+        }
+        else
+        {
+            if(projectilesToSendCount == 0)
+                done = true;
+            else
+            {
+                // Send remainder
+
+                pckt_t* spawnProjectilePacket = PCKT_MakeProjectileSpawnPacket(&packetToSend, projectilesToSendCount, projectilesToSend+projectilesSent);
+            
+                if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+                {
+                    // Store the packet in the output buffer
+                    outputPcktBuffer.hasBegunWriting = TRUE;
+                    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
+                    outputPcktBuffer.packetsToWrite++;
+                }
+                else
+                {
+                    printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnProjectile\n");
+                }
+
+                projectilesToSendCount = 0;
+                done = true;
+            }
+        }
+    }
+    // Reset abs array length
+    projectilesToSendLength = 0;
+
     return PCKT_SendPacket(O_GameOnPacketIsSent);
 }
 
@@ -259,9 +320,13 @@ int O_GameOnPacketIsReceived(void)
             pckt_projectile_spawn_t projectilePacket;
             memcpy(&projectilePacket, receivedPacket->data, sizeof(projectilePacket));
 
-            printf("Packet received! ID: %d\n", receivedPacket->id);
+            printf("Packet received! ID: %d | Value: %d\n", receivedPacket->id, projectilePacket.length);
 
-            G_SpawnProjectile(projectilePacket.networkID, projectilePacket.spriteID, projectilePacket.angle, projectilePacket.level, projectilePacket.posX, projectilePacket.posY, projectilePacket.posZ, projectilePacket.verticalAngle, projectilePacket.isOfPlayer, NULL, true);
+            for(int i = 0; i < projectilePacket.length; i++)
+            {
+                G_SpawnProjectile(projectilePacket.projectiles[i].networkID, projectilePacket.projectiles[i].spriteID, projectilePacket.projectiles[i].angle, projectilePacket.projectiles[i].level, projectilePacket.projectiles[i].posX, projectilePacket.projectiles[i].posY, projectilePacket.projectiles[i].posZ, projectilePacket.projectiles[i].verticalAngle, projectilePacket.projectiles[i].isOfPlayer, NULL, true);
+            }
+
             break;
         }
 
@@ -457,19 +522,25 @@ void O_GamePickPickup(int level, int dX, int dY)
 
 void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID)
 {
-    // Make greet packet
-    pckt_t* spawnProjectilePacket = PCKT_MakeProjectileSpawnPacket(&packetToSend, pNetworkID, pSpriteID, pAngle, pLevel, pPosX, pPosY, pPosZ, pVerticalAngle, pIsOfPlayer, pAiOwnerID);
-    
-    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    // Adds a projectile to the projectile list to send
+    if(projectilesToSendLength < MAX_PROJECTILES_TO_SEND_SIZE)
     {
-        // Store the packet in the output buffer
-        outputPcktBuffer.hasBegunWriting = TRUE;
-        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
-        outputPcktBuffer.packetsToWrite++;
+        projectilesToSend[projectilesToSendLength].networkID = pNetworkID;
+        projectilesToSend[projectilesToSendLength].spriteID = pSpriteID;
+        projectilesToSend[projectilesToSendLength].angle = pAngle;
+        projectilesToSend[projectilesToSendLength].level = pLevel;
+        projectilesToSend[projectilesToSendLength].posX = pPosX;
+        projectilesToSend[projectilesToSendLength].posY = pPosY;
+        projectilesToSend[projectilesToSendLength].posZ = pPosZ;
+        projectilesToSend[projectilesToSendLength].verticalAngle = pVerticalAngle;
+        projectilesToSend[projectilesToSendLength].isOfPlayer = pIsOfPlayer;
+        projectilesToSend[projectilesToSendLength].aiOwnerID = pAiOwnerID;
+
+        projectilesToSendLength++;
     }
     else
     {
-        printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnProjectile\n");
+        printf("ERROR: Cannot send any more projectiles.\n");
     }
 }
 
