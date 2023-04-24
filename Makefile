@@ -17,7 +17,7 @@ COMPILER_FLAGS = -O3
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lws2_32
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = bin/Toment
+OBJ_NAME = bin/TomentOnline
 
 #This is the target that compiles our executable
 all : $(OBJS)

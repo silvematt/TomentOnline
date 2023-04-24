@@ -424,10 +424,17 @@ void O_GameSetDoorState(int level, int dX, int dY, doorstate_e state)
     // Make greet packet
     pckt_t* doorPacket = PCKT_MakeDoorChangePacket(&packetToSend, level, dX, dY, (int)state);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)doorPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)doorPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameSetDoorState\n");
+    }
 }
 
 void O_GamePickPickup(int level, int dX, int dY)
@@ -435,10 +442,17 @@ void O_GamePickPickup(int level, int dX, int dY)
     // Make greet packet
     pckt_t* pickupPacket = PCKT_MakePickupPickedPacket(&packetToSend, level, dX, dY);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)pickupPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)pickupPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GamePickPickup\n");
+    }
 }
 
 void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLevel, float pPosX, float pPosY, float pPosZ, float pVerticalAngle, bool pIsOfPlayer, int pAiOwnerID)
@@ -446,20 +460,34 @@ void O_GameSpawnProjectile(int pNetworkID, int pSpriteID, float pAngle, int pLev
     // Make greet packet
     pckt_t* spawnProjectilePacket = PCKT_MakeProjectileSpawnPacket(&packetToSend, pNetworkID, pSpriteID, pAngle, pLevel, pPosX, pPosY, pPosZ, pVerticalAngle, pIsOfPlayer, pAiOwnerID);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)spawnProjectilePacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnProjectile\n");
+    }
 }
 
 void O_GameDestroyProjectile(int pNetworkID, int pSpriteID, bool pForceDestroy)
 {
     pckt_t* destrProjectilePacket = PCKT_MakeProjectileDestrPacket(&packetToSend, pNetworkID, pSpriteID, pForceDestroy);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)destrProjectilePacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)destrProjectilePacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameDestroyProjectile\n");
+    }
 }
 
 void O_GameSendAIUpdate(void)
@@ -495,10 +523,19 @@ void O_GameSendAIUpdate(void)
         memcpy(aiMovementPacket->data, &content, sizeof(content));
 
         printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", counter);
-        // Store the packet in the output buffer
-        outputPcktBuffer.hasBegunWriting = TRUE;
-        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
-        outputPcktBuffer.packetsToWrite++;
+
+        if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+        {
+            // Store the packet in the output buffer
+            outputPcktBuffer.hasBegunWriting = TRUE;
+            memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiMovementPacket, PCKT_SIZE);
+            outputPcktBuffer.packetsToWrite++;
+        }
+        else
+        {
+            printf("CRITICAL ERROR: Send buffer was full when in O_GameSendAIUpdate\n");
+        }
+        
     }
 }
 
@@ -506,10 +543,17 @@ void O_GameAITakeDamage(int pNetworkID, float pDamage, bool pDied)
 {
     pckt_t* aiPacket = PCKT_MakeAIAttackPacket(&packetToSend, pNetworkID, pDamage, pDied);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameAITakeDamage\n");
+    }
 }
 
 
@@ -517,38 +561,66 @@ void O_GameAIPlayAnim(int networkID, int anim, bool loop)
 {
     pckt_t* aiPacket = PCKT_MakeAIPlayAnimPacket(&packetToSend, networkID, anim, loop);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+         // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameAIPlayAnim\n");
+    }
 }
 
 void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop)
 {
     pckt_t* aiPacket = PCKT_MakeAIInstantiatePacket(&packetToSend, pNetworkID, pLevel, pGridX, pGridY, pSpriteID, pPlayAnim, pAnimID, pLoop);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)aiPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameAIInstantiate\n");
+    }
 }
 
 void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE])
 {
     pckt_t* puddlePacket = PCKT_MakePuddlesInstantiatePacket(&packetToSend, length, puddles);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnPuddles\n");
+    }
 }
 
 void O_GameHealOther(float amount)
 {
     pckt_t* healPacket = PCKT_MakeHealOtherPacket(&packetToSend, amount);
     
-    // Store the packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)healPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)healPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameHealOther\n");
+    }
 }

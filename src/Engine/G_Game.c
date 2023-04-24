@@ -405,7 +405,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_SwordProjectile:
-                            damage = 30.5f;
+                            damage = 60.5f;
                             break;
 
                         default:
@@ -460,7 +460,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_SwordProjectile:
-                            damage = 30.5f;
+                            damage = 60.5f;
                             break;
 
                         default:
@@ -498,7 +498,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_SwordProjectile:
-                            damage = 30.5f;
+                            damage = 60.5f;
                             break;
 
                         default:

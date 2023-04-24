@@ -198,11 +198,18 @@ int NET_HostGameMakeGreetPacket(void)
     // Make greet packet
     pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name, thisPlayer.favoriteClass);
     
-    // Store the greet packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
-    printf("GREET PACKET MADE!\n");
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the greet packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+        printf("GREET PACKET MADE!\n");
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in NET_HostGameMakeGreetPacket\n");
+    }
 }
 
 int NET_HostGameSendGreet(void)
@@ -422,11 +429,18 @@ int NET_JoinGameMakeGreetPacket(void)
     // Make greet packet
     pckt_t* greetPacket = PCKT_MakeGreetPacket(&packetToSend, thisPlayer.name, thisPlayer.favoriteClass);
     
-    // Store the greet packet in the output buffer
-    outputPcktBuffer.hasBegunWriting = TRUE;
-    memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
-    outputPcktBuffer.packetsToWrite++;
-    printf("GREET PACKET MADE!\n");
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the greet packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)greetPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+        printf("GREET PACKET MADE!\n");
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in NET_JoinGameMakeGreetPacket\n");
+    }
 }
 
 int NET_JoinGameSendGreet(void)

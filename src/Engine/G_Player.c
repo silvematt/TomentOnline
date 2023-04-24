@@ -325,8 +325,28 @@ void G_PlayerCollisionCheck()
                 player.deltaPos.x = 0;
                 player.deltaPos.y = 0;
             }
+
+            // Check if there is collision currently, this can happen when network lags and the AI is moved in front of the player
+            if(P_CheckCircleCollision(&player.collisionCircle, &cur->base.collisionCircle) > 0)
+            {
+                player.deltaPos.x = 0;
+                player.deltaPos.y = 0;
+
+                // Even without moving, there's a collision, resolve it
+                float solvingAngle = atan2(player.collisionCircle.pos.y - cur->base.collisionCircle.pos.y, player.collisionCircle.pos.x - cur->base.collisionCircle.pos.x);
+                float distanceBetweenCircles = P_GetDistance(player.collisionCircle.pos.x, player.collisionCircle.pos.y, cur->base.collisionCircle.pos.x, cur->base.collisionCircle.pos.y);
+
+                float distToSolve = player.collisionCircle.r + cur->base.collisionCircle.r - distanceBetweenCircles;
+
+                // Move player away from colliding object
+                float displacementX = cos(solvingAngle) * distToSolve;
+                float displacementY = sin(solvingAngle) * distToSolve;
+                player.position.x += displacementX;
+                player.position.y += displacementY;
+            }
         }
     }
+
 
     // Check collision with other player
     if(P_CheckCircleCollision(&hypoteticalPlayerCircle, &otherPlayerObject.base.collisionCircle) > 0)
@@ -1709,10 +1729,10 @@ static bool I_PlayerAttack(int attackType)
             damage = 100.0f;
         // DPS cheap shot
         else if(attackType == 2)
-            damage = 110.0f;
+            damage = 120.0f;
         // DPS split
         else if(attackType == 3)
-            damage = 150.0f;
+            damage = 200.0f;
     }
     
 
