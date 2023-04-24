@@ -517,6 +517,18 @@ void G_PlayerRender(void)
                             player.hasToCast = false;
                         }
                     }
+
+                    case CLASS_DPS:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            I_PlayerAttack(2);
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                        break;
+                    }
                 }
             }
 
@@ -546,6 +558,43 @@ void G_PlayerRender(void)
                             O_GameSpawnProjectile(networkID, SPELL_CONCENTRATED_HEAL, player.angle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
                         }
 
+                        break;
+                    }
+
+                    case CLASS_DPS:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            float projAngle = player.angle;
+                            // Spawn a projectile   
+                            // Angle must be the same for each resolution
+                            float angle = (player.verticalHeadMovement / MAX_VERTICAL_HEAD_MOV) * 75.0f;
+                            uint32_t networkID = REPL_GenerateNetworkID();
+                            G_SpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL, false);
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
+                            
+                            projAngle += 0.174533;
+                            FIX_ANGLES(projAngle);
+
+                            networkID = REPL_GenerateNetworkID();
+                            G_SpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL, false);
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
+
+                            projAngle -= 0.349066;
+                            FIX_ANGLES(projAngle);
+
+                            networkID = REPL_GenerateNetworkID();
+                            G_SpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, NULL, false);
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, SPELL_SWORD_PROJECTILE, projAngle, player.level, player.position.x + cos(player.angle) * TILE_SIZE, player.position.y + sin(player.angle) * TILE_SIZE, player.z-(HALF_TILE_SIZE), angle, true, 0);
+
+
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
                         break;
                     }
                 }
@@ -590,6 +639,18 @@ void G_PlayerRender(void)
                             G_PlayerGainHealth(100.0f);
                             O_GameHealOther(100.0f);
 
+                            player.hasCasted = true;
+                            player.hasToCast = false;
+                        }
+                        break;
+                    }
+
+                    case CLASS_DPS:
+                    {
+                        // Attack
+                        if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
+                        {
+                            I_PlayerAttack(3);
                             player.hasCasted = true;
                             player.hasToCast = false;
                         }
@@ -1645,7 +1706,13 @@ static bool I_PlayerAttack(int attackType)
     {
         // Tank shield slam
         if(attackType == 1)
-            damage = 80.0f;
+            damage = 100.0f;
+        // DPS cheap shot
+        else if(attackType == 2)
+            damage = 110.0f;
+        // DPS split
+        else if(attackType == 3)
+            damage = 150.0f;
     }
     
 

@@ -33,6 +33,4 @@ typedef struct skill_t
 
 void G_InitializeSkills(void);
 
-void G_DoSkill(skill_t skill);
-
 #endif

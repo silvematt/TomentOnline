@@ -82,7 +82,8 @@ typedef enum spritesObjectID_e
     DS_PlayerTank,
     DS_PlayerHealer,
     DS_PlayerDPS,
-    S_ConcentratedHeal
+    S_ConcentratedHeal,
+    S_SwordProjectile
 } spritesObjectID_t;
 
 // All skies textures
@@ -465,7 +466,11 @@ typedef enum imgIDs_e
     IMG_ID_ICE_CONSACRATED,
     IMG_ID_SKILL_ANIM_HEALER_SELF_HEAL,
     IMG_ID_SPELL_CONCENTRATED_HEAL,
-    IMG_ID_SPELL_CONCENTRATED_HEAL_EXPLOSION
+    IMG_ID_SPELL_CONCENTRATED_HEAL_EXPLOSION,
+    IMG_ID_SKILL_ANIM_DPS_CHEAPSHOT,
+    IMG_ID_SKILL_ANIM_DPS_SPLIT,
+    IMG_ID_SWORD_PROJECTILE,
+    IMG_ID_SWORD_PROJECTILE_EXPLOSION
 } imgIDs_e;
 
 // Archt Data

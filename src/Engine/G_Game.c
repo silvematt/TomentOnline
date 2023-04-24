@@ -404,6 +404,10 @@ void G_UpdateProjectiles(void)
                             damage = 15.0f;
                             break;
 
+                        case S_SwordProjectile:
+                            damage = 30.5f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -455,6 +459,10 @@ void G_UpdateProjectiles(void)
                             damage = 15.0f;
                             break;
 
+                        case S_SwordProjectile:
+                            damage = 30.5f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -487,6 +495,10 @@ void G_UpdateProjectiles(void)
 
                         case S_IceDart1:
                             damage = 15.0f;
+                            break;
+
+                        case S_SwordProjectile:
+                            damage = 30.5f;
                             break;
 
                         default:

@@ -1027,8 +1027,9 @@ void D_InitLoadSprites(void)
     object_t* playerCharacterHealer = (object_t*)malloc(sizeof(object_t));
     object_t* playerCharacterDPS = (object_t*)malloc(sizeof(object_t));
     object_t* spellConcentratedHeal = (object_t*)malloc(sizeof(object_t));
+    object_t* spellSwordProjectile = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 24; // Set length
+    tomentdatapack.spritesLength = 25; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1054,6 +1055,7 @@ void D_InitLoadSprites(void)
     D_InitObject(playerCharacterHealer);
     D_InitObject(playerCharacterDPS);
     D_InitObject(spellConcentratedHeal);
+    D_InitObject(spellSwordProjectile);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1080,6 +1082,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_PlayerHealer] = playerCharacterHealer;
     tomentdatapack.sprites[DS_PlayerDPS] = playerCharacterDPS;
     tomentdatapack.sprites[S_ConcentratedHeal] = spellConcentratedHeal;
+    tomentdatapack.sprites[S_SwordProjectile] = spellSwordProjectile;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1846,6 +1849,42 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_ConcentratedHeal]->Callback = NULL;
     SDL_FreeSurface(temp1);
 
+    // Spell Concentrated Heal
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SWORD_PROJECTILE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SWORD_PROJECTILE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SWORD_PROJECTILE))
+    {
+        tomentdatapack.sprites[S_SwordProjectile]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[S_SwordProjectile]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        tomentdatapack.sprites[S_SwordProjectile]->animations->belongsTo = tomentdatapack.sprites[S_SwordProjectile];
+
+        // Idle = Normal
+        tomentdatapack.sprites[S_SwordProjectile]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_SwordProjectile]->animations->animIdleSheetLength = 6;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SWORD_PROJECTILE_EXPLOSION].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SWORD_PROJECTILE_EXPLOSION].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[S_SwordProjectile]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_SwordProjectile]->animations->animDieSheetLength = 5;
+
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[S_SwordProjectile]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_SwordProjectile]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[S_SwordProjectile]->flags, 1); // Set animated sprite bit flag to 1
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_SwordProjectile] = 6;
+
+    // Callback
+    tomentdatapack.sprites[S_SwordProjectile]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -1868,6 +1907,9 @@ void D_InitLoadSprites(void)
     D_SetObject(playerCharacterTank, DS_PlayerTank, tomentdatapack.sprites[DS_PlayerTank]->texture, NULL);
     D_SetObject(playerCharacterHealer, DS_PlayerHealer, tomentdatapack.sprites[DS_PlayerHealer]->texture, NULL);
     D_SetObject(playerCharacterDPS, DS_PlayerDPS, tomentdatapack.sprites[DS_PlayerDPS]->texture, NULL);
+    D_SetObject(spellConcentratedHeal, S_ConcentratedHeal, tomentdatapack.sprites[S_ConcentratedHeal]->texture, NULL);
+    D_SetObject(spellSwordProjectile, S_SwordProjectile, tomentdatapack.sprites[S_SwordProjectile]->texture, NULL);
+
 }
 
 
@@ -2280,8 +2322,40 @@ void D_InitLoadPlayersFP(void)
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellSheetLength = 6;
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellActionFrame = 4;
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpellkSpeedModifier = 0;
-
         SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animCastSpell, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // DPS Skill Cheapshot
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_DPS_CHEAPSHOT].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_DPS_CHEAPSHOT].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial1SheetLength = 5;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial1ActionFrame = 2;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial1SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial1, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // DPS Skill obliterate
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_P_GREATSWORD_ATTACK].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_P_GREATSWORD_ATTACK].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial2SheetLength = 7;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial2ActionFrame = 3;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial2SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial2, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+        SDL_FreeSurface(animTemp1);
+
+        // DPS Skill split
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_DPS_SPLIT].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ANIM_DPS_SPLIT].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial3 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial3SheetLength = 7;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial3ActionFrame = 4;
+        tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial3SpeedModifier = 0;
+        SDL_SetColorKey(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->animSpecial3, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
         SDL_FreeSurface(animTemp1);
     }
     else
