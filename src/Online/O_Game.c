@@ -51,7 +51,7 @@ int O_GameInitializeOtherPlayer(void)
 
     otherPlayerObject.base.collisionCircle.pos.x = otherPlayerObject.base.pos.x;
     otherPlayerObject.base.collisionCircle.pos.y = otherPlayerObject.base.pos.y;
-    otherPlayerObject.base.collisionCircle.r = 32;
+    otherPlayerObject.base.collisionCircle.r = -1.0f;
 
     // Get ID
 

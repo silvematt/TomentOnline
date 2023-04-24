@@ -159,6 +159,9 @@ void D_InitUIAssets(void)
     uiAssets_t* skillIconHealerSelfHeal = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconHealerConcentratedHeal = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconHealerDivineIntervention = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconDpsCheapshot = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconDpsObliterate = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* skillIconDpsSplit = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -193,8 +196,11 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_SELF_HEAL] = skillIconHealerSelfHeal;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_CONCENTRATED_HEAL] = skillIconHealerConcentratedHeal;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION] = skillIconHealerDivineIntervention;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_CHEAPSHOT] = skillIconDpsCheapshot;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_OBLITERATE] = skillIconDpsObliterate;
+    tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_SPLIT] = skillIconDpsSplit;
 
-    tomentdatapack.uiAssetsLenght = 33;
+    tomentdatapack.uiAssetsLenght = 36;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -618,6 +624,45 @@ void D_InitUIAssets(void)
     {
         tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
         SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_HEALER_DIVINE_INTERVENTION]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Cheapshot Icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_CHEAPSHOT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_CHEAPSHOT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_DPS_CHEAPSHOT))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_CHEAPSHOT]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_CHEAPSHOT]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Obliterate Icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_OBLITERATE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_OBLITERATE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_DPS_OBLITERATE))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_OBLITERATE]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_OBLITERATE]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    }
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    // Split Icon
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_SPLIT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKILL_ICON_DPS_SPLIT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKILL_ICON_DPS_SPLIT))
+    {
+        tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_SPLIT]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+        SDL_SetColorKey(tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_SPLIT]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
     }
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);

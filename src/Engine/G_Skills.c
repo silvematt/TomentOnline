@@ -61,18 +61,18 @@ void G_InitializeSkills(void)
 
         case CLASS_DPS:
         {
-            // Obliterate
-            player.skills[0].skillID = DPS_SKILL_OBLITERATE;
-            player.skills[0].cooldown = 5000;
+            // CheapShot slash
+            player.skills[0].skillID = DPS_SKILL_CHEAPSHOT;
+            player.skills[0].cooldown = 6000;
             player.skills[0].timer = U_TimerCreateNew();
-            player.skills[0].manaConsumption = 20.0f;
+            player.skills[0].manaConsumption = 40.0f;
             player.skills[0].timer->Start(player.skills[0].timer);
 
-            // Triple slash
-            player.skills[1].skillID = DPS_SKILL_TRIPLE_SLASH;
+            // Obliterate
+            player.skills[1].skillID = DPS_SKILL_OBLITERATE;
             player.skills[1].cooldown = 10000;
             player.skills[1].timer = U_TimerCreateNew();
-            player.skills[1].manaConsumption = 40.0f;
+            player.skills[1].manaConsumption = 20.0f;
             player.skills[1].timer->Start(player.skills[1].timer);
 
             // Split
