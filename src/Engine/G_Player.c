@@ -310,8 +310,9 @@ void G_PlayerCollisionCheck()
     // Player->Dynamic Sprites
     //---------------------------------------------------
     
-    // The circle the player has if the delta movement is applied
-    circle_t hypoteticalPlayerCircle = {player.collisionCircle.pos.x += player.deltaPos.x, player.collisionCircle.pos.y += player.deltaPos.y, player.collisionCircle.r};
+    // The circle the player has if the delta movement is applied 
+    // Radius+2 to avoid flickering
+    circle_t hypoteticalPlayerCircle = {player.collisionCircle.pos.x += player.deltaPos.x, player.collisionCircle.pos.y += player.deltaPos.y, player.collisionCircle.r+2};
     for(int i = 0; i < allDynamicSpritesLength; i++)
     {
         if(allDynamicSprites[i]->base.active && allDynamicSprites[i]->base.level == player.level)
