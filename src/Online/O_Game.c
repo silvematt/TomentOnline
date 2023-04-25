@@ -389,6 +389,8 @@ int O_GameOnPacketIsReceived(void)
                 allDynamicSprites[cur->networkID]->base.pos.x = cur->x;
                 allDynamicSprites[cur->networkID]->base.pos.y = cur->y;
                 allDynamicSprites[cur->networkID]->base.z = cur->z;
+                allDynamicSprites[cur->networkID]->posArrived = true;
+                
                 allDynamicSprites[cur->networkID]->hostAggro = cur->hostAggro;
                 allDynamicSprites[cur->networkID]->joinerAggro = cur->joinerAggro;
             }

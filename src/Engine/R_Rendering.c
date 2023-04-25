@@ -2335,15 +2335,52 @@ void R_DrawSprite(sprite_t* sprite, bool angled)
 //-------------------------------------
 void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
 {
+    // New values are either the same as the internals (already calculated ones) or the linerally interpolated if this client is the joiner
+    float newCenteredPosX, newCenteredPosY;
+    float newSpacePosX, newSpacePosY;
+    float newZ;
+    float newDist;
+
+    // If this player is not the host he should use the display position instead of the internal one
+    if(!thisPlayer.isHost && sprite->type == DS_TYPE_AI)
+    {
+        newCenteredPosX = sprite->displayPos.x + (HALF_TILE_SIZE);
+        newCenteredPosY = sprite->displayPos.y + (HALF_TILE_SIZE);
+
+        newZ = sprite->displayZ;
+
+        // Calculate runtime stuff
+        // Get Player Space pos
+        newSpacePosX = newCenteredPosX - player.centeredPos.x;
+        newSpacePosY = newCenteredPosY - player.centeredPos.y;
+    
+        newDist = sqrt(newSpacePosX*newSpacePosX + newSpacePosY*newSpacePosY);
+    }
+    else // otherwise the internal one is just fine
+    {
+        newCenteredPosX = sprite->base.centeredPos.x;
+        newCenteredPosY = sprite->base.centeredPos.y;
+
+        newZ = sprite->base.z;
+
+        // Calculate runtime stuff
+        // Get Player Space pos
+        newSpacePosX = sprite->base.pSpacePos.x;
+        newSpacePosY = sprite->base.pSpacePos.y;
+    
+        newDist = sprite->base.dist;
+    }
+    
+
     // Done in degrees to avoid computations (even if I could cache radians values and stuff)
     // Calculate angle and convert to degrees (*-1 makes sure it uses SDL screen space coordinates for unit circle and quadrants)
     float angle;
 
     // AI should always face the player, projectiles should be drawn like normal sprites
     if(sprite->type == DS_TYPE_AI)
-        angle = sprite->base.angle = ((atan2(-sprite->base.pSpacePos.y, sprite->base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
+        angle = sprite->base.angle = ((atan2(-newSpacePosY, newSpacePosX))* RADIAN_TO_DEGREE)*-1;
     else
-        angle = ((atan2(-sprite->base.pSpacePos.y, sprite->base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
+        angle = ((atan2(-newSpacePosY, newSpacePosX))* RADIAN_TO_DEGREE)*-1;
 
     FIX_ANGLES_DEGREES(angle);
     
@@ -2361,11 +2398,11 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
     
     // Calculate distance and fix fisheye
     float fixedAngle = ((angle*RADIAN) - player.angle);
-    float dist = (sprite->base.dist * cos(fixedAngle));
+    float dist = (newDist * cos(fixedAngle));
 
-    sprite->base.height = DISTANCE_TO_PROJECTION * TILE_SIZE / sprite->base.dist;
+    sprite->base.height = DISTANCE_TO_PROJECTION * TILE_SIZE / newDist;
 
-    float screenZ = round(DISTANCE_TO_PROJECTION / dist*(player.z-sprite->base.z-(HALF_TILE_SIZE)));
+    float screenZ = round(DISTANCE_TO_PROJECTION / dist*(player.z-newZ-(HALF_TILE_SIZE)));
 
     if(sprite->base.height <= 0)
         return;
@@ -2401,7 +2438,7 @@ void R_DrawDynamicSprite(dynamicSprite_t* sprite, bool angled)
         }
 
         FIX_ANGLES(adjustedAngle);
-        float angle2 = atan2(sprite->base.centeredPos.x - player.centeredPos.x, sprite->base.centeredPos.y - player.centeredPos.y) / (2 * M_PI) + 0.5f - adjustedAngle / (2 * M_PI);
+        float angle2 = atan2(newCenteredPosX - player.centeredPos.x, newCenteredPosY - player.centeredPos.y) / (2 * M_PI) + 0.5f - adjustedAngle / (2 * M_PI);
         int angleFrame = (int)(round(angle2 * MAX_VIEWEABLE_SPRITE_ANGLES)) % MAX_VIEWEABLE_SPRITE_ANGLES;
         if (angleFrame < 0) {
             angleFrame += MAX_VIEWEABLE_SPRITE_ANGLES;

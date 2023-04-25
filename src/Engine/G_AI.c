@@ -40,8 +40,9 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->canBeHit = true;
 
     // Get World Pos
-    cur->base.pos.x = x * TILE_SIZE;
-    cur->base.pos.y = y * TILE_SIZE;
+    cur->displayPos.x = cur->base.pos.x = x * TILE_SIZE;
+    cur->displayPos.y = cur->base.pos.y = y * TILE_SIZE;
+    cur->displayZ = cur->base.z;
 
     cur->base.collisionCircle.pos.x = cur->base.pos.x;
     cur->base.collisionCircle.pos.y = cur->base.pos.y;

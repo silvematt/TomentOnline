@@ -183,6 +183,28 @@ typedef struct dynamicSprite_s
     // Online position updates
     bool posArrived;
     float lastPosX, lastPosY, lastPosZ;
+
+    // Display positions
+    
+    /*
+        When the host calculates the position packets and sends them to the joiner, there will always be some delay. 
+        If the joiner sets the coordinates directly, there is no other problem than the fact that the movements of the AI will be visibly snapped to the movements coordinates inside the packets.
+
+        If the joiner smoothly interoplates its current positions to the packet's position, the movements appear smooth, but the world may get out of synch as the host may do something like instantiating the AI on a tile that is occupied for the other player (because the smoothed movement is slower and not synchronized at any given frame)
+        So it's definitely a no-go.
+        
+        The solution is to use a display position only on the joiner side.
+        The joiner will keep setting directly what is the normal "pos" (now called the "internal" pos) of the AIs that will make sure the worlds are synched.
+        But the Drawables will now be rendered using the display pos instead of the internal pos.
+
+        The display pos is smoothly interpolated by what it was before and what arrived in the packet.
+
+        The result is that the world will be kept in synch and the AI will appear moving smoothly on the joiner when lag occurs.
+    */
+    vector2_t displayPos;
+    float displayZ;
+    float displayDist;       
+
 } dynamicSprite_t;
 
 // -------------------------------

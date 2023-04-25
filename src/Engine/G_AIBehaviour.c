@@ -229,6 +229,19 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
     }
     else if(!thisPlayer.isHost)
     {
+        // Update the displayPosition (pos is set directly when a packet arrives)
+        if(cur->posArrived)
+        {
+            // Move smoothly the other player to last known pos
+            float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+            float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+            float deltaZ = (cur->base.z) - cur->displayZ;
+
+            cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
+            cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+            cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+        }
+
         // Position is updated by packets
          // Check if this AI changed grid pos
         if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
@@ -575,6 +588,19 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
     }
     else if(!thisPlayer.isHost)
     {
+        // Update the displayPosition (pos is set directly when a packet arrives)
+        if(cur->posArrived)
+        {
+            // Move smoothly the other player to last known pos
+            float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+            float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+            float deltaZ = (cur->base.z) - cur->displayZ;
+
+            cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
+            cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+            cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+        }
+
         // Check if this AI changed grid pos
         if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
         {
@@ -983,6 +1009,19 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             }
             else if(!thisPlayer.isHost)
             {
+                // Update the displayPosition (pos is set directly when a packet arrives)
+                if(cur->posArrived)
+                {
+                    // Move smoothly the other player to last known pos
+                    float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+                    float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+                    float deltaZ = (cur->base.z) - cur->displayZ;
+
+                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
+                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                }
+
                 // Check if this AI changed grid pos
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
@@ -1209,6 +1248,18 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             }
             else if(!thisPlayer.isHost)
             {
+                if(cur->posArrived)
+                {
+                    // Move smoothly the other player to last known pos
+                    float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+                    float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+                    float deltaZ = (cur->base.z) - cur->displayZ;
+
+                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
+                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                }
+
                 // Check if this AI changed grid pos
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
@@ -1476,6 +1527,18 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             }
             else if(!thisPlayer.isHost)
             {
+                if(cur->posArrived)
+                {
+                    // Move smoothly the other player to last known pos
+                    float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+                    float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+                    float deltaZ = (cur->base.z) - cur->displayZ;
+
+                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
+                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                }
+                
                 // Check if this AI changed grid pos
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {

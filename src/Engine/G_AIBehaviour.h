@@ -4,6 +4,8 @@
 #include "D_AssetsManager.h"
 #include "U_DataTypes.h"
 
+#define DISPLAY_POS_SMOOTH_SPEED 5.0f
+
 // AI Specific, allows to modify the AI Behaviour for each enemy
 void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur);
 void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur);
