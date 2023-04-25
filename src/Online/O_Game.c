@@ -17,6 +17,8 @@ unsigned projectilesToSendLength = 0;
 // Initializes the other player's sprite rapresentation
 int O_GameInitializeOtherPlayer(void)
 {
+    otherPlayerObject.posArrived = false;
+
     // Init player
     otherPlayerObject.base.active = TRUE;
     otherPlayerObject.base.pos.x = (currentMap.playerStartingGridX * TILE_SIZE);
@@ -46,6 +48,7 @@ int O_GameInitializeOtherPlayer(void)
     otherPlayerObject.base.active = true;
     otherPlayerObject.base.level = 0;
     otherPlayerObject.base.level = SDL_clamp(otherPlayerObject.base.level, 0, MAX_N_LEVELS-1);
+    otherPlayerObject.speed = 5.0f;
 
     otherPlayerObject.base.z = TILE_SIZE * (0);
     otherPlayerObject.verticalMovementDelta = 0.0f;
@@ -101,6 +104,19 @@ int O_GameOtherPlayerLoop(void)
     int oldGridPosX = otherPlayerObject.base.gridPos.x;
     int oldGridPosY = otherPlayerObject.base.gridPos.y;
 
+    if(otherPlayerObject.posArrived)
+    {
+        // Move smoothly the other player to last known pos
+        float deltaX = (otherPlayerObject.lastPosX) - otherPlayerObject.base.pos.x;
+        float deltaY = (otherPlayerObject.lastPosY) - otherPlayerObject.base.pos.y;
+        float deltaZ = (otherPlayerObject.lastPosZ) - otherPlayerObject.base.z;
+
+        otherPlayerObject.base.pos.x += (deltaX * otherPlayerObject.speed) * deltaTime;
+        otherPlayerObject.base.pos.y += (deltaY * otherPlayerObject.speed) * deltaTime; 
+        otherPlayerObject.base.z     += (deltaZ * otherPlayerObject.speed) * deltaTime; 
+    }
+    
+
     // Compute centered pos for calculations
     otherPlayerObject.base.centeredPos.x = otherPlayerObject.base.pos.x + PLAYER_CENTER_FIX;
     otherPlayerObject.base.centeredPos.y = otherPlayerObject.base.pos.y + PLAYER_CENTER_FIX;
@@ -119,9 +135,6 @@ int O_GameOtherPlayerLoop(void)
 
     // Calculate the distance to player
     otherPlayerObject.base.dist = sqrt(otherPlayerObject.base.pSpacePos.x*otherPlayerObject.base.pSpacePos.x + otherPlayerObject.base.pSpacePos.y*otherPlayerObject.base.pSpacePos.y);
-
-    float deltaX = 0.0f;
-    float deltaY = 0.0f;
 
     // Update collision circle
     otherPlayerObject.base.collisionCircle.pos.x = otherPlayerObject.base.centeredPos.x;
@@ -259,9 +272,11 @@ int O_GameOnPacketIsReceived(void)
             printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, playerPacket.x, playerPacket.y, playerPacket.angle);
 
             // Update other player position
-            otherPlayerObject.base.pos.x = playerPacket.x;
-            otherPlayerObject.base.pos.y = playerPacket.y;
-            otherPlayerObject.base.z = playerPacket.z;
+            otherPlayerObject.lastPosX = playerPacket.x;
+            otherPlayerObject.lastPosY = playerPacket.y;
+            otherPlayerObject.lastPosZ = playerPacket.z;
+            otherPlayerObject.posArrived = true;
+
             otherPlayerObject.base.angle = playerPacket.angle;
 
             otherPlayerObject.attributes.curHealth = playerPacket.curHealth;

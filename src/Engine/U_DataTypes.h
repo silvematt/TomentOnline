@@ -179,6 +179,10 @@ typedef struct dynamicSprite_s
     // Aggro variables to determine which player this AI should follow and attack
     int hostAggro;
     int joinerAggro;
+
+    // Online position updates
+    bool posArrived;
+    float lastPosX, lastPosY, lastPosZ;
 } dynamicSprite_t;
 
 // -------------------------------
