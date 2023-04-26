@@ -393,6 +393,8 @@ int O_GameOnPacketIsReceived(void)
                 
                 allDynamicSprites[cur->networkID]->hostAggro = cur->hostAggro;
                 allDynamicSprites[cur->networkID]->joinerAggro = cur->joinerAggro;
+                allDynamicSprites[cur->networkID]->canBeHit = cur->canBeHit;
+
             }
 
             break;
@@ -604,6 +606,7 @@ void O_GameSendAIUpdate(void)
                 content.ais[counter].z = allDynamicSprites[i]->base.z;
                 content.ais[counter].hostAggro = allDynamicSprites[i]->hostAggro;
                 content.ais[counter].joinerAggro = allDynamicSprites[i]->joinerAggro;
+                content.ais[counter].canBeHit = allDynamicSprites[i]->canBeHit;
 
                 counter++;
                 content.length++;

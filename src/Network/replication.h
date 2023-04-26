@@ -9,6 +9,7 @@ typedef struct aireplicated_t
     uint32_t networkID;
     float x,y,z;
     char hostAggro, joinerAggro;
+    bool canBeHit;
 } aireplicated_t;
 
 extern uint32_t lastUsedNetworkID;
