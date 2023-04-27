@@ -46,6 +46,7 @@ void NET_InitializeNetPlayers(void)
     thisPlayer.gameStated = false;
     thisPlayer.curWeapon = 0;
     thisPlayer.curSpell = 0;
+    thisPlayer.dead = false;
 
     otherPlayer.id = 0;
     otherPlayer.socket = -1;
@@ -60,6 +61,7 @@ void NET_InitializeNetPlayers(void)
     otherPlayer.gameStated = false;
     otherPlayer.curWeapon = 0;
     otherPlayer.curSpell = 0;
+    otherPlayer.dead = false;
 }
 
 

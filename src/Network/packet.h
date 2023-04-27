@@ -29,6 +29,7 @@
 #define PCKTID_AI_INSTANTIATE       13
 #define PCKTID_PUDDLES_INSTANTIATE  14
 #define PCKTID_HEAL_OTHER           15
+#define PCKTID_PLAYER_DEATH         16
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -226,6 +227,7 @@ pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, b
 pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
 pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE]);
 pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount);
+pckt_t* PCKT_MakePlayerDeathPacket(pckt_t* packet);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));

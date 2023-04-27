@@ -123,7 +123,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
     if(!outputPcktBuffer.hasBegunWriting)
     {
         //printf("There is nothing to write.\n");
-        return 1;
+        return 104;
     }
 
     while(outputPcktBuffer.packetsToWrite > 0)
@@ -252,6 +252,8 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
             }
         }
     }
+
+    return 0;
 }
 
 pckt_t* PCKT_MakeGreetPacket(pckt_t* packet, char pName[NET_MAX_PLAYER_NAME_LENGTH], byte pFavClass)
@@ -559,6 +561,19 @@ pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount)
 
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}
+
+pckt_t* PCKT_MakePlayerDeathPacket(pckt_t* packet)
+{
+    PCKT_Zero(packet);
+    
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_PLAYER_DEATH;
+
+    // No content
 
     return packet;
 }

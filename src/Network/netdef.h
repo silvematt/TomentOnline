@@ -50,6 +50,8 @@ typedef struct netplayer
     // Object specific details like health and mana are in otherPlayerObject
     int curWeapon;
     int curSpell;
+
+    bool dead;
 } netplayer_t;
 
 extern netplayer_t thisPlayer;

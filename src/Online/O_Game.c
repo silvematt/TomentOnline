@@ -6,6 +6,7 @@
 #include "../Engine/G_Pathfinding.h"
 #include "../Engine/G_AI.h"
 #include "../Engine/T_TextRendering.h"
+#include "../Engine/G_MainMenu.h"
 
 #include "../Network/replication.h"
 
@@ -247,7 +248,20 @@ int O_GameSendPackets(void)
 
 int O_GameOnPacketIsSent(void)
 {
+    char sentPcktBuffer[PCKT_SIZE];
+    memcpy(sentPcktBuffer, outputPcktBuffer.buffer, PCKT_SIZE);
 
+    pckt_t* sentPacket = (pckt_t*)sentPcktBuffer;
+
+    // Die
+    if(sentPacket->id == PCKTID_PLAYER_DEATH)
+    {
+        closesocket(otherPlayer.socket);
+
+        player.hasBeenInitialized = false;
+        G_SetMenu(&DeathMenu);
+        A_ChangeState(GSTATE_MENU);
+    }
 }
 
 int O_GameOnPacketIsReceived(void)
@@ -499,6 +513,14 @@ int O_GameOnPacketIsReceived(void)
             G_PlayerGainHealth(healPacket.healAmount);
             break;
         }
+
+        case PCKTID_PLAYER_DEATH:
+        {
+            otherPlayer.dead = true;
+            G_SetMenu(&DisconnectedMenu);
+            A_ChangeState(GSTATE_MENU);
+            break;
+        }
     }
 }
 
@@ -723,6 +745,24 @@ void O_GameHealOther(float amount)
         // Store the packet in the output buffer
         outputPcktBuffer.hasBegunWriting = TRUE;
         memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)healPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameHealOther\n");
+    }
+}
+
+// Death packet should not be appended to the buffer, but sent immediately.
+void O_GameSendDeathPacket(void)
+{
+    pckt_t* deathPacket = PCKT_MakePlayerDeathPacket(&packetToSend);
+    
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)deathPacket, PCKT_SIZE);
         outputPcktBuffer.packetsToWrite++;
     }
     else

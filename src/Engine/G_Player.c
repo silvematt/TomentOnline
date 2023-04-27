@@ -1261,9 +1261,10 @@ void G_PlayerGainMana(float amount)
 
 void G_PlayerDeath()
 {
-    player.hasBeenInitialized = false;
-    G_SetMenu(&DeathMenu);
-    A_ChangeState(GSTATE_MENU);
+    O_GameSendDeathPacket();
+    thisPlayer.dead = true;
+
+    // Death screen will be shown when O_GameSendDeathPacket is sent
 }
 
 //-------------------------------------

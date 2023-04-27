@@ -46,10 +46,9 @@ menu_t MainMenu = {MENU_START, MainMenuElements, 6, &MainMenuElements[1]};
 
 menuelement_t DeathMenuElements[] =
 {
-    {"Restart  Game",    {220, 200, 400, 40}, CALLBACK_MAINMENU_NewGame},
-    {"Return",           {220, 250, 200, 40}, CALLBACK_ReturnToMainMenu},
+    {"Return",           {220, 250, 200, 40}, CALLBACK_ReturnToMainMenu}
 };
-menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 2, &DeathMenuElements[0]};
+menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 1, &DeathMenuElements[0]};
 
 menuelement_t OptionsMenuElements[] =
 {
@@ -287,7 +286,10 @@ void G_RenderCurrentMenuBackground(void)
 
         case MENU_DISCONNECTED:
         {
-            T_DisplayTextScaled(FONT_BLKCRY, "You have been disconnected.", 100, 80, 2.0f);
+            if(!otherPlayer.dead)
+                T_DisplayTextScaled(FONT_BLKCRY, "You have been disconnected.", 100, 80, 2.0f);
+            else
+                T_DisplayTextScaled(FONT_BLKCRY, "The other player died!", 110, 80, 2.0f);
             break;
         }
     }

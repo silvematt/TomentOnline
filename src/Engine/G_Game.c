@@ -152,25 +152,31 @@ void G_StateGameLoop(void)
         return;
     }
 
-    // Do stuff
-    G_PlayerTick();
-    G_UpdateDoors();
-    G_AIUpdate();
-    G_UpdateProjectiles();
-    G_UpdateMapPuddles();
+    // Update the game unless we're dead
+    // The game stops O_GameSendPackets sends the DeathPacket, so more frames could be processed while we wait for that
+    // thisPlayer.dead is set immediatly on death detection 
+    if(!thisPlayer.dead)
+    {
+        // Do stuff
+        G_PlayerTick();
+        G_UpdateDoors();
+        G_AIUpdate();
+        G_UpdateProjectiles();
+        G_UpdateMapPuddles();
 
-    // Update other player
-    O_GameOtherPlayerLoop();
+        // Update other player
+        O_GameOtherPlayerLoop();
 
-    P_PhysicsEndTick();
+        P_PhysicsEndTick();
 
-    // Render
-    // Creates the frame
-    R_ComposeFrame();
+        // Render
+        // Creates the frame
+        R_ComposeFrame();
 
-    // Displays it on the screen
-    R_FinishUpdate();
-
+        // Displays it on the screen
+        R_FinishUpdate();
+    }
+    
     oldTime = curTime;
 }
 
