@@ -394,7 +394,6 @@ int O_GameOnPacketIsReceived(void)
                 allDynamicSprites[cur->networkID]->hostAggro = cur->hostAggro;
                 allDynamicSprites[cur->networkID]->joinerAggro = cur->joinerAggro;
                 allDynamicSprites[cur->networkID]->canBeHit = cur->canBeHit;
-
             }
 
             break;

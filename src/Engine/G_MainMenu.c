@@ -27,17 +27,20 @@ static void CALLBACK_JOINMENU_Abort(void);
 
 static void CALLBACK_LOBBY_Ready(void);
 
+static void CALLBACK_DISCONNECTED_Leave(void);
+
+
 // ----------------------------
 // Define Menus
 // ----------------------------
 menuelement_t MainMenuElements[] =
 {
-    {"Continue",    {220, 150, 400, 40}, CALLBACK_Continue},
-    {"Host  Game",   {220, 200, 400, 40}, CALLBACK_MAINMENU_HostGame},
-    {"Join  Game",  {220, 250, 400, 40}, CALLBACK_MAINMENU_JoinGame},
-    {"Options",     {220, 300, 400, 40}, CALLBACK_MAINMENU_Options},
-    {"About",       {220, 350, 400, 40}, CALLBACK_MAINMENU_About},
-    {"Quit",        {220, 400, 400, 40}, CALLBACK_MAINMENU_Quit}
+    {"Continue",    {250, 170, 400, 40}, CALLBACK_Continue},
+    {"Host  Game",   {250, 220, 400, 40}, CALLBACK_MAINMENU_HostGame},
+    {"Join  Game",  {250, 270, 400, 40}, CALLBACK_MAINMENU_JoinGame},
+    {"Options",     {250, 320, 400, 40}, CALLBACK_MAINMENU_Options},
+    {"About",       {250, 370, 400, 40}, CALLBACK_MAINMENU_About},
+    {"Quit",        {250, 420, 400, 40}, CALLBACK_MAINMENU_Quit}
 };
 menu_t MainMenu = {MENU_START, MainMenuElements, 6, &MainMenuElements[1]};
 
@@ -90,6 +93,14 @@ menuelement_t InLobbyMenuElements[] =
 };
 menu_t InLobbyMenu = {MENU_INLOBBY, InLobbyMenuElements, 2, &InLobbyMenuElements[0]};
 
+menuelement_t DisconnectedMenuElements[] =
+{
+    {"Leave",   {220, 350, 400, 40}, CALLBACK_DISCONNECTED_Leave},
+};
+
+menu_t DisconnectedMenu = {MENU_DISCONNECTED, DisconnectedMenuElements, 1, &DisconnectedMenuElements[0]};
+
+
 menu_t* currentMenu;
 
 
@@ -107,7 +118,7 @@ void G_RenderCurrentMenuBackground(void)
     {
         case MENU_START:
         {
-            SDL_Rect titleRect = {110, 10, tomentdatapack.uiAssets[M_ASSET_TITLE]->texture->w, tomentdatapack.uiAssets[M_ASSET_TITLE]->texture->h};
+            SDL_Rect titleRect = {175, 10, tomentdatapack.uiAssets[M_ASSET_TITLE]->texture->w, tomentdatapack.uiAssets[M_ASSET_TITLE]->texture->h};
             R_BlitIntoScreenScaled(NULL, tomentdatapack.uiAssets[M_ASSET_TITLE]->texture, &titleRect);
             break;
         }
@@ -273,6 +284,12 @@ void G_RenderCurrentMenuBackground(void)
             O_LobbySendPackets();
             break;
         }
+
+        case MENU_DISCONNECTED:
+        {
+            T_DisplayTextScaled(FONT_BLKCRY, "You have been disconnected.", 100, 80, 2.0f);
+            break;
+        }
     }
 }
 
@@ -431,4 +448,10 @@ static void CALLBACK_JOINMENU_Abort(void)
 static void CALLBACK_LOBBY_Ready(void)
 {
     O_LobbySetReady(!thisPlayer.isReady);
+}
+
+static void CALLBACK_DISCONNECTED_Leave(void)
+{
+    G_SetMenu(&MainMenu);
+    A_ChangeState(GSTATE_MENU);
 }

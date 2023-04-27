@@ -138,8 +138,19 @@ void G_StateGameLoop(void)
         return;
 
     // Do Network
-    O_GameReceivePackets();
-    O_GameSendPackets();
+    int recVal  = O_GameReceivePackets();
+    int sendVal = O_GameSendPackets();
+
+    // Check for network error
+    if(recVal == PCKT_RECEIVE_RETURN_ERROR)
+    {
+        closesocket(otherPlayer.socket);
+
+        // Stop the game
+        G_SetMenu(&DisconnectedMenu);
+        A_ChangeState(GSTATE_MENU);
+        return;
+    }
 
     // Do stuff
     G_PlayerTick();

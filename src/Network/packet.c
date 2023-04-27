@@ -37,7 +37,7 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
         if(WSAGetLastError() != WSAEWOULDBLOCK)
         {
             printf("Receive Error. RecvVal = %d | WSAError: %d\n", recvVal, WSAGetLastError());
-            return 2;
+            return PCKT_RECEIVE_RETURN_ERROR;
         }
         else
             return 1;

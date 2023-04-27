@@ -61,6 +61,7 @@ extern bool wantsToAbortJoining;
 
 // Initializes network related stuff
 int NET_InitializeNet(void);
+void NET_InitializeNetPlayers(void);
 
 // Starts the procedure to host a game
 int NET_HostGameProcedure(void);

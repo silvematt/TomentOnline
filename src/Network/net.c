@@ -26,8 +26,42 @@ int NET_InitializeNet(void)
     PCKT_ZeroBuffer(&inputPcktBuffer);
     PCKT_ZeroBuffer(&outputPcktBuffer);
 
+    NET_InitializeNetPlayers();
+
     return 0;
 }
+
+void NET_InitializeNetPlayers(void)
+{
+    thisPlayer.id = 0;
+    thisPlayer.socket = -1;
+    //thisPlayer.address = 0;
+    thisPlayer.status = NETSTS_NULL;
+    thisPlayer.isHost = false;
+    thisPlayer.name[0] = '\0';
+    //thisPlayer.favoriteClass = CLASS_TANK; // The class contained in the greet packet, used to initialize the lobby state and set in the Options main menu
+    thisPlayer.selectedClass = CLASS_TANK;
+    thisPlayer.isReady = false;
+    thisPlayer.startingGame = false;
+    thisPlayer.gameStated = false;
+    thisPlayer.curWeapon = 0;
+    thisPlayer.curSpell = 0;
+
+    otherPlayer.id = 0;
+    otherPlayer.socket = -1;
+    //otherPlayer.address = 0;
+    otherPlayer.status = NETSTS_NULL;
+    otherPlayer.isHost = false;
+    otherPlayer.name[0] = '\0';
+    //otherPlayer.favoriteClass = CLASS_TANK; // The class contained in the greet packet, used to initialize the lobby state and set in the Options main menu
+    otherPlayer.selectedClass = CLASS_TANK;
+    otherPlayer.isReady = false;
+    otherPlayer.startingGame = false;
+    otherPlayer.gameStated = false;
+    otherPlayer.curWeapon = 0;
+    otherPlayer.curSpell = 0;
+}
+
 
 int NET_HostGameProcedure(void)
 {
