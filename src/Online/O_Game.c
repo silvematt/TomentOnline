@@ -517,6 +517,7 @@ int O_GameOnPacketIsReceived(void)
         case PCKTID_PLAYER_DEATH:
         {
             otherPlayer.dead = true;
+            player.hasBeenInitialized = false;
             G_SetMenu(&DisconnectedMenu);
             A_ChangeState(GSTATE_MENU);
             break;

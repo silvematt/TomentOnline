@@ -65,7 +65,9 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->animPlay = false;
     cur->animFrame = 0;
     cur->animPlayOnce = false;
-    
+
+    cur->bossPhase = 0;
+
     // Init attributes based on the sprite
     switch(cur->base.spriteID)
     {
@@ -104,10 +106,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 600.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 5.0f;
+            cur->attributes.baseDamage = 10.0f;
             cur->attributes.attackChance = 90;
             cur->attributes.criticalChance = 10;
-            cur->attributes.criticalModifier = 1.5f;
+            cur->attributes.criticalModifier = 2.0f;
             break;
 
 

@@ -140,6 +140,7 @@ typedef struct dynamicSprite_s
     bool bossPreventOpeningDoorsWhileFighting; // If this is true, when this boss will be fought the player will not be able to interact with doors
     bool bossPreventClimbingLaddersWhileFighting; // If this is true, when this boss will be fought the player will not be able to interact with ladders
     bool bossPreventActivatingTriggersWhileFighting; // If this is true, when this boss will be fought the player will not be able to interact with triggers
+    int bossPhase;
 
     bool canBeHit;
 

@@ -1395,6 +1395,14 @@ void D_InitLoadSprites(void)
         tomentdatapack.sprites[DS_SkeletonElite]->animations->animAttackSheetLength = 4;
         SDL_FreeSurface(animTemp1);
 
+        // Skeleton Resurrect
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKELETON_ELITE_RESURRECTION].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SKELETON_ELITE_RESURRECTION].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_SkeletonElite]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_SkeletonElite]->animations->animSpecial1SheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+
     }
     else
         tomentdatapack.sprites[DS_SkeletonElite]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;

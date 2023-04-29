@@ -237,9 +237,9 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
             float deltaY = (cur->base.pos.y) - cur->displayPos.y;
             float deltaZ = (cur->base.z) - cur->displayZ;
 
-            cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
-            cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
-            cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+            cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+            cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+            cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
         }
 
         // Position is updated by packets
@@ -596,9 +596,9 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             float deltaY = (cur->base.pos.y) - cur->displayPos.y;
             float deltaZ = (cur->base.z) - cur->displayZ;
 
-            cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
-            cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
-            cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+            cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+            cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+            cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
         }
 
         // Check if this AI changed grid pos
@@ -1014,9 +1014,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     float deltaY = (cur->base.pos.y) - cur->displayPos.y;
                     float deltaZ = (cur->base.z) - cur->displayZ;
 
-                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
-                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
-                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+                    cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+                    cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
                 }
 
                 // Check if this AI changed grid pos
@@ -1252,9 +1252,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     float deltaY = (cur->base.pos.y) - cur->displayPos.y;
                     float deltaZ = (cur->base.z) - cur->displayZ;
 
-                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
-                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
-                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+                    cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+                    cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
                 }
 
                 // Check if this AI changed grid pos
@@ -1454,50 +1454,117 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                             allDynamicSpritesLength = OBJECTARRAY_DEFAULT_SIZE_HIGH-5;
                         }
 
-                        // Spawn AI
-                        if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
+                        // Select from: Resurrection, Mass Resurrection and Royal Resurrection
+                        int resurrection =  rand() % (3);
+                        printf("RESURRECTION ID %d\n\n\n\n\n\n\n\n\n\n", resurrection);
+
+                        if(resurrection == 0)   // Resurrection
                         {
-                            currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
-                            G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x+1, cur->base.gridPos.y);
-                            G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                            // Spawn AI
+                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
+                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x+1, cur->base.gridPos.y);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                            O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
+                            }
+
+                            // Spawn AI
+                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
+                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x-1, cur->base.gridPos.y);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
+                            }
+
+                            // Spawn AI
+                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
+                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y+1);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, 3, true, ANIM_SPECIAL1, false);
+                            }
+
+                            // Spawn AI
+                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
+                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y-1);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, 3, true, ANIM_SPECIAL1, false);
+                            }
                         }
-
-                        // Spawn AI
-                        if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
+                        // Royal Resurrection
+                        else if(resurrection == 1)
                         {
-                            currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
-                            G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x-1, cur->base.gridPos.y);
-                            G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                            // Spawn AI
+                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
+                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x+1, cur->base.gridPos.y);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                            O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
+                            }
+                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
+                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x-1, cur->base.gridPos.y);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
+                            }
+                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
+                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x, cur->base.gridPos.y+1);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
+                            }
+                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
+                            {
+                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
+                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x, cur->base.gridPos.y-1);
+                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
+                            }
                         }
-
-                        // Spawn AI
-                        if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
+                        // Mass resurrection
+                        else if(resurrection == 2)
                         {
-                            currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
-                            G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y+1);
-                            G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                            int massResurrectionNum = 6;
+                            for(int i = 0; i < massResurrectionNum; i++)
+                            {
+                                int mGridX = (rand() % (19 - 1 + 1)) + 1;
+                                int mGridY = (rand() % (23 - 1 + 1)) + 1;
 
-                            O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, 3, true, ANIM_SPECIAL1, false);
+                                if(currentMap.dynamicSpritesLevel0[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel0[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 0, DS_Skeleton, mGridX, mGridY);
+                                    G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                                    O_GameAIInstantiate(spawned->networkID, 0, mGridX, mGridY, DS_Skeleton, true, ANIM_SPECIAL1, false);
+                                }
+                            }
                         }
-
-                        // Spawn AI
-                        if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
-                        {
-                            currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
-                            G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y-1);
-                            G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                            O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, 3, true, ANIM_SPECIAL1, false);
-                        }
-                        
                     }
 
                     if(cur->cooldowns[3]->GetTicks(cur->cooldowns[3]) > 2000)
@@ -1531,9 +1598,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     float deltaY = (cur->base.pos.y) - cur->displayPos.y;
                     float deltaZ = (cur->base.z) - cur->displayZ;
 
-                    cur->displayPos.x += (deltaX * DISPLAY_POS_SMOOTH_SPEED) * deltaTime;
-                    cur->displayPos.y += (deltaY * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
-                    cur->displayZ     += (deltaZ * DISPLAY_POS_SMOOTH_SPEED) * deltaTime; 
+                    cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+                    cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+                    cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
                 }
                 
                 // Check if this AI changed grid pos
