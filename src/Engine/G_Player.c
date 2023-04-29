@@ -1164,6 +1164,25 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 //debugRendering = !debugRendering;
             }
 
+            if(e->key.keysym.sym == SDLK_F5)
+            {
+                //debugRendering = !debugRendering;
+
+                int curx = player.position.x;
+                int cury = player.position.y;
+
+                int curz = player.z;
+                float curAngle = player.angle;
+
+                G_InitGame();
+
+                player.position.x = curx;
+                player.position.y = cury;
+                player.z = curz;
+                player.angle = curAngle;
+
+            }
+
             else if(e->key.keysym.sym == SDLK_F2)
             {
                 r_debugPathfinding = true;

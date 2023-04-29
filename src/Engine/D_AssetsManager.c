@@ -2096,15 +2096,18 @@ void D_InitLoadSkies(void)
     // Create Objects
     object_t* skyDefault = (object_t*)malloc(sizeof(object_t));
     object_t* skyRed = (object_t*)malloc(sizeof(object_t));
+    object_t* skyIcyMountains = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.skiesLength = 2; // Set length
+    tomentdatapack.skiesLength = 3; // Set length
 
     D_InitObject(skyDefault);
     D_InitObject(skyRed);
+    D_InitObject(skyIcyMountains);
 
     // Put objects in the datapack
     tomentdatapack.skies[SKY_Default1] = skyDefault;
     tomentdatapack.skies[SKY_Red1] = skyRed;
+    tomentdatapack.skies[SKY_Night] = skyRed;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -2132,9 +2135,20 @@ void D_InitLoadSkies(void)
         tomentdatapack.skies[SKY_Red1]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
     SDL_FreeSurface(temp1);
 
+    // Sky Icy Mountains
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SKY_NIGHT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SKY_NIGHT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SKY_NIGHT))
+        tomentdatapack.skies[SKY_Night]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.skies[SKY_Night]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(skyDefault, SKY_Default1, tomentdatapack.skies[SKY_Default1]->texture, NULL);
     D_SetObject(skyRed, SKY_Red1, tomentdatapack.skies[SKY_Red1]->texture, NULL);
+    D_SetObject(skyRed, SKY_Night, tomentdatapack.skies[SKY_Night]->texture, NULL);
 }
 
 void D_InitLoadPlayersFP(void)

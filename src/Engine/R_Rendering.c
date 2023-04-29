@@ -868,7 +868,7 @@ void R_RaycastPlayersLevel(int level, int x, float _rayAngle)
                 R_CeilingCasting(level+1, leveledStart, rayAngle, x, wallHeight);
         }
         // If the player is at the second floor
-        else if(level == 1 && !(currentMap.hasAbsCeiling && currentMap.absCeilingLevel == level))
+        else if(level == 1)
         {
             R_CeilingCasting(level, leveledStart, rayAngle, x, wallHeight);
         }
@@ -2258,7 +2258,7 @@ void R_DrawSprite(sprite_t* sprite, bool angled)
 {
     // Done in degrees to avoid computations (even if I could cache radians values and stuff)
     // Calculate angle and convert to degrees (*-1 makes sure it uses SDL screen space coordinates for unit circle and quadrants)
-    float angle = ((atan2(-sprite->pSpacePos.y, sprite->pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
+    float angle = sprite->angle = ((atan2(-sprite->pSpacePos.y, sprite->pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
     FIX_ANGLES_DEGREES(angle);
 
     float playerAngle = player.angle * RADIAN_TO_DEGREE;
@@ -2275,10 +2275,13 @@ void R_DrawSprite(sprite_t* sprite, bool angled)
     
     // Calculate distance and fix fisheye
     float fixedAngle = ((angle*RADIAN) - player.angle);
+    
+    FIX_ANGLES(fixedAngle);
+
     float dist = (sprite->dist * cos(fixedAngle));
 
     sprite->height = DISTANCE_TO_PROJECTION * TILE_SIZE / sprite->dist;
-    float screenZ = round(DISTANCE_TO_PROJECTION / dist*(player.z-(HALF_TILE_SIZE)));
+    float screenZ = round(DISTANCE_TO_PROJECTION / dist*(player.z-(TILE_SIZE*sprite->level)-(HALF_TILE_SIZE)));
 
     if(sprite->height <= 0)
         return;
@@ -2323,7 +2326,7 @@ void R_DrawSprite(sprite_t* sprite, bool angled)
         offset = j*TILE_SIZE/sprite->height + (UNIT_SIZE*currentFrame);
         drawX = PROJECTION_PLANE_WIDTH-(spriteX)+j-(sprite->height/2);
 
-        R_DrawStripeTexturedShaded(drawX, drawYStart-(sprite->height*sprite->level)+1, drawYEnd-(sprite->height*sprite->level)+1, tomentdatapack.sprites[sprite->spriteID]->texture,offset, yOffsetValue, sprite->height, lighting, dist, hasFog, fogFactor);
+        R_DrawStripeTexturedShaded(drawX, drawYStart, drawYEnd, tomentdatapack.sprites[sprite->spriteID]->texture,offset, yOffsetValue, sprite->height, lighting, dist, hasFog, fogFactor);
     }
 
     // Draws the center of the sprite

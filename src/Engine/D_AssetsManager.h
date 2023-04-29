@@ -91,7 +91,8 @@ typedef enum skiesObjectID_e
 {
     // 0 = Empty
     SKY_Default1 = 1,
-    SKY_Red1
+    SKY_Red1,
+    SKY_Night
 } skiesObjectID_e;
 
 // Animations of an Object
@@ -471,7 +472,8 @@ typedef enum imgIDs_e
     IMG_ID_SKILL_ANIM_DPS_SPLIT,
     IMG_ID_SWORD_PROJECTILE,
     IMG_ID_SWORD_PROJECTILE_EXPLOSION,
-    IMG_ID_SKELETON_ELITE_RESURRECTION
+    IMG_ID_SKELETON_ELITE_RESURRECTION,
+    IMG_ID_SKY_NIGHT,
 } imgIDs_e;
 
 // Archt Data

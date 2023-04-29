@@ -92,10 +92,8 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
 
         case DS_SkeletonElite:
             cur->base.name = "Royal  Skeleton";
-            cur->isBoss = true;
+            cur->isBoss = false;
             cur->bossPreventClimbingLaddersWhileFighting = true;
-            cur->bossPreventOpeningDoorsWhileFighting = true;
-            cur->bossPreventActivatingTriggersWhileFighting = false;
 
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
@@ -106,9 +104,9 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 600.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 10.0f;
+            cur->attributes.baseDamage = 20.0f;
             cur->attributes.attackChance = 90;
-            cur->attributes.criticalChance = 10;
+            cur->attributes.criticalChance = 20;
             cur->attributes.criticalModifier = 2.0f;
             break;
 

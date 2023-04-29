@@ -83,7 +83,7 @@ void G_InitGame(void)
         projectilesHead = NULL;
     }
 
-    G_ChangeMap("devmap");
+    G_ChangeMap("thefrozenend");
     
     gameTimer->Start(gameTimer);
     playerUpdatePacketsTimer->Start(playerUpdatePacketsTimer);

@@ -393,7 +393,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
     float otherDist = sqrt((cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)*(cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x) + (cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y)*(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y));
 
     // Use the correct distance between
-    float correctDist = 0;
+    float correctDist = cur->base.dist;
 
     cur->hasChanged = false;
     // Movements
@@ -478,7 +478,9 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             correctDist = otherDist;
         }
         else
+        {
             cur->path = &path; // not gonna happen anyway
+        }
             
         float deltaX = 0.0f;
         float deltaY = 0.0f; 
@@ -579,7 +581,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
 
         // Check Attack
         // If the player is at attack distance OR if he was in combat before but the AI can't reach him to close up the distance (example: casters on towers)
-        if(correctDist < AI_SPELL_ATTACK_DISTANCE || (cur->aggroedPlayer && !path.isValid))
+        if(cur->base.dist < AI_SPELL_ATTACK_DISTANCE || otherDist < AI_SPELL_ATTACK_DISTANCE  || (cur->aggroedPlayer && !path.isValid))
         {
             // In range for attacking (casting spell)
             G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
@@ -646,16 +648,6 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
         // Update collision circle
         cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
         cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
-
-        // Check Attack
-        // If the player is at attack distance OR if he was in combat before but the AI can't reach him to close up the distance (example: casters on towers)
-        correctDist = (cur->hostAggro >= cur->joinerAggro) ? otherDist : cur->base.dist; 
-        if(G_AICanAttack(cur) &&  correctDist < AI_SPELL_ATTACK_DISTANCE) //|| (cur->aggroedPlayer && !cur->path->isValid))
-        {
-            // In range for attacking (casting spell)
-            G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
-            cur->aggroedPlayer = true;
-        }
     }
 
     // Select Animation & Play it
