@@ -84,7 +84,9 @@ typedef enum spritesObjectID_e
     DS_PlayerDPS,
     S_ConcentratedHeal,
     S_SwordProjectile,
-    DS_MorgathulTheKeeper
+    DS_MorgathulTheKeeper,
+    S_MorgathulOrb,
+    DS_Kroganar
 } spritesObjectID_t;
 
 // All skies textures

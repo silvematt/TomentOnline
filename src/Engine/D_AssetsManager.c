@@ -1029,8 +1029,10 @@ void D_InitLoadSprites(void)
     object_t* spellConcentratedHeal = (object_t*)malloc(sizeof(object_t));
     object_t* spellSwordProjectile = (object_t*)malloc(sizeof(object_t));
     object_t* aiMorgathulTheKeeper = (object_t*)malloc(sizeof(object_t));
+    object_t* morgathulOrb = (object_t*)malloc(sizeof(object_t));
+    object_t* aiKroganar = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 26; // Set length
+    tomentdatapack.spritesLength = 28; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1058,6 +1060,8 @@ void D_InitLoadSprites(void)
     D_InitObject(spellConcentratedHeal);
     D_InitObject(spellSwordProjectile);
     D_InitObject(aiMorgathulTheKeeper);
+    D_InitObject(morgathulOrb);
+    D_InitObject(aiKroganar);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1086,6 +1090,8 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_ConcentratedHeal] = spellConcentratedHeal;
     tomentdatapack.sprites[S_SwordProjectile] = spellSwordProjectile;
     tomentdatapack.sprites[DS_MorgathulTheKeeper] = aiMorgathulTheKeeper;
+    tomentdatapack.sprites[S_MorgathulOrb] = morgathulOrb;
+    tomentdatapack.sprites[DS_Kroganar] = aiKroganar;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1954,6 +1960,92 @@ void D_InitLoadSprites(void)
 
     // Callback
     tomentdatapack.sprites[DS_MorgathulTheKeeper]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
+    // Spell Morgathul Orb
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_MORGATHUL_ORB].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_MORGATHUL_ORB].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SPELL_MORGATHUL_ORB))
+    {
+        tomentdatapack.sprites[S_MorgathulOrb]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[S_MorgathulOrb]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        tomentdatapack.sprites[S_MorgathulOrb]->animations->belongsTo = tomentdatapack.sprites[S_MorgathulOrb];
+
+        // Idle = Normal
+        tomentdatapack.sprites[S_MorgathulOrb]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_MorgathulOrb]->animations->animIdleSheetLength = 4;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_MORGATHUL_ORB_EXPLOSION].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_MORGATHUL_ORB_EXPLOSION].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[S_MorgathulOrb]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_MorgathulOrb]->animations->animDieSheetLength = 4;
+
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[S_MorgathulOrb]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_MorgathulOrb]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[S_MorgathulOrb]->flags, 1); // Set animated sprite bit flag to 1
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_MorgathulOrb] = 4;
+
+    // Callback
+    tomentdatapack.sprites[S_MorgathulOrb]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
+    // AI Kroganar
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_IDLE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_IDLE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_KROGANAR_IDLE))
+    {
+        tomentdatapack.sprites[DS_Kroganar]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[DS_Kroganar]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        tomentdatapack.sprites[DS_Kroganar]->animations->belongsTo = tomentdatapack.sprites[DS_Kroganar];
+
+        // Idle = Normal
+        tomentdatapack.sprites[DS_Kroganar]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animIdleSheetLength = 0;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_DEATH].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_DEATH].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animDieSheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+
+        // Skeleton Attack
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_ATTACK].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_ATTACK].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animAttackSheetLength = 3;
+        SDL_FreeSurface(animTemp1);
+
+        // Skeleton Resurrect
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_RESURRECTION].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_KROGANAR_RESURRECTION].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_Kroganar]->animations->animSpecial1SheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[DS_Kroganar]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[DS_Kroganar]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[DS_Kroganar]->flags, 2); // Set dynamic bit flag to 1
+
+    // Callback
+    tomentdatapack.sprites[DS_Kroganar]->Callback = NULL;
+
     SDL_FreeSurface(temp1);
 
     // Final sets

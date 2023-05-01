@@ -425,6 +425,10 @@ void G_UpdateProjectiles(void)
                             damage = 60.5f;
                             break;
 
+                        case S_MorgathulOrb:
+                            damage = 76.2f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -480,6 +484,10 @@ void G_UpdateProjectiles(void)
                             damage = 60.5f;
                             break;
 
+                        case S_MorgathulOrb:
+                            damage = 76.2f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -516,6 +524,10 @@ void G_UpdateProjectiles(void)
 
                         case S_SwordProjectile:
                             damage = 60.5f;
+                            break;
+
+                        case S_MorgathulOrb:
+                            damage = 76.2f;
                             break;
 
                         default:

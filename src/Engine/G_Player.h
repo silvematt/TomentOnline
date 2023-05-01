@@ -71,7 +71,8 @@ typedef enum playerSpells_e
     SPELL_FIREBALL1 = 4, // Needs to be the same as the corresponding sprite that will be instantiated as the projectile
     SPELL_ICEDART1 = 8,
     SPELL_CONCENTRATED_HEAL = 24,
-    SPELL_SWORD_PROJECTILE = 25
+    SPELL_SWORD_PROJECTILE = 25,
+    SPELL_MORGATHUL_ORB = 27
 } playerSpells_e;
 
 typedef struct player_s

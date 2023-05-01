@@ -168,14 +168,14 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->bossPreventOpeningDoorsWhileFighting = true;
             cur->bossPreventActivatingTriggersWhileFighting = true;
 
-            cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
-            cur->spellInUse = SPELL_FIREBALL1;
+            cur->BehaviourUpdate = G_AI_BehaviourMorgathulTheKeeper;
+            cur->spellInUse = SPELL_MORGATHUL_ORB;
 
-            cur->speed = 3.25f;
-            cur->attributes.maxHealth = 4250.0f;
+            cur->speed = 1.5f;
+            cur->attributes.maxHealth = 3000.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 4250.0f;
+            cur->attributes.maxMana = 3000.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 25.0f;
@@ -189,6 +189,26 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->cooldowns[2] = U_TimerCreateNew(); // Spell1 cooldown
             cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
         break;
+
+        case DS_Kroganar:
+            cur->base.name = "Kroganar";
+            cur->isBoss = false;
+            cur->bossPreventClimbingLaddersWhileFighting = true;
+
+            cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
+            
+            cur->speed = 5.0f;
+            cur->attributes.maxHealth = 800.0f;
+            cur->attributes.curHealth = cur->attributes.maxHealth;
+
+            cur->attributes.maxMana = 800.0f;
+            cur->attributes.curMana = cur->attributes.maxMana;
+
+            cur->attributes.baseDamage = 10.0f;
+            cur->attributes.attackChance = 90;
+            cur->attributes.criticalChance = 30;
+            cur->attributes.criticalModifier = 2.0f;
+            break;
 
         default:
             printf("AI with ID %d was not initalized. Setting it with base stats.\n");
