@@ -334,7 +334,7 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
         {
             if(cur->curAnimLength > 0)
                 cur->animFrame = ((int)floor(cur->animTimer->GetTicks(cur->animTimer) / cur->animSpeed) % cur->curAnimLength);
-
+            
             // Prevent loop
             if(cur->animFrame >= cur->curAnimLength-1)
             {
@@ -344,6 +344,7 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 if(cur->state == DS_STATE_ATTACKING  || cur->state == DS_STATE_SPECIAL1)
                 {
                     G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                    return;
                 }
             }
         }

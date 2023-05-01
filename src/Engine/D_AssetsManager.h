@@ -83,7 +83,8 @@ typedef enum spritesObjectID_e
     DS_PlayerHealer,
     DS_PlayerDPS,
     S_ConcentratedHeal,
-    S_SwordProjectile
+    S_SwordProjectile,
+    DS_MorgathulTheKeeper
 } spritesObjectID_t;
 
 // All skies textures
@@ -474,6 +475,18 @@ typedef enum imgIDs_e
     IMG_ID_SWORD_PROJECTILE_EXPLOSION,
     IMG_ID_SKELETON_ELITE_RESURRECTION,
     IMG_ID_SKY_NIGHT,
+    IMG_ID_MORGATHUL_IDLE,
+    IMG_ID_MORGATHUL_CAST1,
+    IMG_ID_MORGATHUL_CAST2,
+    IMG_ID_MORGATHUL_COPY_DEATH,
+    IMG_ID_MORGATHUL_DEATH,
+    IMG_ID_SPELL_MORGATHUL_ORB,
+    IMG_ID_SPELL_MORGATHUL_ORB_EXPLOSION,
+    IMG_ID_KROGANAR_IDLE,
+    IMG_ID_KROGANAR_ATTACK,
+    IMG_ID_KROGANAR_DEATH,
+    IMG_ID_KROGANAR_RESURRECTION,
+    IMG_ID_VIOLET_VOID
 } imgIDs_e;
 
 // Archt Data

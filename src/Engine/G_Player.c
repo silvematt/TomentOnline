@@ -98,7 +98,7 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 250.0f;
+                player.attributes.maxHealth = 250000000000.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 100.0f;
@@ -111,7 +111,7 @@ void G_InitPlayer(void)
 
             case CLASS_HEALER:
             {
-                player.attributes.maxHealth = 100.0f;
+                player.attributes.maxHealth = 10000000000.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 250.0f;
@@ -1164,15 +1164,14 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 //debugRendering = !debugRendering;
             }
 
+            // reloads the map (used for building maps)
             if(e->key.keysym.sym == SDLK_F5)
             {
-                //debugRendering = !debugRendering;
-
                 int curx = player.position.x;
                 int cury = player.position.y;
-
                 int curz = player.z;
                 float curAngle = player.angle;
+                float curVerticalMovement = player.verticalHeadMovement;
 
                 G_InitGame();
 
@@ -1180,7 +1179,7 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 player.position.y = cury;
                 player.z = curz;
                 player.angle = curAngle;
-
+                player.verticalHeadMovement = curVerticalMovement;
             }
 
             else if(e->key.keysym.sym == SDLK_F2)

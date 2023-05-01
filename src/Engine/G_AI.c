@@ -160,6 +160,36 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
             break;
 
+        case DS_MorgathulTheKeeper:
+
+            cur->base.name = "Morgathul  The  Keeper";
+            cur->isBoss = true;
+            cur->bossPreventClimbingLaddersWhileFighting = false;
+            cur->bossPreventOpeningDoorsWhileFighting = true;
+            cur->bossPreventActivatingTriggersWhileFighting = true;
+
+            cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
+            cur->spellInUse = SPELL_FIREBALL1;
+
+            cur->speed = 3.25f;
+            cur->attributes.maxHealth = 4250.0f;
+            cur->attributes.curHealth = cur->attributes.maxHealth;
+
+            cur->attributes.maxMana = 4250.0f;
+            cur->attributes.curMana = cur->attributes.maxMana;
+
+            cur->attributes.baseDamage = 25.0f;
+            cur->attributes.attackChance = 100;
+            cur->attributes.criticalChance = 10;
+            cur->attributes.criticalModifier = 1.5f;
+
+            // This boss has cooldowns for spells
+            cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[1] = U_TimerCreateNew(); // Fireball cooldown
+            cur->cooldowns[2] = U_TimerCreateNew(); // Spell1 cooldown
+            cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
+        break;
+
         default:
             printf("AI with ID %d was not initalized. Setting it with base stats.\n");
             cur->isBoss = false;
@@ -181,6 +211,9 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->hostAggro = 0;
     cur->joinerAggro = 0;
     cur->hasChanged = false;
+
+    // Start playing idle
+    G_AIPlayAnimationLoop(cur, ANIM_IDLE);
 
     // Add it to the dynamic sprite list
     allDynamicSprites[allDynamicSpritesLength] = cur;
@@ -283,6 +316,35 @@ void G_AIPlayAnimationOnce(dynamicSprite_t* cur, objectanimationsID_e animID)
             break;
     }
 
+    // Immediatly set the correct animation
+    switch(cur->state)
+    {
+        case DS_STATE_IDLE:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            break;
+
+        case DS_STATE_DEAD:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            break;
+
+        case DS_STATE_ATTACKING:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            break;
+
+        case DS_STATE_SPECIAL1:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
+        default:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            break;
+    }
+
     cur->animPlay = true;
 }
 
@@ -312,6 +374,35 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
         case ANIM_SPECIAL2:
             cur->state = DS_STATE_SPECIAL2;
             cur->animSpeed = ANIMATION_SPEED_DIVIDER;
+            break;
+    }
+
+    // Immediatly set the correct animation
+    switch(cur->state)
+    {
+        case DS_STATE_IDLE:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            break;
+
+        case DS_STATE_DEAD:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            break;
+
+        case DS_STATE_ATTACKING:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            break;
+
+        case DS_STATE_SPECIAL1:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
+        default:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
             break;
     }
 

@@ -1028,8 +1028,9 @@ void D_InitLoadSprites(void)
     object_t* playerCharacterDPS = (object_t*)malloc(sizeof(object_t));
     object_t* spellConcentratedHeal = (object_t*)malloc(sizeof(object_t));
     object_t* spellSwordProjectile = (object_t*)malloc(sizeof(object_t));
+    object_t* aiMorgathulTheKeeper = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 25; // Set length
+    tomentdatapack.spritesLength = 26; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1056,6 +1057,7 @@ void D_InitLoadSprites(void)
     D_InitObject(playerCharacterDPS);
     D_InitObject(spellConcentratedHeal);
     D_InitObject(spellSwordProjectile);
+    D_InitObject(aiMorgathulTheKeeper);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1083,6 +1085,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_PlayerDPS] = playerCharacterDPS;
     tomentdatapack.sprites[S_ConcentratedHeal] = spellConcentratedHeal;
     tomentdatapack.sprites[S_SwordProjectile] = spellSwordProjectile;
+    tomentdatapack.sprites[DS_MorgathulTheKeeper] = aiMorgathulTheKeeper;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1893,6 +1896,66 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_SwordProjectile]->Callback = NULL;
     SDL_FreeSurface(temp1);
 
+     // LOAD DYNAMIC
+    // AI Skeleton Lord
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_IDLE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_IDLE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_MORGATHUL_IDLE))
+    {
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->belongsTo = tomentdatapack.sprites[DS_MorgathulTheKeeper];
+
+        // Idle = Normal
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animIdleSheetLength = 4;
+
+        // Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_DEATH].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_DEATH].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animDieSheetLength = 7;
+        SDL_FreeSurface(animTemp1);
+
+        // Attack melee
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animAttackSheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+
+        // Cast spell
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animCastSpellSheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+
+        // Special: Resurrection/Copy
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1SheetLength = 7;
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1ActionFrame = 4;
+        
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[DS_MorgathulTheKeeper]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[DS_MorgathulTheKeeper]->flags, 2); // Set dynamic bit flag to 1
+
+    // Callback
+    tomentdatapack.sprites[DS_MorgathulTheKeeper]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -1917,7 +1980,7 @@ void D_InitLoadSprites(void)
     D_SetObject(playerCharacterDPS, DS_PlayerDPS, tomentdatapack.sprites[DS_PlayerDPS]->texture, NULL);
     D_SetObject(spellConcentratedHeal, S_ConcentratedHeal, tomentdatapack.sprites[S_ConcentratedHeal]->texture, NULL);
     D_SetObject(spellSwordProjectile, S_SwordProjectile, tomentdatapack.sprites[S_SwordProjectile]->texture, NULL);
-
+    D_SetObject(aiMorgathulTheKeeper, DS_MorgathulTheKeeper, tomentdatapack.sprites[DS_MorgathulTheKeeper]->texture, NULL);
 }
 
 
