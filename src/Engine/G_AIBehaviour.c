@@ -676,6 +676,11 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
             break;
 
+        case DS_STATE_SPECIAL1:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
@@ -694,8 +699,14 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             {
                 cur->animPlay = false;
 
+                // Go back to idle if it was attacking
+                if(cur->state == DS_STATE_SPECIAL1)
+                {
+                    G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                    return;
+                }
                 // Spawn the spell and go back to idle
-                if(cur->state == DS_STATE_ATTACKING)
+                else if(cur->state == DS_STATE_ATTACKING)
                 {
                     // Let only the host instance the projectile
                     if(thisPlayer.isHost)
@@ -709,7 +720,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
 
                             if(cur->joinerAggro > cur->hostAggro)
                             {
-                                projAngle = ((atan2(-(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y), (cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)))* RADIAN_TO_DEGREE)*-1 + 180;
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
                                 FIX_ANGLES_DEGREES(projAngle);
                             }
 
@@ -1712,6 +1723,11 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
             break;
 
+        case DS_STATE_SPECIAL3:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
+            break;
+
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
@@ -1749,7 +1765,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
 
                             if(cur->joinerAggro > cur->hostAggro)
                             {
-                                projAngle = ((atan2(-(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y), (cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)))* RADIAN_TO_DEGREE)*-1 + 180;
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
                                 FIX_ANGLES_DEGREES(projAngle);
                             }
 
@@ -1796,6 +1812,12 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
 
 void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 {
+    // Check phase
+    if(cur->bossPhase == 0 && cur->attributes.curHealth <= cur->attributes.maxHealth / 2)
+    {
+        cur->bossPhase = 1;
+    }
+
     switch(cur->state)
     {
         case DS_STATE_NULL:
@@ -2035,7 +2057,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
                 cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
 
-                // For seven seconds, attack melee or ranged
+                // Normal stance
                 if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 10000)
                 {
                     // Check fireball cooldown
@@ -2049,12 +2071,39 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 }
                 else
                 {
-                    G_AIPlayAnimationOnce(cur, ANIM_SPECIAL2);
-                    O_GameAIPlayAnim(cur->networkID, ANIM_SPECIAL2, true);
+                    int spell =  rand() % (2);
+
+                    // Violet void/copy
+                    if(spell == 0)
+                    {
+                        G_AIPlayAnimationOnce(cur, ANIM_SPECIAL2);
+                        O_GameAIPlayAnim(cur->networkID, ANIM_SPECIAL2, true);
+                    }
+                    // Orb Storm
+                    else if(spell == 1)
+                    {
+                        // Set counter, how many orbs the boss is going to launch
+                        if(cur->bossPhase == 0)
+                        {
+                            cur->counter1 = (rand() % (12 - 6 + 1)) + 6;
+                            cur->value1 = 500; // spell speed, one orb every 500ms
+                        }
+                        else
+                        {
+                            cur->counter1 = (rand() % (20 - 12 + 1)) + 12;
+                            cur->value1 = 250; // spell speed, one orb every 250ms
+                        }
+
+                        G_AIPlayAnimationLoop(cur, ANIM_SPECIAL3);
+                        O_GameAIPlayAnim(cur->networkID, ANIM_SPECIAL3, true);
+
+                        
+                        cur->cooldowns[3]->Start(cur->cooldowns[3]);
+                    }
+
 
                     /*
                     // Do a spell
-                    int spell =  rand() % (2);
                     
                     // Hell
                     if(spell == 0)
@@ -2150,6 +2199,8 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
         }
 
         case DS_STATE_SPECIAL1:
+        case DS_STATE_SPECIAL2:
+        case DS_STATE_SPECIAL3:
         {
             int oldGridPosX = cur->base.gridPos.x;
             int oldGridPosY = cur->base.gridPos.y;
@@ -2266,357 +2317,6 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
             
             break;
         }
-
-        case DS_STATE_SPECIAL2:
-        {
-            int oldGridPosX = cur->base.gridPos.x;
-            int oldGridPosY = cur->base.gridPos.y;
-
-            // Calculate centered pos
-            cur->base.centeredPos.x = cur->base.pos.x + (HALF_TILE_SIZE);
-            cur->base.centeredPos.y = cur->base.pos.y + (HALF_TILE_SIZE);
-
-            // Calculate runtime stuff
-            // Get Player Space pos
-            cur->base.pSpacePos.x = cur->base.centeredPos.x - player.centeredPos.x;
-            cur->base.pSpacePos.y = cur->base.centeredPos.y - player.centeredPos.y;
-
-            cur->base.gridPos.x = cur->base.centeredPos.x / TILE_SIZE;
-            cur->base.gridPos.y = cur->base.centeredPos.y / TILE_SIZE;
-
-            // Determine AI's level
-            cur->base.level = 0;
-            cur->base.level = SDL_clamp(cur->base.level, 0, MAX_N_LEVELS-1);
-
-            if(cur->verticalMovementDelta > 0 || cur->verticalMovementDelta < 0)
-                cur->base.z += cur->verticalMovementDelta * deltaTime;
-
-            cur->base.angle = ((atan2(-cur->base.pSpacePos.y, cur->base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
-            FIX_ANGLES_DEGREES(cur->base.angle);
-            
-            // Set the target as the player
-            cur->targetPos = &player.centeredPos;
-            cur->targetGridPos = &player.gridPosition;
-            cur->targetColl = &player.collisionCircle;
-
-            // Calculate the distance to player
-            cur->base.dist = sqrt(cur->base.pSpacePos.x*cur->base.pSpacePos.x + cur->base.pSpacePos.y*cur->base.pSpacePos.y);
-            cur->hasChanged = true;
-
-            if(thisPlayer.isHost)
-            {
-                // 1) Reach the center of the arena
-                if(cur->base.gridPos.x != 11 || cur->base.gridPos.y != 9)
-                {
-                    vector2Int_t targetPos = {11,9};
-                    path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, targetPos, cur);
-                    cur->path = &path;
-
-                    float deltaX = 0.0f;
-                    float deltaY = 0.0f; 
-
-                    // Check if path is valid and if there's space to follow it
-                    if(path.isValid && path.nodesLength-1 >= 0 && path.nodes[path.nodesLength-1] != NULL &&
-                        G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false)
-                    {
-                        deltaX = (path.nodes[path.nodesLength-1]->gridPos.x * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.x;
-                        deltaY = (path.nodes[path.nodesLength-1]->gridPos.y * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.y;
-
-                        // Check if we're far away from the target
-                        cur->base.pos.x += (deltaX * cur->speed) * deltaTime;
-                        cur->base.pos.y += (deltaY * cur->speed) * deltaTime; 
-
-                        // Recalculate centered pos after delta move
-                        cur->base.centeredPos.x = cur->base.pos.x + (HALF_TILE_SIZE);
-                        cur->base.centeredPos.y = cur->base.pos.y + (HALF_TILE_SIZE);
-
-                        cur->base.gridPos.x = cur->base.centeredPos.x / TILE_SIZE;
-                        cur->base.gridPos.y = cur->base.centeredPos.y / TILE_SIZE;
-
-
-                        // Check if this AI changed grid pos
-                        if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
-                        {
-                            // If the tile the AI ended up in is not occupied
-
-                            if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
-                            {
-                                // Update the dynamic map
-                                switch(cur->base.level)
-                                {
-                                    case 0:
-                                        currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
-                                        currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
-                                        break;
-                                    
-                                    case 1:
-                                        currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
-                                        currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
-                                        break;
-
-                                    case 2:
-                                        currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
-                                        currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
-                                        break;
-
-                                    default:
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                // Move back
-                                cur->base.pos.x -= (deltaX * cur->speed) * deltaTime;
-                                cur->base.pos.y -= (deltaY * cur->speed) * deltaTime; 
-
-                                cur->base.gridPos.x = oldGridPosX;
-                                cur->base.gridPos.y = oldGridPosY;
-                            }
-                        }
-                        
-                        // Update collision circle
-                        cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
-                        cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
-                    }   
-                }
-                // 2) Fly in the sky
-                else if(cur->base.z < 128 && !cur->cooldowns[3]->isStarted)
-                {
-                    // Fly
-                    cur->verticalMovementDelta = 100.0f;
-                    cur->canBeHit = false;
-                }
-                // 3) Resurrect and go down
-                else
-                {
-                    // Resurrect cooldown
-                    if(!cur->cooldowns[3]->isStarted)
-                    {
-                        cur->cooldowns[3]->Start(cur->cooldowns[3]);
-                        cur->base.z = 128;
-                        cur->verticalMovementDelta = 0;
-
-                        // Edge case, if the boss spawns over 255 minions, free up a bit of the array to allow the new to be spawned
-                        if(allDynamicSpritesLength+4 >= OBJECTARRAY_DEFAULT_SIZE_HIGH)
-                        {
-                            for(int i = OBJECTARRAY_DEFAULT_SIZE_HIGH-5; i < OBJECTARRAY_DEFAULT_SIZE_HIGH; i++)
-                            {
-                                if(allDynamicSprites[i] != NULL)
-                                    free(allDynamicSprites[i]);
-                            }
-
-                            allDynamicSpritesLength = OBJECTARRAY_DEFAULT_SIZE_HIGH-5;
-                        }
-
-                        // Select from: Resurrection, Mass Resurrection and Royal Resurrection
-                        int resurrection =  rand() % (3);
-                        printf("RESURRECTION ID %d\n\n\n\n\n\n\n\n\n\n", resurrection);
-
-                        if(resurrection == 0)   // Resurrection
-                        {
-                            // Spawn AI
-                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
-                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x+1, cur->base.gridPos.y);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
-                            }
-
-                            // Spawn AI
-                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
-                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x-1, cur->base.gridPos.y);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, 3, true, ANIM_SPECIAL1, false);
-                            }
-
-                            // Spawn AI
-                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
-                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y+1);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, 3, true, ANIM_SPECIAL1, false);
-                            }
-
-                            // Spawn AI
-                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
-                                G_AIInitialize(spawned, 0, 3, cur->base.gridPos.x, cur->base.gridPos.y-1);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, 3, true, ANIM_SPECIAL1, false);
-                            }
-                        }
-                        // Royal Resurrection
-                        else if(resurrection == 1)
-                        {
-                            // Spawn AI
-                            if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
-                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x+1, cur->base.gridPos.y);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
-                            }
-                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
-                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x-1, cur->base.gridPos.y);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
-                            }
-                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
-                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x, cur->base.gridPos.y+1);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
-                            }
-                            else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
-                            {
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
-                                G_AIInitialize(spawned, 0, DS_SkeletonElite, cur->base.gridPos.x, cur->base.gridPos.y-1);
-                                G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, DS_SkeletonElite, true, ANIM_SPECIAL1, false);
-                            }
-                        }
-                        // Mass resurrection
-                        else if(resurrection == 2)
-                        {
-                            int massResurrectionNum = 6;
-                            for(int i = 0; i < massResurrectionNum; i++)
-                            {
-                                int mGridX = (rand() % (19 - 1 + 1)) + 1;
-                                int mGridY = (rand() % (23 - 1 + 1)) + 1;
-
-                                if(currentMap.dynamicSpritesLevel0[mGridY][mGridX] == NULL)
-                                {
-                                    currentMap.dynamicSpritesLevel0[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[mGridY][mGridX];
-                                    G_AIInitialize(spawned, 0, DS_Skeleton, mGridX, mGridY);
-                                    G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
-
-                                    O_GameAIInstantiate(spawned->networkID, 0, mGridX, mGridY, DS_Skeleton, true, ANIM_SPECIAL1, false);
-                                }
-                            }
-                        }
-                    }
-
-                    if(cur->cooldowns[3]->GetTicks(cur->cooldowns[3]) > 2000)
-                    {
-                        if(cur->base.z > 0)
-                        {
-                            cur->verticalMovementDelta = -400.0f;
-                            cur->canBeHit = true;
-                        }
-                        else
-                        {
-                            cur->verticalMovementDelta = 0;
-                            cur->base.z = 0;
-                            cur->canBeHit = true;
-
-                            cur->cooldowns[0]->Start(cur->cooldowns[0]);
-                            cur->cooldowns[3]->Stop(cur->cooldowns[3]);
-                            G_AIPlayAnimationLoop(cur, ANIM_IDLE);
-                            O_GameAIPlayAnim(cur->networkID, ANIM_IDLE, true);
-                        }
-                    }
-                }
-                break;
-            }
-            else if(!thisPlayer.isHost)
-            {
-                if(cur->posArrived)
-                {
-                    // Move smoothly the other player to last known pos
-                    float deltaX = (cur->base.pos.x) - cur->displayPos.x;
-                    float deltaY = (cur->base.pos.y) - cur->displayPos.y;
-                    float deltaZ = (cur->base.z) - cur->displayZ;
-
-                    cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
-                    cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
-                    cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
-
-                    // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
-                    {
-                        player.isFightingBoss = true;
-                        player.bossFighting = cur;
-                    }
-                }
-                
-                // Check if this AI changed grid pos
-                if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
-                {
-                    // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
-                    {
-                        player.isFightingBoss = true;
-                        player.bossFighting = cur;
-                    }
-
-                    // If the tile the AI ended up in is not occupied
-                    if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
-                    {
-                        // Update the dynamic map
-                        switch(cur->base.level)
-                        {
-                            case 0:
-                                currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
-                                currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
-                                break;
-                            
-                            case 1:
-                                currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
-                                currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
-                                break;
-
-                            case 2:
-                                currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
-                                currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
-                                break;
-
-                            default:
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        // Move back
-                        cur->base.gridPos.x = oldGridPosX;
-                        cur->base.gridPos.y = oldGridPosY;
-
-                        cur->base.pos.x = cur->base.gridPos.x*TILE_SIZE;
-                        cur->base.pos.y = cur->base.gridPos.y*TILE_SIZE;
-
-                        cur->state = DS_STATE_MOVING;
-                    }
-                }
-                
-                // Update collision circle
-                cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
-                cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
-            }
-        }
     }
 
     // Select Animation & Play it
@@ -2657,6 +2357,12 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
             curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2ActionFrame;
+            break;
+
+        case DS_STATE_SPECIAL3:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3ActionFrame;
             break;
 
         default:
@@ -2718,6 +2424,28 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
         {
             if(cur->animFrame == curAnimActionFrame && thisPlayer.isHost)
             {
+                if(cur->bossPhase == 1)
+                {
+                    // Do copy as well
+                    int massResurrectionNum = 4;
+                    for(int i = 0; i < massResurrectionNum; i++)
+                    {
+                        int mGridX = (rand() % (34 - 22 + 1)) + 22;
+                        int mGridY = (rand() % (72 - 45 + 1)) + 45;
+
+                        if(currentMap.dynamicSpritesLevel0[mGridY][mGridX] == NULL)
+                        {
+                            currentMap.dynamicSpritesLevel0[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[mGridY][mGridX];
+                            G_AIInitialize(spawned, 0, DS_MorgathulCopy, mGridX, mGridY);
+                            G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+
+                            O_GameAIInstantiate(spawned->networkID, 0, mGridX, mGridY, DS_MorgathulCopy, true, ANIM_SPECIAL1, false);
+                        }
+                    }
+                }
+
+                // Do violet void
                 int puddlesLength = 64;
                 packedpuddle_t puddles[puddlesLength];
                 int count = 0;
@@ -2742,7 +2470,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 
                         if(!already)
                         {
-                            puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), cur->base.gridPos.x+x, cur->base.gridPos.y+y, false, true, 40.0f, 10000, cur->base.level, TEXTURE_VioletVoid, false);
+                            puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), cur->base.gridPos.x+x, cur->base.gridPos.y+y, false, true, 30.0f, 7500, cur->base.level, TEXTURE_VioletVoid, false);
                             count++;
                         }
                     }
@@ -2751,6 +2479,41 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 O_GameSpawnPuddles(count, puddles);
 
                 cur->cooldowns[2]->Pause(cur->cooldowns[2]);
+            }
+        }
+        // Orb storm
+        else if(cur->state == DS_STATE_SPECIAL3)
+        {
+            if(thisPlayer.isHost)
+            {
+                if(cur->cooldowns[3]->GetTicks(cur->cooldowns[3]) > cur->value1)
+                {
+                    if(cur->counter1 > 0)
+                    {
+                        float projAngle = cur->base.angle + 180;
+
+                        if(cur->joinerAggro > cur->hostAggro)
+                        {
+                            projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
+                            FIX_ANGLES_DEGREES(projAngle);
+                        }
+
+                        FIX_ANGLES_DEGREES(projAngle);
+                            
+                        uint32_t networkID = REPL_GenerateNetworkID();
+                        G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                        O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+                       
+                        cur->cooldowns[3]->Start(cur->cooldowns[3]);
+                        cur->counter1--;
+                    }
+                    else    // Exit
+                    {
+                        cur->cooldowns[0]->Start(cur->cooldowns[0]);
+                        G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                        cur->cooldowns[3]->Stop(cur->cooldowns[3]);
+                    }
+                }
             }
         }
 
@@ -2783,7 +2546,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 
                             if(cur->joinerAggro > cur->hostAggro)
                             {
-                                projAngle = ((atan2(-(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y), (cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)))* RADIAN_TO_DEGREE)*-1 + 180;
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
                                 FIX_ANGLES_DEGREES(projAngle);
                             }
 
@@ -2792,7 +2555,9 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                             uint32_t networkID = REPL_GenerateNetworkID();
                             G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
-                            projAngle += 10;
+                            
+                            // Copies cast only 1 projectile
+                            projAngle += 15;
                             FIX_ANGLES_DEGREES(projAngle);
                             
                             networkID = REPL_GenerateNetworkID();
@@ -2800,12 +2565,13 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
                             
 
-                            projAngle -= 20;
+                            projAngle -= 25;
                             FIX_ANGLES_DEGREES(projAngle);
                             
                             networkID = REPL_GenerateNetworkID();
                             G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
                             O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+                    
                         }
                         cur->cooldowns[1]->Start(cur->cooldowns[1]);
                     }
@@ -2838,5 +2604,405 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
     if(cur->isAlive && doorstateLevel0[18][11] == DState_Open && player.gridPosition.y < 17 && cur->base.gridPos.y < 17)
     {
         G_SetDoorState(0, 18, 11, DState_Closing);
+    }
+}
+
+void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur)
+{
+    int oldGridPosX = cur->base.gridPos.x;
+    int oldGridPosY = cur->base.gridPos.y;
+
+    // Calculate centered pos
+    cur->base.centeredPos.x = cur->base.pos.x + (HALF_TILE_SIZE);
+    cur->base.centeredPos.y = cur->base.pos.y + (HALF_TILE_SIZE);
+
+    // Calculate runtime stuff
+    // Get Player Space pos
+    cur->base.pSpacePos.x = cur->base.centeredPos.x - player.centeredPos.x;
+    cur->base.pSpacePos.y = cur->base.centeredPos.y - player.centeredPos.y;
+
+    cur->base.gridPos.x = cur->base.centeredPos.x / TILE_SIZE;
+    cur->base.gridPos.y = cur->base.centeredPos.y / TILE_SIZE;
+
+    // Determine AI's level
+    cur->base.level = (int)floor(cur->base.z / TILE_SIZE);
+    cur->base.level = SDL_clamp(cur->base.level, 0, MAX_N_LEVELS-1);
+
+    if(cur->verticalMovementDelta > 0 || cur->verticalMovementDelta < 0)
+        cur->base.z += cur->verticalMovementDelta * deltaTime;
+
+    cur->base.angle = ((atan2(-cur->base.pSpacePos.y, cur->base.pSpacePos.x))* RADIAN_TO_DEGREE)*-1;
+    FIX_ANGLES_DEGREES(cur->base.angle);
+    
+    // Set the target as the player
+    cur->targetPos = &player.centeredPos;
+    cur->targetGridPos = &player.gridPosition;
+    cur->targetColl = &player.collisionCircle;
+
+    // Calculate the distance to player
+    cur->base.dist = sqrt(cur->base.pSpacePos.x*cur->base.pSpacePos.x + cur->base.pSpacePos.y*cur->base.pSpacePos.y);
+    float otherDist = sqrt((cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x)*(cur->base.centeredPos.x - otherPlayerObject.base.centeredPos.x) + (cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y)*(cur->base.centeredPos.y - otherPlayerObject.base.centeredPos.y));
+
+    // Use the correct distance between
+    float correctDist = cur->base.dist;
+
+    cur->hasChanged = false;
+    // Movements
+    if(cur->isAlive && G_AICanAttack(cur) && thisPlayer.isHost)
+    {
+        // Calculate paths for both the player and the otherPlayer
+
+        // Calculate player path
+        path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, player.gridPosition, cur);
+
+        // Calculate other player path
+        path_t otherPath = G_PerformPathfinding(cur->base.level, cur->base.gridPos, otherPlayerObject.base.gridPos, cur);
+
+        // Select path
+        if(path.isValid && otherPath.isValid)
+        {
+            if(path.nodesLength <= otherPath.nodesLength)
+            {
+                // Set the target as the this player
+                cur->targetPos = &player.centeredPos;
+                cur->targetGridPos = &player.gridPosition;
+                cur->targetColl = &player.collisionCircle;
+                cur->path = &path;
+                
+                // Check if aggro changed
+                if(cur->hostAggro < cur->joinerAggro)
+                    cur->hasChanged = true;
+
+                cur->hostAggro = 10;
+                cur->joinerAggro = 0;
+
+                correctDist = cur->base.dist;
+            }
+            else
+            {
+                // Set the target as the other player
+                cur->targetPos = &otherPlayerObject.base.centeredPos;
+                cur->targetGridPos = &otherPlayerObject.base.gridPos;
+                cur->targetColl = &otherPlayerObject.base.collisionCircle;
+                cur->path = &otherPath;
+
+                // Check if aggro changed
+                if(cur->joinerAggro < cur->hostAggro)
+                    cur->hasChanged = true;
+
+                cur->hostAggro = 0;
+                cur->joinerAggro = 10;
+
+                correctDist = otherDist;
+            }
+        }
+        else if(path.isValid && !otherPath.isValid)
+        {
+            cur->targetPos = &player.centeredPos;
+            cur->targetGridPos = &player.gridPosition;
+            cur->targetColl = &player.collisionCircle;
+            cur->path = &path;        
+
+            // Check if aggro changed
+            if(cur->hostAggro < cur->joinerAggro)
+                cur->hasChanged = true;
+
+            cur->hostAggro = 10;
+            cur->joinerAggro = 0;
+
+            correctDist = cur->base.dist;
+        }
+        else if(!path.isValid && otherPath.isValid)
+        {
+            cur->targetPos = &otherPlayerObject.base.centeredPos;
+            cur->targetGridPos = &otherPlayerObject.base.gridPos;
+            cur->targetColl = &otherPlayerObject.base.collisionCircle;
+            cur->path = &otherPath;     
+
+            // Check if aggro changed
+            if(cur->joinerAggro < cur->hostAggro)
+                cur->hasChanged = true;
+
+            cur->hostAggro = 0;
+            cur->joinerAggro = 10;   
+
+            correctDist = otherDist;
+        }
+        else
+        {
+            cur->path = &path; // not gonna happen anyway
+        }
+            
+        float deltaX = 0.0f;
+        float deltaY = 0.0f; 
+
+        // Shortcut for cur->path
+        path = *cur->path;
+        // Check if path is valid and if there's space to follow it
+        if(path.isValid && path.nodesLength-1 >= 0 && path.nodes[path.nodesLength-1] != NULL &&
+            (G_CheckDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == false || G_GetFromDynamicSpriteMap(cur->base.level, path.nodes[path.nodesLength-1]->gridPos.y, path.nodes[path.nodesLength-1]->gridPos.x) == &otherPlayerObject))
+        {
+            // From here on, the AI is chasing the player so it is safe to say that they're fightingx
+            if(player.hasBeenInitialized && !cur->aggroedPlayer)
+            {
+                cur->aggroedPlayer = true;
+                cur->cooldowns[0]->Start(cur->cooldowns[0]);
+            }
+
+            // Check boss fight
+            if(!player.isFightingBoss && cur->isBoss)
+            {
+                player.isFightingBoss = true;
+                player.bossFighting = cur;
+            }
+
+            deltaX = (path.nodes[path.nodesLength-1]->gridPos.x * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.x;
+            deltaY = (path.nodes[path.nodesLength-1]->gridPos.y * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.y;
+
+            // Check if we're far away from the target
+            if(P_CheckCircleCollision(&cur->base.collisionCircle, cur->targetColl) < 0 && 
+                P_GetDistance((*cur->targetPos).x, (*cur->targetPos).y, cur->base.centeredPos.x + ((deltaX * cur->speed) * deltaTime), cur->base.centeredPos.y + ((deltaX * cur->speed) * deltaTime)) > AI_STOP_DISTANCE)
+                {
+                    cur->hasChanged = true;
+
+                    cur->base.pos.x += (deltaX * cur->speed) * deltaTime;
+                    cur->base.pos.y += (deltaY * cur->speed) * deltaTime; 
+
+                    // Recalculate centered pos after delta move
+                    cur->base.centeredPos.x = cur->base.pos.x + (HALF_TILE_SIZE);
+                    cur->base.centeredPos.y = cur->base.pos.y + (HALF_TILE_SIZE);
+
+                    cur->base.gridPos.x = cur->base.centeredPos.x / TILE_SIZE;
+                    cur->base.gridPos.y = cur->base.centeredPos.y / TILE_SIZE;
+
+                    cur->state = DS_STATE_MOVING;
+                }
+                else
+                {
+                    // Attacking
+                    cur->state = DS_STATE_IDLE;
+                }
+        }
+        else
+        {
+            cur->state = DS_STATE_IDLE;
+        }
+
+
+        // Check if this AI changed grid pos
+        if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
+        {
+            // If the tile the AI ended up in is not occupied
+
+            if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
+            {
+                // Update the dynamic map
+                switch(cur->base.level)
+                {
+                    case 0:
+                        currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+                    
+                    case 1:
+                        currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    case 2:
+                        currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // Move back
+                cur->base.pos.x -= (deltaX * cur->speed) * deltaTime;
+                cur->base.pos.y -= (deltaY * cur->speed) * deltaTime; 
+
+                cur->base.gridPos.x = oldGridPosX;
+                cur->base.gridPos.y = oldGridPosY;
+
+                cur->state = DS_STATE_MOVING;
+            }
+        }
+        
+        // Update collision circle
+        cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
+        cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
+
+        // Check Attack
+        // If the player is at attack distance OR if he was in combat before but the AI can't reach him to close up the distance (example: casters on towers)
+        if((cur->base.dist < AI_SPELL_ATTACK_DISTANCE || otherDist < AI_SPELL_ATTACK_DISTANCE  || (cur->aggroedPlayer && !path.isValid)) && 
+            cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) > 1500)
+        {
+            // In range for attacking (casting spell)
+            G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
+            O_GameAIPlayAnim(cur->networkID, ANIM_ATTACK1, false);
+            cur->aggroedPlayer = true;
+        }
+    }
+    else if(!thisPlayer.isHost)
+    {
+        // Update the displayPosition (pos is set directly when a packet arrives)
+        if(cur->posArrived)
+        {
+            // Move smoothly the other player to last known pos
+            float deltaX = (cur->base.pos.x) - cur->displayPos.x;
+            float deltaY = (cur->base.pos.y) - cur->displayPos.y;
+            float deltaZ = (cur->base.z) - cur->displayZ;
+
+            cur->displayPos.x += (deltaX * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime;
+            cur->displayPos.y += (deltaY * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+            cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
+
+            // Check boss fight
+            if(!player.isFightingBoss && cur->isBoss)
+            {
+                player.isFightingBoss = true;
+                player.bossFighting = cur;
+            }
+        }
+
+        // Check if this AI changed grid pos
+        if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
+        {
+            // If the tile the AI ended up in is not occupied
+
+            if(G_CheckDynamicSpriteMap(cur->base.level, cur->base.gridPos.y, cur->base.gridPos.x) == false)
+            {
+                // Update the dynamic map
+                switch(cur->base.level)
+                {
+                    case 0:
+                        currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel0[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+                    
+                    case 1:
+                        currentMap.dynamicSpritesLevel1[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel1[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    case 2:
+                        currentMap.dynamicSpritesLevel2[cur->base.gridPos.y][cur->base.gridPos.x] = currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX];
+                        currentMap.dynamicSpritesLevel2[oldGridPosY][oldGridPosX] = NULL;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // Move back
+                cur->base.gridPos.x = oldGridPosX;
+                cur->base.gridPos.y = oldGridPosY;
+
+                cur->base.pos.x = cur->base.gridPos.x*TILE_SIZE;
+                cur->base.pos.y = cur->base.gridPos.y*TILE_SIZE;
+
+                cur->state = DS_STATE_MOVING;
+            }
+        }
+        
+        // Update collision circle
+        cur->base.collisionCircle.pos.x = cur->base.centeredPos.x;
+        cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
+    }
+
+    // Select Animation & Play it
+    switch(cur->state)
+    {
+        case DS_STATE_IDLE:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            break;
+
+        case DS_STATE_DEAD:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            break;
+
+        case DS_STATE_ATTACKING:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            break;
+
+        case DS_STATE_SPECIAL1:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
+        default:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            break;
+    }
+
+    if(cur->animPlay)
+    {
+        if(cur->animPlayOnce)
+        {
+            if(cur->curAnimLength > 0)
+                cur->animFrame = ((int)floor(cur->animTimer->GetTicks(cur->animTimer) / cur->animSpeed) % cur->curAnimLength);
+
+            // Prevent loop
+            if(cur->animFrame >= cur->curAnimLength-1)
+            {
+                cur->animPlay = false;
+
+                // Go back to idle if it was attacking
+                if(cur->state == DS_STATE_SPECIAL1)
+                {
+                    G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                    return;
+                }
+                // Spawn the spell and go back to idle
+                else if(cur->state == DS_STATE_ATTACKING)
+                {
+                    // Let only the host instance the projectile
+                    if(thisPlayer.isHost)
+                    {
+                        // Attack chance, casters may fail spell
+                        int attack      =  (rand() % (100)) + 1;
+
+                        if(attack <= cur->attributes.attackChance)
+                        {
+                            float projAngle = cur->base.angle + 180;
+
+                            if(cur->joinerAggro > cur->hostAggro)
+                            {
+                                projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
+                                FIX_ANGLES_DEGREES(projAngle);
+                            }
+
+                            FIX_ANGLES_DEGREES(projAngle);
+
+                            uint32_t networkID = REPL_GenerateNetworkID();
+
+                            G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                            
+                            // Spawn it online
+                            O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, player.z-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+
+                            cur->cooldowns[0]->Start(cur->cooldowns[0]);
+                        }
+                    }
+
+                    G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                }
+            }
+        }
+        else
+        {
+            // Allow loop
+            if(cur->curAnimLength > 0)
+                cur->animFrame = ((int)floor(cur->animTimer->GetTicks(cur->animTimer) / cur->animSpeed) % cur->curAnimLength);
+        }
     }
 }

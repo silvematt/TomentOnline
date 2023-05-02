@@ -198,16 +198,38 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 5.0f;
-            cur->attributes.maxHealth = 1200.0f;
+            cur->attributes.maxHealth = 1250.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 1200.0f;
+            cur->attributes.maxMana = 1250.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 14.5f;
+            cur->attributes.baseDamage = 10.5f;
             cur->attributes.attackChance = 90;
             cur->attributes.criticalChance = 15;
             cur->attributes.criticalModifier = 2.0f;
+            break;
+
+        case DS_MorgathulCopy:
+            cur->base.name = "Morgathul  Copy";
+            cur->isBoss = false;
+
+            cur->BehaviourUpdate = G_AI_BehaviourMorgathulCopy;
+            cur->spellInUse = SPELL_MORGATHUL_ORB;
+
+            cur->speed = 1.5f;
+            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.curHealth = cur->attributes.maxHealth;
+
+            cur->attributes.maxMana = 100.0f;
+            cur->attributes.curMana = cur->attributes.maxMana;
+
+            cur->attributes.baseDamage = 5.0f;
+            cur->attributes.attackChance = 100;
+            cur->attributes.criticalChance = 5;
+            cur->attributes.criticalModifier = 1.5f;
+
+            cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
             break;
 
         default:
@@ -334,6 +356,11 @@ void G_AIPlayAnimationOnce(dynamicSprite_t* cur, objectanimationsID_e animID)
             cur->state = DS_STATE_SPECIAL2;
             cur->animSpeed = ANIMATION_SPEED_DIVIDER;
             break;
+
+        case ANIM_SPECIAL3:
+            cur->state = DS_STATE_SPECIAL3;
+            cur->animSpeed = ANIMATION_SPEED_DIVIDER;
+            break;
     }
 
     // Immediatly set the correct animation
@@ -357,6 +384,16 @@ void G_AIPlayAnimationOnce(dynamicSprite_t* cur, objectanimationsID_e animID)
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
+        case DS_STATE_SPECIAL2:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
+            break;
+
+        case DS_STATE_SPECIAL3:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
             break;
 
         default:
@@ -395,6 +432,11 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
             cur->state = DS_STATE_SPECIAL2;
             cur->animSpeed = ANIMATION_SPEED_DIVIDER;
             break;
+
+        case ANIM_SPECIAL3:
+            cur->state = DS_STATE_SPECIAL3;
+            cur->animSpeed = ANIMATION_SPEED_DIVIDER;
+            break;
     }
 
     // Immediatly set the correct animation
@@ -418,6 +460,16 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            break;
+
+        case DS_STATE_SPECIAL2:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
+            break;
+
+        case DS_STATE_SPECIAL3:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
             break;
 
         default:
@@ -444,7 +496,7 @@ void G_AITakeDamage(dynamicSprite_t* cur, float amount)
 
 bool G_AICanAttack(dynamicSprite_t* cur)
 {
-    return (cur->state != DS_STATE_ATTACKING && cur->state != DS_STATE_DEAD && cur->state != DS_STATE_CASTING && cur->state != DS_STATE_SPECIAL1 && cur->state != DS_STATE_SPECIAL2);
+    return (cur->state != DS_STATE_ATTACKING && cur->state != DS_STATE_DEAD && cur->state != DS_STATE_CASTING && cur->state != DS_STATE_SPECIAL1 && cur->state != DS_STATE_SPECIAL2 && cur->state != DS_STATE_SPECIAL3);
 }
 
 void G_AICheckPuddleDamage(dynamicSprite_t* ai)

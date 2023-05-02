@@ -98,7 +98,7 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 500.0f;
+                player.attributes.maxHealth = 350.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 100.0f;
@@ -111,20 +111,20 @@ void G_InitPlayer(void)
 
             case CLASS_HEALER:
             {
-                player.attributes.maxHealth = 10000000000.0f;
+                player.attributes.maxHealth = 200.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 250.0f;
                 player.attributes.curMana = player.attributes.maxMana;
 
                 G_PlayerSetWeapon(PLAYER_FP_AXE);
-                G_PlayerSetSpell(SPELL_FIREBALL1);
+                G_PlayerSetSpell(SPELL_ICEDART1);
                 break;
             }
 
             case CLASS_DPS:
             {
-                player.attributes.maxHealth = 150.0f;
+                player.attributes.maxHealth = 250.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 150.0f;
@@ -1015,6 +1015,7 @@ static void G_PlayerUIRender_OtherPlayer()
 // -----------------------------------
 void G_PlayerUIRender(void)
 {
+    //printf("COORD: %d | %d\n", player.gridPosition.x, player.gridPosition.y);
     G_PlayerUIRender_ThisPlayer();
     G_PlayerUIRender_OtherPlayer();
 

@@ -104,7 +104,8 @@ typedef enum dynamicSpriteState_e
     DS_STATE_DEAD,
     DS_STATE_CASTING,
     DS_STATE_SPECIAL1,
-    DS_STATE_SPECIAL2
+    DS_STATE_SPECIAL2,
+    DS_STATE_SPECIAL3
 } dynamicSpriteState_e;
 
 // Types of dynamic sprites
@@ -141,6 +142,8 @@ typedef struct dynamicSprite_s
     bool bossPreventClimbingLaddersWhileFighting; // If this is true, when this boss will be fought the player will not be able to interact with ladders
     bool bossPreventActivatingTriggersWhileFighting; // If this is true, when this boss will be fought the player will not be able to interact with triggers
     int bossPhase;
+    int counter1; // a counter useful to build spells on it
+    float value1; // a value useful to build spells on it
 
     bool canBeHit;
 
