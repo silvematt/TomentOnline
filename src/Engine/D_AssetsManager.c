@@ -718,8 +718,9 @@ void D_InitLoadTextures(void)
     textureObject_t* floorDirt1 = (textureObject_t*)malloc(sizeof(textureObject_t));
     textureObject_t* ice = (textureObject_t*)malloc(sizeof(textureObject_t));
     textureObject_t* iceConsacrated = (textureObject_t*)malloc(sizeof(textureObject_t));
+    textureObject_t* violetVoid = (textureObject_t*)malloc(sizeof(textureObject_t));
 
-    tomentdatapack.texturesLength = 13; // Set length
+    tomentdatapack.texturesLength = 14; // Set length
 
     D_InitTextureAsset(wallBrick1);
     D_InitTextureAsset(wallBrick1Dark);
@@ -734,6 +735,7 @@ void D_InitLoadTextures(void)
     D_InitTextureAsset(floorDirt1);
     D_InitTextureAsset(ice);
     D_InitTextureAsset(iceConsacrated);
+    D_InitTextureAsset(violetVoid);
 
     // Put objects in the datapack
     tomentdatapack.textures[TEXTURE_WallBrick1] = wallBrick1;
@@ -749,6 +751,7 @@ void D_InitLoadTextures(void)
     tomentdatapack.textures[TEXTURE_FloorDirt1] = floorDirt1;
     tomentdatapack.textures[TEXTURE_Ice] = ice;
     tomentdatapack.textures[TEXTURE_IceConsacrated] = iceConsacrated;
+    tomentdatapack.textures[TEXTURE_VioletVoid] = violetVoid;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -891,6 +894,17 @@ void D_InitLoadTextures(void)
     U_SetBit(&tomentdatapack.textures[TEXTURE_IceConsacrated]->flags, 0); // Set IsLadder = 1
     SDL_FreeSurface(temp1);
 
+    // Ice Consacrated
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_VIOLET_VOID].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_VIOLET_VOID].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_VIOLET_VOID))
+        tomentdatapack.textures[TEXTURE_VioletVoid]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.textures[TEXTURE_VioletVoid]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.textures[TEXTURE_VioletVoid]->flags, 0); // Set IsLadder = 1
+    SDL_FreeSurface(temp1);
+
     // Final sets
     wallBrick1->ID = TEXTURE_WallBrick1;
     wallBrick1Dark->ID = TEXTURE_WallBrick1Dark;
@@ -905,7 +919,7 @@ void D_InitLoadTextures(void)
     floorDirt1->ID = TEXTURE_FloorDirt1;
     ice->ID = TEXTURE_Ice;
     iceConsacrated->ID = TEXTURE_IceConsacrated;
-
+    violetVoid->ID = TEXTURE_VioletVoid;
 }
 
 void D_InitLoadWalls(void)
@@ -1950,6 +1964,15 @@ void D_InitLoadSprites(void)
         tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1SheetLength = 7;
         tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial1ActionFrame = 4;
+        
+        SDL_FreeSurface(animTemp1);
+
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial2SheetLength = 7;
+        tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->animSpecial2ActionFrame = 4;
         
         SDL_FreeSurface(animTemp1);
     }

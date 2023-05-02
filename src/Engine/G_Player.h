@@ -266,4 +266,6 @@ void G_PlayerSetSpell(playerSpells_e spellID);
 //-------------------------------------
 void G_PlayerDeath();
 
+void G_PlayerCheckPuddleDamage(void);
+
 #endif

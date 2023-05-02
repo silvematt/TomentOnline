@@ -52,7 +52,8 @@ typedef enum textureID_e
     TEXTURE_FloorBrick2,
     TEXTURE_FloorDirt1,
     TEXTURE_Ice,
-    TEXTURE_IceConsacrated
+    TEXTURE_IceConsacrated,
+    TEXTURE_VioletVoid
 } textureID_e;
 
 // All sprites

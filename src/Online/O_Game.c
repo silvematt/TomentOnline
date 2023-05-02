@@ -720,20 +720,63 @@ void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int
     }
 }
 
-void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_OBJECTS_INSTANTIATE])
+void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_ABS_SIZE])
 {
-    pckt_t* puddlePacket = PCKT_MakePuddlesInstantiatePacket(&packetToSend, length, puddles);
-    
-    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    bool done = false;
+    int indx = 0;
+
+    while(!done)
     {
-        // Store the packet in the output buffer
-        outputPcktBuffer.hasBegunWriting = TRUE;
-        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
-        outputPcktBuffer.packetsToWrite++;
-    }
-    else
-    {
-        printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnPuddles\n");
+        pckt_t* puddlePacket = PCKT_MakePuddlesInstantiatePacket(&packetToSend);
+        
+        // Create and fill the content
+        pckt_puddle_instantiate_t content;
+
+        bool needsToContinue = false;
+        int counter = 0;
+        content.length = 0;
+
+        for(int i = indx; i < length; i++)
+        {
+            if(counter < MAX_PUDDLE_OBJECTS_INSTANTIATE)
+            {
+                content.puddles[counter] = puddles[i];
+                
+                counter++;
+                content.length++;
+            }
+            else
+            {
+                needsToContinue = true;
+                counter = 0;
+                break;
+            }
+
+            indx++;
+        }
+
+        if(content.length > 0)
+        {
+            // Convert content as packet.data
+            memcpy(puddlePacket->data, &content, sizeof(content));
+
+            printf("PUDDLE PACKET MADE! LENGTH: %d\n", content.length);
+
+            if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+            {
+                // Store the packet in the output buffer
+                outputPcktBuffer.hasBegunWriting = TRUE;
+                memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)puddlePacket, PCKT_SIZE);
+                outputPcktBuffer.packetsToWrite++;
+            }
+            else
+            {
+                printf("CRITICAL ERROR: Send buffer was full when in O_GameSpawnPuddles\n");
+            }
+        }
+
+        if(!needsToContinue)
+            done = true;
     }
 }
 

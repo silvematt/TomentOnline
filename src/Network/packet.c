@@ -524,7 +524,7 @@ pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel,
     return packet;
 }
 
-pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE])
+pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet)
 {
     PCKT_Zero(packet);
     
@@ -532,18 +532,12 @@ pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpud
     packet->protocol = PROT_ID_TCP;
     packet->id = PCKTID_PUDDLES_INSTANTIATE;
 
-    // Create and fill the content
+    // Create the content
     pckt_puddle_instantiate_t content;
-    content.length = pLength;
-
-    for(int i = 0; i < pLength; i++)
-    {
-        content.puddles[i] = pPuddles[i];
-    }
-
+        
     // Convert content as packet.data
     memcpy(packet->data, &content, sizeof(content));
-
+    
     return packet;
 }
 

@@ -172,10 +172,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_MORGATHUL_ORB;
 
             cur->speed = 1.5f;
-            cur->attributes.maxHealth = 3000.0f;
+            cur->attributes.maxHealth = 2250.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 3000.0f;
+            cur->attributes.maxMana = 2250.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 25.0f;
@@ -198,15 +198,15 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 5.0f;
-            cur->attributes.maxHealth = 800.0f;
+            cur->attributes.maxHealth = 1200.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 800.0f;
+            cur->attributes.maxMana = 1200.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 10.0f;
+            cur->attributes.baseDamage = 14.5f;
             cur->attributes.attackChance = 90;
-            cur->attributes.criticalChance = 30;
+            cur->attributes.criticalChance = 15;
             cur->attributes.criticalModifier = 2.0f;
             break;
 
@@ -455,7 +455,7 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
         // If it is a networked instance, the damage needs to be dealt from the other player
         if(!cur->isNetworkedInstance && ai->isAlive)
         {
-            if(ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
+            if(cur->damagesAI && ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
             {
                 // Take puddle damage
                 G_AITakeDamage(ai, cur->damage * deltaTime);

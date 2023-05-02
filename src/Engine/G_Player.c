@@ -98,7 +98,7 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 250000000000.0f;
+                player.attributes.maxHealth = 500.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 100.0f;
@@ -258,6 +258,8 @@ void G_PlayerTick(void)
         player.state = PSTATE_CLIMBING_LADDER;
         I_PlayerLadderMovements();
     }
+
+    G_PlayerCheckPuddleDamage();
 }
 
 
@@ -632,19 +634,35 @@ void G_PlayerRender(void)
                         {
                             unsigned puddlesLength = 9;
                             packedpuddle_t puddles[puddlesLength];
+                            int count = 0;
 
-                            puddles[0] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y  , true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[1] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[2] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[3] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[4] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                            for(int x = -1; x <= 1; x++)
+                            {
+                                for(int y = -1; y <= 1; y++)
+                                {
+                                    bool already = false;
 
-                            puddles[5] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[6] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x-1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[7] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y-1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
-                            puddles[8] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+1, player.gridPosition.y+1, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                                    // Check if there is already a puddle
+                                    mappudlle_t* puddle = activeMapPuddlesHead;
+                                    while(puddle != NULL)
+                                    {
+                                        if(puddle->gridX == player.gridPosition.x+x && puddle->gridY == player.gridPosition.y+y)
+                                        {
+                                            already = true;
+                                            break;
+                                        }
+                                        puddle = puddle->next;
+                                    }
 
-                            O_GameSpawnPuddles(puddlesLength, puddles);
+                                    if(!already)
+                                    {
+                                        puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+x, player.gridPosition.y+y, true, false, 50.0f, 5000, player.level, TEXTURE_IceConsacrated, false);
+                                        count++;
+                                    }
+                                }
+                            }
+
+                            O_GameSpawnPuddles(count, puddles);
 
                             player.hasCasted = true;
                             player.hasToCast = false;
@@ -1987,5 +2005,20 @@ static void I_PlayerLadderMovements()
 
         player.hasToClimb = false;
         player.state = PSTATE_IDLE;
+    }
+}
+
+void G_PlayerCheckPuddleDamage(void)
+{
+    mappudlle_t* cur = activeMapPuddlesHead;
+    while(cur != NULL)
+    {   
+        if(cur->damagesPlayers && player.gridPosition.x == cur->gridX && player.gridPosition.y == cur->gridY)
+        {
+            // Take puddle damage
+            G_PlayerTakeDamage(cur->damage * deltaTime);
+        }
+
+        cur = cur->next;
     }
 }

@@ -170,6 +170,7 @@ typedef struct packedpuddle_t
     int previousFloorID;
 } packedpuddle_t;
 
+#define MAX_PUDDLE_ABS_SIZE 2048
 #define MAX_PUDDLE_OBJECTS_INSTANTIATE 30   //sizeof(packedpuddle_t) * 30 <= MAX_PCKT_DATA
 typedef struct pckt_puddle_instantiate_t
 {
@@ -225,7 +226,7 @@ pckt_t* PCKT_MakeAIMovementUpdatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeAIAttackPacket(pckt_t* packet, int pNetworkID, float pDamage, bool pDied);
 pckt_t* PCKT_MakeAIPlayAnimPacket(pckt_t* packet, int pNetworkID, int pAnimID, bool pLoop);
 pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel, int pGridX, int pGridY, int pSpriteID, bool pPlayAnim, int pAnimID, bool pLoop);
-pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet, int pLength, packedpuddle_t pPuddles[MAX_PUDDLE_OBJECTS_INSTANTIATE]);
+pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount);
 pckt_t* PCKT_MakePlayerDeathPacket(pckt_t* packet);
 

@@ -2036,10 +2036,10 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 cur->base.collisionCircle.pos.y = cur->base.centeredPos.y;
 
                 // For seven seconds, attack melee or ranged
-                if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 7000000)
+                if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 10000)
                 {
                     // Check fireball cooldown
-                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1500)
+                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1250)
                     {
                         // In range for attacking (casting spell)
                         G_AIPlayAnimationOnce(cur, ANIM_CAST_SPELL);
@@ -2049,6 +2049,9 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 }
                 else
                 {
+                    G_AIPlayAnimationOnce(cur, ANIM_SPECIAL2);
+                    O_GameAIPlayAnim(cur->networkID, ANIM_SPECIAL2, true);
+
                     /*
                     // Do a spell
                     int spell =  rand() % (2);
@@ -2665,7 +2668,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 
     if(cur->animPlay)
     {
-        // Check for Special 1
+        // Check for Special 1 - Resurect Kroganar
         if(cur->state == DS_STATE_SPECIAL1 && cur->cooldowns[2]->IsPaused(cur->cooldowns[2]) == false)
         {
             if(cur->animFrame == curAnimActionFrame && thisPlayer.isHost)
@@ -2706,6 +2709,46 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 
                     O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, DS_Kroganar, true, ANIM_SPECIAL1, false);
                 }
+
+                cur->cooldowns[2]->Pause(cur->cooldowns[2]);
+            }
+        }
+        // Special 2, violet void
+        else if(cur->state == DS_STATE_SPECIAL2 && cur->cooldowns[2]->IsPaused(cur->cooldowns[2]) == false)
+        {
+            if(cur->animFrame == curAnimActionFrame && thisPlayer.isHost)
+            {
+                int puddlesLength = 64;
+                packedpuddle_t puddles[puddlesLength];
+                int count = 0;
+
+                for(int x = -4; x < 4; x++)
+                {
+                    for(int y = -4; y < 4; y++)
+                    {
+                        bool already = false;
+
+                        // Check if there is already a puddle
+                        mappudlle_t* puddle = activeMapPuddlesHead;
+                        while(puddle != NULL)
+                        {
+                            if(puddle->gridX == cur->base.gridPos.x+x && puddle->gridY == cur->base.gridPos.y+y)
+                            {
+                                already = true;
+                                break;
+                            }
+                            puddle = puddle->next;
+                        }
+
+                        if(!already)
+                        {
+                            puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), cur->base.gridPos.x+x, cur->base.gridPos.y+y, false, true, 40.0f, 10000, cur->base.level, TEXTURE_VioletVoid, false);
+                            count++;
+                        }
+                    }
+                }
+
+                O_GameSpawnPuddles(count, puddles);
 
                 cur->cooldowns[2]->Pause(cur->cooldowns[2]);
             }
@@ -2771,8 +2814,15 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 }
                 else if(cur->state == DS_STATE_SPECIAL1)
                 {
-                    cur->cooldowns[2]->Start(cur->cooldowns[2]);
+                    cur->cooldowns[0]->Start(cur->cooldowns[0]);
                     G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                    cur->cooldowns[2]->Start(cur->cooldowns[2]);
+                }
+                else if(cur->state == DS_STATE_SPECIAL2)
+                {
+                    cur->cooldowns[0]->Start(cur->cooldowns[0]);
+                    G_AIPlayAnimationLoop(cur, ANIM_IDLE);
+                    cur->cooldowns[2]->Start(cur->cooldowns[2]);
                 }
             }
         }

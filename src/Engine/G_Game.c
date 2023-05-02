@@ -426,7 +426,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_MorgathulOrb:
-                            damage = 76.2f;
+                            damage = 0.0f;
                             break;
 
                         default:
@@ -645,7 +645,18 @@ void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float
 
     newNode->this.base.spriteID = id;
     newNode->this.base.sheetLength = tomentdatapack.spritesSheetsLenghtTable[id];
-    newNode->this.speed = 500.0f;
+
+    // Select speed
+    switch(id)
+    {
+        case S_MorgathulOrb:
+            newNode->this.speed = 700.0f;
+            break;
+        
+        default:
+            newNode->this.speed = 500.0f;
+            break;
+    }
 
     newNode->this.base.active = true;
     newNode->this.base.angle = angle;
