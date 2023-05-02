@@ -440,7 +440,7 @@ void G_UpdateProjectiles(void)
                         player.crosshairTimer->Start(player.crosshairTimer);
                     }
 
-                    G_AITakeDamage(sprite, damage);
+                    G_AITakeDamage(sprite, damage, true);
                     O_GameAITakeDamage(sprite->networkID, damage, sprite->isAlive != true);
 
                     cur->this.isBeingDestroyed = true;
@@ -485,7 +485,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_MorgathulOrb:
-                            damage = 76.2f;
+                            damage = 50.25f;
                             break;
 
                         default:
@@ -527,7 +527,7 @@ void G_UpdateProjectiles(void)
                             break;
 
                         case S_MorgathulOrb:
-                            damage = 76.2f;
+                            damage = 50.25f;
                             break;
 
                         default:

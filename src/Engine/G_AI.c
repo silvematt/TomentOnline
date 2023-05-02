@@ -172,10 +172,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_MORGATHUL_ORB;
 
             cur->speed = 1.5f;
-            cur->attributes.maxHealth = 2250.0f;
+            cur->attributes.maxHealth = 2500.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 2250.0f;
+            cur->attributes.maxMana = 2500.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 25.0f;
@@ -204,10 +204,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 1250.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 10.5f;
+            cur->attributes.baseDamage = 15.5f;
             cur->attributes.attackChance = 90;
             cur->attributes.criticalChance = 15;
-            cur->attributes.criticalModifier = 2.0f;
+            cur->attributes.criticalModifier = 1.25f;
             break;
 
         case DS_MorgathulCopy:
@@ -481,12 +481,14 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
     cur->animPlay = true;
 }
 
-void G_AITakeDamage(dynamicSprite_t* cur, float amount)
+void G_AITakeDamage(dynamicSprite_t* cur, float amount, bool setAggro)
 {
     if(cur != NULL && cur->isAlive)
     {
         cur->attributes.curHealth -= amount;
-        cur->aggroedPlayer = true;
+
+        if(setAggro)
+            cur->aggroedPlayer = true;
         
         // Check death
         if(cur->attributes.curHealth <= 0.0f)
@@ -510,7 +512,7 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
             if(cur->damagesAI && ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
             {
                 // Take puddle damage
-                G_AITakeDamage(ai, cur->damage * deltaTime);
+                G_AITakeDamage(ai, cur->damage * deltaTime, true);
                 O_GameAITakeDamage(ai->networkID, cur->damage * deltaTime, ai->isAlive != true);
             }
         }

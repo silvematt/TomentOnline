@@ -72,28 +72,6 @@ int O_GameInitializeOtherPlayer(void)
     otherPlayerObject.animPlay = false;
     otherPlayerObject.animFrame = 0;
     otherPlayerObject.animPlayOnce = false;
-    
-    
-    /*
-    // Absolute initialization, should not be repeted on next G_InitPlayer calls
-    if(!player.hasBeenInitialized)
-    {
-        player.attributes.maxHealth = 100.0f;
-        player.attributes.curHealth = player.attributes.maxHealth;
-        
-        player.attributes.maxMana = 100.0f;
-        player.attributes.curMana = player.attributes.maxMana;
-
-        G_PlayerSetWeapon(PLAYER_FP_HANDS);
-        G_PlayerSetSpell(SPELL_NULL);
-        player.hasBeenInitialized = true;
-
-        player.hasAxe = false;
-        player.hasGreatsword = false;
-        player.hasFireball = false;
-        player.hasIceDart = false;
-    }
-    */
    
     otherPlayerObject.state = DS_STATE_IDLE;
 
@@ -422,7 +400,7 @@ int O_GameOnPacketIsReceived(void)
             printf("Packet received! ID: %d | - Values (%d,%f,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.damage, aiPacket.died);
 
             if(allDynamicSprites[aiPacket.networkID]->isAlive)
-                G_AITakeDamage(allDynamicSprites[aiPacket.networkID], aiPacket.damage);
+                G_AITakeDamage(allDynamicSprites[aiPacket.networkID], aiPacket.damage, false);
 
             // Check our died with other players
             

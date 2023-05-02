@@ -885,9 +885,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     // From here on, the AI is chasing the player so it is safe to say that they're fighting
                     if(player.hasBeenInitialized && !cur->aggroedPlayer)
                     {
-                        cur->aggroedPlayer = true;
                         cur->cooldowns[0]->Start(cur->cooldowns[0]);
                         cur->cooldowns[1]->Start(cur->cooldowns[1]);
+                        cur->aggroedPlayer = true;
                     }
 
                     // Check boss fight
@@ -985,7 +985,6 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                         // In range for attacking (casting spell)
                         G_AIPlayAnimationOnce(cur, ANIM_CAST_SPELL);
                         O_GameAIPlayAnim(cur->networkID, ANIM_CAST_SPELL, false);
-                        cur->aggroedPlayer = true;
                     }
                     // Check Attack
                     else if(cur->base.dist < AI_MELEE_ATTACK_DISTANCE && cur->base.level == player.level && cur->hostAggro >= cur->joinerAggro)
@@ -993,7 +992,6 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                         // In range for attacking
                         G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
                         G_AIAttackPlayer(cur);
-                        cur->aggroedPlayer = true;
                     }
                 }
                 else
@@ -1094,7 +1092,6 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     // In range for attacking
                     G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
                     G_AIAttackPlayer(cur);
-                    cur->aggroedPlayer = true;
                 }
             }
             
@@ -1952,7 +1949,6 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     // From here on, the AI is chasing the player so it is safe to say that they're fighting
                     if(player.hasBeenInitialized && !cur->aggroedPlayer)
                     {
-                        cur->aggroedPlayer = true;
                         cur->cooldowns[0]->Start(cur->cooldowns[0]);
                         cur->cooldowns[1]->Start(cur->cooldowns[1]);
                         cur->cooldowns[2]->Start(cur->cooldowns[2]);
@@ -1967,8 +1963,8 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                         // Resurrect the kroganar
                         G_AIPlayAnimationOnce(cur, ANIM_SPECIAL1);
                         O_GameAIPlayAnim(cur->networkID, ANIM_SPECIAL1, true);
-
-                        return; // execute next frame
+                        cur->aggroedPlayer = true;
+                        return;
                     }
 
                     // Check boss fight
@@ -1978,12 +1974,21 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                         player.bossFighting = cur;
                     }
 
-                    deltaX = (path.nodes[path.nodesLength-1]->gridPos.x * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.x;
-                    deltaY = (path.nodes[path.nodesLength-1]->gridPos.y * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.y;
+                    // Dont get too close
+                    float pDistance = P_GetDistance((*cur->targetPos).x, (*cur->targetPos).y, cur->base.centeredPos.x + ((deltaX * cur->speed) * deltaTime), cur->base.centeredPos.y + ((deltaX * cur->speed) * deltaTime));
+                    if(pDistance > 200.0f)
+                    {
+                        deltaX = (path.nodes[path.nodesLength-1]->gridPos.x * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.x;
+                        deltaY = (path.nodes[path.nodesLength-1]->gridPos.y * TILE_SIZE + (HALF_TILE_SIZE)) - cur->base.centeredPos.y;
+                    }
+                    else
+                    {
+                        deltaX = deltaY = 0;
+                    }
 
                     // Check if we're far away from the target
                     if(P_CheckCircleCollision(&cur->base.collisionCircle, cur->targetColl) < 0 && 
-                        P_GetDistance((*cur->targetPos).x, (*cur->targetPos).y, cur->base.centeredPos.x + ((deltaX * cur->speed) * deltaTime), cur->base.centeredPos.y + ((deltaX * cur->speed) * deltaTime)) > AI_STOP_DISTANCE)
+                        pDistance > AI_STOP_DISTANCE)
                         {
                             cur->hasChanged = true;
 
@@ -2061,12 +2066,11 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 10000)
                 {
                     // Check fireball cooldown
-                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1250)
+                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1500)
                     {
                         // In range for attacking (casting spell)
                         G_AIPlayAnimationOnce(cur, ANIM_CAST_SPELL);
                         O_GameAIPlayAnim(cur->networkID, ANIM_CAST_SPELL, false);
-                        cur->aggroedPlayer = true;
                     }
                 }
                 else
@@ -2745,8 +2749,8 @@ void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur)
             // From here on, the AI is chasing the player so it is safe to say that they're fightingx
             if(player.hasBeenInitialized && !cur->aggroedPlayer)
             {
-                cur->aggroedPlayer = true;
                 cur->cooldowns[0]->Start(cur->cooldowns[0]);
+                cur->aggroedPlayer = true;
             }
 
             // Check boss fight
@@ -2843,7 +2847,6 @@ void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur)
             // In range for attacking (casting spell)
             G_AIPlayAnimationOnce(cur, ANIM_ATTACK1);
             O_GameAIPlayAnim(cur->networkID, ANIM_ATTACK1, false);
-            cur->aggroedPlayer = true;
         }
     }
     else if(!thisPlayer.isHost)

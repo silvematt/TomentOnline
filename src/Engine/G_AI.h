@@ -42,7 +42,7 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID);
 //-------------------------------------
 // Damages the AI entity
 //-------------------------------------
-void G_AITakeDamage(dynamicSprite_t* cur, float amount);
+void G_AITakeDamage(dynamicSprite_t* cur, float amount, bool setAggro);
 
 //-------------------------------------
 // True if the AI can attack

@@ -85,7 +85,6 @@ void G_InitPlayer(void)
 
         G_PlayerSetWeapon(PLAYER_FP_HANDS);
         G_PlayerSetSpell(SPELL_NULL);
-        player.hasBeenInitialized = true;
 
         player.hasAxe = false;
         player.hasGreatsword = false;
@@ -138,6 +137,7 @@ void G_InitPlayer(void)
 
         G_InitializeSkills();
     }
+
     // Rect for minimap
     SDL_Rect_Set(&player.surfaceRect, (int)player.position.x, (int)player.position.y, PLAYER_WIDTH, PLAYER_HEIGHT);
 
@@ -146,6 +146,7 @@ void G_InitPlayer(void)
 
     player.isFightingBoss = false;
     player.bossFighting = NULL;
+    player.hasBeenInitialized = true;
 
     // Do one tick
     G_PlayerTick();
@@ -1784,7 +1785,7 @@ static bool I_PlayerAttack(int attackType)
 
         if(ai->isAlive)
         {
-            G_AITakeDamage(ai, damage);
+            G_AITakeDamage(ai, damage, true);
             bool died = (ai->attributes.curHealth <= 0.0f);
             O_GameAITakeDamage(ai->networkID, damage, died);
         }
