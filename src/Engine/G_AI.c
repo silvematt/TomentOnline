@@ -527,7 +527,6 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
 
 void G_FreeDynamicSprite(dynamicSprite_t* ai)
 {
-    printf("Freeing dynamic sprite\n");
     if(!ai)
     {
         printf("Trying to free a non-existing dynamic sprite\n");

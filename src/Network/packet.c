@@ -153,7 +153,12 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
                 {
                     //pckt_t* receivedPacket = (pckt_t*)inputPcktBuffer.buffer;
                     //OnPacketIsSent must do the conversion, it may use the outputBuffer for its all purpose or allocate a pckt_t and release the outputBuffer for future use  
-                    OnPacketIsSent();
+                    int sVal = OnPacketIsSent();
+
+                    if(sVal == PCKT_SEND_AND_CLOSE)
+                    {
+                        return 1;
+                    }
 
                     // Check if there are other packets queued
                     if(outputPcktBuffer.packetsToWrite > 1)

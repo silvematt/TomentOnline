@@ -238,7 +238,10 @@ int O_GameOnPacketIsSent(void)
 
         G_SetMenu(&DeathMenu);
         A_ChangeState(GSTATE_MENU);
+        return PCKT_SEND_AND_CLOSE;
     }
+
+    return 0;
 }
 
 int O_GameOnPacketIsReceived(void)

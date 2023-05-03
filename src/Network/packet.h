@@ -12,6 +12,7 @@
 #define MAX_PCKT_DATA 1300 // sizeof the char buffer inside the packet data
 
 #define PCKT_RECEIVE_RETURN_ERROR 240
+#define PCKT_SEND_AND_CLOSE 640
 
 // Packets IDs
 #define PCKTID_GREET                1
