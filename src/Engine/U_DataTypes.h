@@ -88,6 +88,8 @@ typedef struct entityattributes_s
     float curMana;
     float maxMana;
 
+    float spellPower;   // multiplier for certain skills (healer)
+
     float baseDamage;
     int attackChance;
     int criticalChance;

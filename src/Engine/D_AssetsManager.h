@@ -88,7 +88,8 @@ typedef enum spritesObjectID_e
     DS_MorgathulTheKeeper,
     S_MorgathulOrb,
     DS_Kroganar,
-    DS_MorgathulCopy
+    DS_MorgathulCopy,
+    S_AltarSpellPower
 } spritesObjectID_t;
 
 // All skies textures
@@ -491,7 +492,8 @@ typedef enum imgIDs_e
     IMG_ID_KROGANAR_DEATH,
     IMG_ID_KROGANAR_RESURRECTION,
     IMG_ID_VIOLET_VOID,
-    IMG_ID_MORGATHUL_COPY_RESURRECTION
+    IMG_ID_MORGATHUL_COPY_RESURRECTION,
+    IMG_ID_S_ALTAR_SPELL_POWER
 } imgIDs_e;
 
 // Archt Data

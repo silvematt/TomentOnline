@@ -1949,6 +1949,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     // From here on, the AI is chasing the player so it is safe to say that they're fighting
                     if(player.hasBeenInitialized && !cur->aggroedPlayer)
                     {
+                        printf("BOSS INITIALIZED! \n\n\n\n\n\n\n");
                         cur->cooldowns[0]->Start(cur->cooldowns[0]);
                         cur->cooldowns[1]->Start(cur->cooldowns[1]);
                         cur->cooldowns[2]->Start(cur->cooldowns[2]);
@@ -1970,6 +1971,8 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     // Check boss fight
                     if(!player.isFightingBoss && cur->isBoss)
                     {
+                        printf("FIGHTING BOSS! \n\n\n\n\n\n\n");
+
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
                     }

@@ -1046,8 +1046,9 @@ void D_InitLoadSprites(void)
     object_t* morgathulOrb = (object_t*)malloc(sizeof(object_t));
     object_t* aiKroganar = (object_t*)malloc(sizeof(object_t));
     object_t* aiMorgathulCopy = (object_t*)malloc(sizeof(object_t));
+    object_t* altarSpellPower = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 29; // Set length
+    tomentdatapack.spritesLength = 30; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1078,6 +1079,7 @@ void D_InitLoadSprites(void)
     D_InitObject(morgathulOrb);
     D_InitObject(aiKroganar);
     D_InitObject(aiMorgathulCopy);
+    D_InitObject(altarSpellPower);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1109,6 +1111,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_MorgathulOrb] = morgathulOrb;
     tomentdatapack.sprites[DS_Kroganar] = aiKroganar;
     tomentdatapack.sprites[DS_MorgathulCopy] = aiMorgathulCopy;
+    tomentdatapack.sprites[S_AltarSpellPower] = altarSpellPower;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -2141,6 +2144,23 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_MorgathulCopy]->Callback = NULL;
     SDL_FreeSurface(temp1);
 
+    // Altar Health
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_ALTAR_SPELL_POWER].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_S_ALTAR_SPELL_POWER].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_S_ALTAR_SPELL_POWER))
+        tomentdatapack.sprites[S_AltarSpellPower]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.sprites[S_AltarSpellPower]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_AltarSpellPower]->flags, 0); // Set collision bit flag to 1
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_AltarSpellPower] = 0;
+
+    // Callback
+    tomentdatapack.sprites[S_AltarSpellPower]->Callback = D_CallbackUseAltar;
+    tomentdatapack.sprites[S_AltarSpellPower]->data = "SPELLPOWER";
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -2167,6 +2187,7 @@ void D_InitLoadSprites(void)
     D_SetObject(spellSwordProjectile, S_SwordProjectile, tomentdatapack.sprites[S_SwordProjectile]->texture, NULL);
     D_SetObject(aiMorgathulTheKeeper, DS_MorgathulTheKeeper, tomentdatapack.sprites[DS_MorgathulTheKeeper]->texture, NULL);
     D_SetObject(aiMorgathulCopy, DS_MorgathulCopy, tomentdatapack.sprites[DS_MorgathulCopy]->texture, NULL);
+    D_SetObject(altarSpellPower, S_AltarSpellPower, tomentdatapack.sprites[S_AltarSpellPower]->texture, NULL);
 }
 
 

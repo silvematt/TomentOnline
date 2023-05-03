@@ -456,7 +456,7 @@ void G_UpdateProjectiles(void)
                     if(cur->this.base.level == otherPlayerObject.base.level && cur->this.base.gridPos.x == otherPlayerObject.base.gridPos.x && cur->this.base.gridPos.y == otherPlayerObject.base.gridPos.y && otherplayerDist < TILE_SIZE-12)
                     {
                         // Heal other player
-                        O_GameHealOther(50.0f);
+                        O_GameHealOther(55.0f * player.attributes.spellPower);
                         cur->this.isBeingDestroyed = true;
                         G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
                         O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);

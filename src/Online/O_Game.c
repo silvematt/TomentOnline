@@ -788,6 +788,6 @@ void O_GameSendDeathPacket(void)
     }
     else
     {
-        printf("CRITICAL ERROR: Send buffer was full when in O_GameHealOther\n");
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameSendDeathPacket\n");
     }
 }

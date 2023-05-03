@@ -74,6 +74,7 @@ void G_InitPlayer(void)
     player.animPlayOnce = false;
     player.animTimer->Start(player.animTimer);
 
+
     // Absolute initialization, should not be repeted on next G_InitPlayer calls
     if(!player.hasBeenInitialized)
     {
@@ -82,6 +83,8 @@ void G_InitPlayer(void)
         
         player.attributes.maxMana = 100.0f;
         player.attributes.curMana = player.attributes.maxMana;
+
+        player.attributes.spellPower = 1.5f;
 
         G_PlayerSetWeapon(PLAYER_FP_HANDS);
         G_PlayerSetSpell(SPELL_NULL);
@@ -536,7 +539,7 @@ void G_PlayerRender(void)
                         // Gain health
                         if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
                         {
-                            G_PlayerGainHealth(20.0f);
+                            G_PlayerGainHealth(20.0f * player.attributes.spellPower);
                             player.hasCasted = true;
                             player.hasToCast = false;
                         }
@@ -676,8 +679,8 @@ void G_PlayerRender(void)
                         // Attack
                         if(player.animFrame == curAnimActionFrame && player.hasToCast && !player.hasCasted)
                         {
-                            G_PlayerGainHealth(100.0f);
-                            O_GameHealOther(100.0f);
+                            G_PlayerGainHealth(100.0f * player.attributes.spellPower);
+                            O_GameHealOther(100.0f    * player.attributes.spellPower);
 
                             player.hasCasted = true;
                             player.hasToCast = false;

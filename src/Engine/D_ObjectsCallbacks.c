@@ -204,4 +204,12 @@ void D_CallbackUseAltar(char* data)
         alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-30, ALERT_MESSAGE_DEF_Y, "You pray to the Altar\nand your mana increases.", 3.0f, 1.0f);
     }
+    else if (strcmp(data, "SPELLPOWER") == 0)
+    {
+        printf("Praying to a Spell Power Altar...\n");
+        player.attributes.spellPower += 0.5f;
+
+        alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
+        R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-30, ALERT_MESSAGE_DEF_Y, "You pray to the Altar\nand your spell power increases.", 3.0f, 1.0f);
+    }
 }
