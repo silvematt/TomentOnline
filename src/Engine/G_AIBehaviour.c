@@ -2069,7 +2069,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 if(cur->cooldowns[0]->GetTicks(cur->cooldowns[0]) < 10000)
                 {
                     // Check fireball cooldown
-                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1500)
+                    if(cur->cooldowns[1]->GetTicks(cur->cooldowns[1]) > 1850)
                     {
                         // In range for attacking (casting spell)
                         G_AIPlayAnimationOnce(cur, ANIM_CAST_SPELL);
