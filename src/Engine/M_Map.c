@@ -161,23 +161,42 @@ void M_LoadMapAsCurrent(char* mapID)
 // -------------------------------
 void M_LoadObjectTMap(void)
 {
-      for(int i = 0; i < allDynamicSpritesLength; i++)
-            if(allDynamicSprites[i])
-                  free(allDynamicSprites[i]);
+      allDynamicSpritesLength = 0;
 
       // Clear maps
       for(int y = 0; y < MAP_HEIGHT; y++)
             for(int x = 0; x < MAP_WIDTH; x++)
                   {
+                        if(currentMap.dynamicSpritesLevel0[y][x])
+                              G_FreeDynamicSprite(currentMap.dynamicSpritesLevel0[y][x]);
+
                         currentMap.dynamicSpritesLevel0[y][x] = NULL;
+
+                        if(currentMap.dynamicSpritesLevel1[y][x])
+                              G_FreeDynamicSprite(currentMap.dynamicSpritesLevel1[y][x]);
+
                         currentMap.dynamicSpritesLevel1[y][x] = NULL;
+
+                        if(currentMap.dynamicSpritesLevel2[y][x])
+                              G_FreeDynamicSprite(currentMap.dynamicSpritesLevel2[y][x]);
+
                         currentMap.dynamicSpritesLevel2[y][x] = NULL;
+
+                        if(currentMap.deadDynamicSpritesLevel0[y][x])
+                              G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel0[y][x]);
+
                         currentMap.deadDynamicSpritesLevel0[y][x] = NULL;
+
+                        if(currentMap.deadDynamicSpritesLevel1[y][x])
+                              G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel1[y][x]);
+
                         currentMap.deadDynamicSpritesLevel1[y][x] = NULL;
+
+                        if(currentMap.deadDynamicSpritesLevel2[y][x])
+                              G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel2[y][x]);
+
                         currentMap.deadDynamicSpritesLevel2[y][x] = NULL;
                   }
-
-      allDynamicSpritesLength = 0;
       
       for(int y = 0; y < MAP_HEIGHT; y++)
             for(int x = 0; x < MAP_WIDTH; x++)

@@ -321,9 +321,6 @@ int O_LobbyOnPacketIsSent(void)
             printf("Starting the game.\n");
 
             // Load game
-            // Initialize the player
-            player.hasBeenInitialized = false;
-
             G_InitGame();
             A_ChangeState(GSTATE_GAME);
             break;

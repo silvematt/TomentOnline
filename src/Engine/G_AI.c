@@ -19,6 +19,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     // Check if there's room for this ai
     if(allDynamicSpritesLength+1 >= OBJECTARRAY_DEFAULT_SIZE_HIGH)
     {
+        printf("Cannot initialize AI, dynamic sprites length: %d\n", allDynamicSpritesLength);
         free (cur);
         return;
     }
@@ -519,4 +520,21 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
 
         cur = cur->next;
     }
+}
+
+void G_FreeDynamicSprite(dynamicSprite_t* ai)
+{
+    if(!ai)
+    {
+        printf("Trying to free a non-existing dynamic sprite\n");
+        ai = NULL;
+        return;
+    }
+
+    for(int i = 0; i < AI_MAX_SPELLS; i++)
+        if(ai->cooldowns[i])
+            free(ai->cooldowns[i]);
+
+    free(ai);
+    ai = NULL;
 }

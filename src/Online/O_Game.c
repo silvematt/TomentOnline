@@ -236,7 +236,6 @@ int O_GameOnPacketIsSent(void)
     {
         closesocket(otherPlayer.socket);
 
-        player.hasBeenInitialized = false;
         G_SetMenu(&DeathMenu);
         A_ChangeState(GSTATE_MENU);
     }
@@ -495,7 +494,7 @@ int O_GameOnPacketIsReceived(void)
         case PCKTID_PLAYER_DEATH:
         {
             otherPlayer.dead = true;
-            player.hasBeenInitialized = false;
+            
             G_SetMenu(&DisconnectedMenu);
             A_ChangeState(GSTATE_MENU);
             break;

@@ -81,4 +81,6 @@ void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float
 void G_UpdateMapPuddles(void);
 packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID, bool isNetworkInstance);
 
+void G_ResetGame(void);
+
 #endif

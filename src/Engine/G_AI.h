@@ -57,4 +57,6 @@ void G_AIAttackPlayer(dynamicSprite_t* cur);
 
 void G_AICheckPuddleDamage(dynamicSprite_t* ai);
 
+void G_FreeDynamicSprite(dynamicSprite_t* ai);
+
 #endif

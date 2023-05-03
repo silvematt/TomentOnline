@@ -2378,46 +2378,46 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
 
     if(cur->animPlay)
     {
-        // Check for Special 1 - Resurect Kroganar
+        // Check for Special 1 - Resurrect Kroganar
         if(cur->state == DS_STATE_SPECIAL1 && cur->cooldowns[2]->IsPaused(cur->cooldowns[2]) == false)
         {
             if(cur->animFrame == curAnimActionFrame && thisPlayer.isHost)
             {
-                if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] == NULL)
+                if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+2][cur->base.gridPos.x] == NULL)
                 {
-                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+1][cur->base.gridPos.x];
-                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x, cur->base.gridPos.y+1);
+                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+2][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y+2][cur->base.gridPos.x];
+                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x, cur->base.gridPos.y+2);
                     G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+1, DS_Kroganar, true, ANIM_SPECIAL1, false);
+                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y+2, DS_Kroganar, true, ANIM_SPECIAL1, false);
                 }
-                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] == NULL)
+                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-2][cur->base.gridPos.x] == NULL)
                 {
-                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-1][cur->base.gridPos.x];
-                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x, cur->base.gridPos.y-1);
+                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-2][cur->base.gridPos.x] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y-2][cur->base.gridPos.x];
+                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x, cur->base.gridPos.y-2);
                     G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-1, DS_Kroganar, true, ANIM_SPECIAL1, false);
+                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x, cur->base.gridPos.y-2, DS_Kroganar, true, ANIM_SPECIAL1, false);
                 }
-                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] == NULL)
+                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+2] == NULL)
                 {
-                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+1];
-                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x+1, cur->base.gridPos.y);
+                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+2] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x+2];
+                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x+2, cur->base.gridPos.y);
                     G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+1, cur->base.gridPos.y, DS_Kroganar, true, ANIM_SPECIAL1, false);
+                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x+2, cur->base.gridPos.y, DS_Kroganar, true, ANIM_SPECIAL1, false);
                 }
-                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] == NULL)
+                else if(currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-2] == NULL)
                 {
-                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-1];
-                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x-1, cur->base.gridPos.y);
+                    currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-2] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[cur->base.gridPos.y][cur->base.gridPos.x-2];
+                    G_AIInitialize(spawned, 0, DS_Kroganar, cur->base.gridPos.x-2, cur->base.gridPos.y);
                     G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-1, cur->base.gridPos.y, DS_Kroganar, true, ANIM_SPECIAL1, false);
+                    O_GameAIInstantiate(spawned->networkID, 0, cur->base.gridPos.x-2, cur->base.gridPos.y, DS_Kroganar, true, ANIM_SPECIAL1, false);
                 }
 
                 cur->cooldowns[2]->Pause(cur->cooldowns[2]);
