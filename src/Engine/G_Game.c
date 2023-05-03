@@ -92,6 +92,7 @@ void G_InitGame(void)
         {
             mappudlle_t* tmp = current;
             current = current->next;
+            free(tmp->timer);
             free(tmp);
         }
         

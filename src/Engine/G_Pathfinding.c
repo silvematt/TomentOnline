@@ -2,6 +2,7 @@
 #include "R_Rendering.h"
 #include "SDL.h"
 #include "G_Player.h"
+#include "G_AI.h"
 #include "../Online/O_Game.h"
 
 pathnode_t frontier[MAP_HEIGHT*MAP_WIDTH+2];
@@ -432,14 +433,23 @@ void G_AddToDeadDynamicSpriteMap(dynamicSprite_t* cur, int level, int y, int x)
         switch(level)
         {
             case 0:
+                if(currentMap.deadDynamicSpritesLevel0[y][x] != NULL)
+                    G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel0[y][x]);
+
                 (currentMap.deadDynamicSpritesLevel0[y][x]) = cur;
                 break;
 
             case 1:
+                if(currentMap.deadDynamicSpritesLevel1[y][x] != NULL)
+                    G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel1[y][x]);
+
                 (currentMap.deadDynamicSpritesLevel1[y][x]) = cur;
                 break;
 
             case 2:
+                if(currentMap.deadDynamicSpritesLevel2[y][x] != NULL)
+                    G_FreeDynamicSprite(currentMap.deadDynamicSpritesLevel2[y][x]);
+
                 (currentMap.deadDynamicSpritesLevel2[y][x]) = cur;
                 break;
 

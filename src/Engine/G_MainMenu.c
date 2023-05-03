@@ -203,7 +203,17 @@ void G_RenderCurrentMenuBackground(void)
             {
                 T_DisplayTextScaled(FONT_BLKCRY, "Retrieving info...", 210, 80, 2.0f);
 
-                PCKT_ReceivePacket(NET_HostGameWaitForGreet);
+                int recVal = PCKT_ReceivePacket(NET_HostGameWaitForGreet);
+                // Check for network error
+                if(recVal == PCKT_RECEIVE_RETURN_ERROR)
+                {
+                    closesocket(otherPlayer.socket);
+
+                    // Stop the game
+                    G_SetMenu(&DisconnectedMenu);
+                    A_ChangeState(GSTATE_MENU);
+                    return;
+                }
             }
             // If he has greet, send our greet and when that is done, set the status = NETSTS_GREETEED (in this case NETSTS_HAVE_TO_GREET is referred to us)
             else if(otherPlayer.status == NETSTS_HAVE_TO_GREET)
@@ -260,7 +270,17 @@ void G_RenderCurrentMenuBackground(void)
             else if(otherPlayer.status == NETSTS_HAVE_TO_GREET)
             {
                 // Receive the other player's greet packet until NET_JoinGameWaitForGreet sets otherPlayer.status to NETSTS_GREETED
-                PCKT_ReceivePacket(NET_JoinGameWaitForGreet);
+                int recVal = PCKT_ReceivePacket(NET_JoinGameWaitForGreet);
+                // Check for network error
+                if(recVal == PCKT_RECEIVE_RETURN_ERROR)
+                {
+                    closesocket(otherPlayer.socket);
+
+                    // Stop the game
+                    G_SetMenu(&DisconnectedMenu);
+                    A_ChangeState(GSTATE_MENU);
+                    return;
+                }
             }
             else if(otherPlayer.status == NETSTS_GREETED)
             {
@@ -275,7 +295,17 @@ void G_RenderCurrentMenuBackground(void)
         case MENU_INLOBBY:
         {
             // Receive packets (wait for readypacket, class changes)
-            O_LobbyReceivePackets();
+            int recVal = O_LobbyReceivePackets();
+            // Check for network error
+            if(recVal == PCKT_RECEIVE_RETURN_ERROR)
+            {
+                closesocket(otherPlayer.socket);
+
+                // Stop the game
+                G_SetMenu(&DisconnectedMenu);
+                A_ChangeState(GSTATE_MENU);
+                return;
+            }
 
             O_LobbyRender();
 

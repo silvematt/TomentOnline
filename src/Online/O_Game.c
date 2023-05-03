@@ -402,7 +402,8 @@ int O_GameOnPacketIsReceived(void)
                 G_AITakeDamage(allDynamicSprites[aiPacket.networkID], aiPacket.damage, false);
 
             // Check our died with other players
-            
+            if(allDynamicSprites[aiPacket.networkID]->isAlive && aiPacket.died)
+                G_AIDie(allDynamicSprites[aiPacket.networkID]);
             break;
         }
 
