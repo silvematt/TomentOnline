@@ -83,6 +83,21 @@ void G_InitGame(void)
         projectilesHead = NULL;
     }
 
+    // Empty puddles list
+    if(activeMapPuddlesHead != NULL)
+    {
+        mappudlle_t* current = activeMapPuddlesHead;
+
+        while(current != NULL)
+        {
+            mappudlle_t* tmp = current;
+            current = current->next;
+            free(tmp);
+        }
+        
+        activeMapPuddlesHead = NULL;
+    }
+
     G_ChangeMap("thefrozenend");
     
     gameTimer->Start(gameTimer);

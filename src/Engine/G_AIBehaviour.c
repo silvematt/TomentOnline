@@ -133,7 +133,7 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
                 cur->aggroedPlayer = true;
 
             // Check boss fight
-            if(!player.isFightingBoss && cur->isBoss)
+            if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
             {
                 player.isFightingBoss = true;
                 player.bossFighting = cur;
@@ -495,7 +495,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             // From here on, the AI is chasing the player so it is safe to say that they're fighting
 
             // Check boss fight
-            if(!player.isFightingBoss && cur->isBoss)
+            if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
             {
                 player.isFightingBoss = true;
                 player.bossFighting = cur;
@@ -604,7 +604,7 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur)
             cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
             // Check boss fight
-            if(!player.isFightingBoss && cur->isBoss)
+            if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
             {
                 player.isFightingBoss = true;
                 player.bossFighting = cur;
@@ -891,7 +891,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     }
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1028,7 +1028,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1039,7 +1039,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1272,7 +1272,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1283,7 +1283,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1625,7 +1625,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                     cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1636,7 +1636,7 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -1955,7 +1955,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                         cur->cooldowns[2]->Start(cur->cooldowns[2]);
 
                          // Check boss fight
-                        if(!player.isFightingBoss && cur->isBoss)
+                        if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                         {
                             player.isFightingBoss = true;
                             player.bossFighting = cur;
@@ -1969,7 +1969,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     }
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         printf("FIGHTING BOSS! \n\n\n\n\n\n\n");
 
@@ -2142,7 +2142,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -2153,7 +2153,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -2262,7 +2262,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                     cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -2273,7 +2273,7 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
                 if(!(oldGridPosX == cur->base.gridPos.x && oldGridPosY == cur->base.gridPos.y))
                 {
                     // Check boss fight
-                    if(!player.isFightingBoss && cur->isBoss)
+                    if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
                     {
                         player.isFightingBoss = true;
                         player.bossFighting = cur;
@@ -2757,7 +2757,7 @@ void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur)
             }
 
             // Check boss fight
-            if(!player.isFightingBoss && cur->isBoss)
+            if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
             {
                 player.isFightingBoss = true;
                 player.bossFighting = cur;
@@ -2867,7 +2867,7 @@ void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur)
             cur->displayZ     += (deltaZ * (cur->speed + DISPLAY_POS_SMOOTH_SPEED)) * deltaTime; 
 
             // Check boss fight
-            if(!player.isFightingBoss && cur->isBoss)
+            if(!player.isFightingBoss && cur->isBoss && cur->isAlive)
             {
                 player.isFightingBoss = true;
                 player.bossFighting = cur;
