@@ -43,7 +43,7 @@ int PCKT_ReceivePacket(int (*OnPacketArrives)(void))
             return 1;
     }
 
-    printf("Receive val: %d\n", recvVal);
+    //printf("Receive val: %d\n", recvVal);
 
     bool allConsumed = false;
     while(!allConsumed)
@@ -145,7 +145,7 @@ int PCKT_SendPacket(int (*OnPacketIsSent)(void))
                     return 1;
             }
 
-            printf("%d Sent!\n", sendVal);
+            //printf("%d Sent!\n", sendVal);
 
             if(sendVal > 0)
             {

@@ -253,7 +253,7 @@ int O_GameOnPacketIsReceived(void)
 
     pckt_t* receivedPacket = (pckt_t*)thisPcktBuffer;
 
-    printf("Packet received! ID: %d\n", receivedPacket->id);
+    //printf("Packet received! ID: %d\n", receivedPacket->id);
 
     switch(receivedPacket->id)
     {
@@ -263,7 +263,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_playerupdate_t playerPacket;
             memcpy(&playerPacket, receivedPacket->data, sizeof(playerPacket));
 
-            printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, playerPacket.x, playerPacket.y, playerPacket.angle);
+            //printf("Packet received! ID: %d | - Values (%f,%f,%f)\n", receivedPacket->id, playerPacket.x, playerPacket.y, playerPacket.angle);
 
             // Update other player position
             otherPlayerObject.lastPosX = playerPacket.x;
@@ -289,7 +289,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_door_change_t doorPacket;
             memcpy(&doorPacket, receivedPacket->data, sizeof(doorPacket));
 
-            printf("Packet received! ID: %d | - Values (%d,%d,%d,%d)\n", receivedPacket->id, doorPacket.level, doorPacket.x, doorPacket.y, doorPacket.state);
+            //printf("Packet received! ID: %d | - Values (%d,%d,%d,%d)\n", receivedPacket->id, doorPacket.level, doorPacket.x, doorPacket.y, doorPacket.state);
 
             // Update doors
             switch(doorPacket.level)
@@ -315,7 +315,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_pickup_picked_t pickupPacket;
             memcpy(&pickupPacket, receivedPacket->data, sizeof(pickupPacket));
 
-            printf("Packet received! ID: %d | - Values (%d,%d,%d)\n", receivedPacket->id, pickupPacket.level, pickupPacket.x, pickupPacket.y);
+            //printf("Packet received! ID: %d | - Values (%d,%d,%d)\n", receivedPacket->id, pickupPacket.level, pickupPacket.x, pickupPacket.y);
 
             R_SetValueFromSpritesMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
             R_SetValueFromCollisionMap(pickupPacket.level, pickupPacket.y, pickupPacket.x, 0);
@@ -329,7 +329,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_projectile_spawn_t projectilePacket;
             memcpy(&projectilePacket, receivedPacket->data, sizeof(projectilePacket));
 
-            printf("Packet received! ID: %d | Value: %d\n", receivedPacket->id, projectilePacket.length);
+            //printf("Packet received! ID: %d | Value: %d\n", receivedPacket->id, projectilePacket.length);
 
             for(int i = 0; i < projectilePacket.length; i++)
             {
@@ -345,7 +345,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_projectile_destr_t projectilePacket;
             memcpy(&projectilePacket, receivedPacket->data, sizeof(projectilePacket));
 
-            printf("Packet received! ID: %d\n", receivedPacket->id);
+            //printf("Packet received! ID: %d\n", receivedPacket->id);
 
             projectileNode_t* cur = projectilesHead;
             int i = 0;
@@ -375,7 +375,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_aimovementupdate_t aiPacket;
             memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
 
-            printf("Packet received! ID: %d - Length: %d\n", receivedPacket->id, aiPacket.length);
+            //printf("Packet received! ID: %d - Length: %d\n", receivedPacket->id, aiPacket.length);
 
             for(int i = 0; i < aiPacket.length; i++)
             {
@@ -399,7 +399,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_aiattacked_t aiPacket;
             memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
 
-            printf("Packet received! ID: %d | - Values (%d,%f,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.damage, aiPacket.died);
+            //printf("Packet received! ID: %d | - Values (%d,%f,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.damage, aiPacket.died);
 
             if(allDynamicSprites[aiPacket.networkID]->isAlive)
                 G_AITakeDamage(allDynamicSprites[aiPacket.networkID], aiPacket.damage, false);
@@ -416,7 +416,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_aiplayanim_t aiPacket;
             memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
 
-            printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.anim);
+            //printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.anim);
 
             if(allDynamicSprites[aiPacket.networkID]->isAlive)
             {
@@ -437,7 +437,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_aiinstantiate_t aiPacket;
             memcpy(&aiPacket, receivedPacket->data, sizeof(aiPacket));
 
-            printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.spriteID);
+            //printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.spriteID);
 
             // Spawn AI
             if(currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] != NULL)
@@ -472,7 +472,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_puddle_instantiate_t puddlePacket;
             memcpy(&puddlePacket, receivedPacket->data, sizeof(puddlePacket));
 
-            printf("Packet received! ID: %d | - Values (%d)\n", receivedPacket->id, puddlePacket.length);
+            //("Packet received! ID: %d | - Values (%d)\n", receivedPacket->id, puddlePacket.length);
 
             for(int i = 0; i < puddlePacket.length; i++)
             {
@@ -489,7 +489,7 @@ int O_GameOnPacketIsReceived(void)
             pckt_heal_other_t healPacket;
             memcpy(&healPacket, receivedPacket->data, sizeof(healPacket));
 
-            printf("Packet received! ID: %d | - Values (%f)\n", receivedPacket->id, healPacket.healAmount);
+            //printf("Packet received! ID: %d | - Values (%f)\n", receivedPacket->id, healPacket.healAmount);
 
             G_PlayerGainHealth(healPacket.healAmount);
             break;
@@ -629,7 +629,7 @@ void O_GameSendAIUpdate(void)
             // Convert content as packet.data
             memcpy(aiMovementPacket->data, &content, sizeof(content));
 
-            printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", content.length);
+            //printf("AI MOVEMENT PACKET MADE! LENGTH: %d\n", content.length);
 
             if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
             {
@@ -741,7 +741,7 @@ void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_ABS_SIZE])
             // Convert content as packet.data
             memcpy(puddlePacket->data, &content, sizeof(content));
 
-            printf("PUDDLE PACKET MADE! LENGTH: %d\n", content.length);
+            //printf("PUDDLE PACKET MADE! LENGTH: %d\n", content.length);
 
             if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
             {

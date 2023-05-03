@@ -66,6 +66,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->animPlay = false;
     cur->animFrame = 0;
     cur->animPlayOnce = false;
+    cur->posArrived = false;
 
     for(int i = 0; i < AI_MAX_SPELLS; i++)
         (cur->cooldowns[i]) = NULL;
