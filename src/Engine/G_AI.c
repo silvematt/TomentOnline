@@ -67,6 +67,9 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->animFrame = 0;
     cur->animPlayOnce = false;
 
+    for(int i = 0; i < AI_MAX_SPELLS; i++)
+        (cur->cooldowns[i]) = NULL;
+
     cur->bossPhase = 0;
 
     // Init attributes based on the sprite
@@ -524,6 +527,7 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
 
 void G_FreeDynamicSprite(dynamicSprite_t* ai)
 {
+    printf("Freeing dynamic sprite\n");
     if(!ai)
     {
         printf("Trying to free a non-existing dynamic sprite\n");
@@ -532,9 +536,8 @@ void G_FreeDynamicSprite(dynamicSprite_t* ai)
     }
 
     for(int i = 0; i < AI_MAX_SPELLS; i++)
-        if(ai->cooldowns[i])
+        if(ai->cooldowns[i] != NULL)
             free(ai->cooldowns[i]);
 
     free(ai);
-    ai = NULL;
 }
