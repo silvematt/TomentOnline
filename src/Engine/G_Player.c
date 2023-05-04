@@ -813,6 +813,10 @@ static void G_PlayerUIRender_ThisPlayer()
             curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD]->texture;
             break;
 
+        case PLAYER_FP_MACE:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_MACE]->texture;
+            break;
+
         default:
             curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_FISTS]->texture;
             break;
@@ -929,27 +933,27 @@ static void G_PlayerUIRender_OtherPlayer()
         healthbarFillScreenPos.x+=2;
 
     if(healthbarFillSize.x >=3)
-        healthbarFillScreenPos.x+=3;
+        healthbarFillScreenPos.x+=2;
 
     R_BlitIntoScreenScaled(&healthbarFillSize, tomentdatapack.uiAssets[G_ASSET_HEALTHBAR_FILL]->texture, &healthbarFillScreenPos);
 
     // MANA BAR
-    SDL_Rect manabarEmptyScreenPos = {85, 195, 122, 18};
+    SDL_Rect manabarEmptyScreenPos = {84, 195, 122, 18};
     SDL_Rect manabarEmptySize = {(0), (0), 161, 24};
 
     R_BlitIntoScreenScaled(&manabarEmptySize, tomentdatapack.uiAssets[G_ASSET_MANABAR_EMPTY]->texture, &manabarEmptyScreenPos);
 
-    SDL_Rect manabarFillScreenPos = {85, 195, 122, 18};
+    SDL_Rect manabarFillScreenPos = {84, 195, 122, 18};
     SDL_Rect manabarFillSize = {(0), (0), 161, 24};
 
-    manabarFillSize.x = -160/otherPlayerObject.attributes.maxMana* otherPlayerObject.attributes.curMana + 160;
+    manabarFillSize.x = -161/otherPlayerObject.attributes.maxMana* otherPlayerObject.attributes.curMana + 161;
 
     // Fix bar border
     if(manabarFillSize.x == 2)
         manabarFillScreenPos.x+=2;
         
     if(manabarFillSize.x >= 3)
-        manabarFillScreenPos.x+=3;
+        manabarFillScreenPos.x+=2;
 
     R_BlitIntoScreenScaled(&manabarFillSize, tomentdatapack.uiAssets[G_ASSET_MANABAR_FILL]->texture, &manabarFillScreenPos);
 
@@ -970,6 +974,10 @@ static void G_PlayerUIRender_OtherPlayer()
 
         case PLAYER_FP_GREATSWORD:
             curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_GREATSWORD]->texture;
+            break;
+
+        case PLAYER_FP_MACE:
+            curWeapon = tomentdatapack.uiAssets[G_ASSET_ICON_MACE]->texture;
             break;
 
         default:
