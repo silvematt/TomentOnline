@@ -84,7 +84,7 @@ void G_InitPlayer(void)
         player.attributes.maxMana = 100.0f;
         player.attributes.curMana = player.attributes.maxMana;
 
-        player.attributes.spellPower = 1.5f;
+        player.attributes.spellPower = 1.0f;
 
         G_PlayerSetWeapon(PLAYER_FP_HANDS);
         G_PlayerSetSpell(SPELL_NULL);
