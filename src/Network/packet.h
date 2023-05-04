@@ -184,7 +184,7 @@ typedef struct pckt_heal_other_t
     float healAmount;
 } pckt_heal_other_t;
 
-#define MAX_PCKTS_PER_BUFFER 50
+#define MAX_PCKTS_PER_BUFFER 200
 typedef struct pckt_buffer_t
 {
     char buffer [PCKT_SIZE*MAX_PCKTS_PER_BUFFER];

@@ -34,7 +34,6 @@ int O_GameInitializeOtherPlayer(void)
 
     otherPlayerObject.base.angle = currentMap.playerStartingRot;
     otherPlayerObject.base.z = (HALF_TILE_SIZE) + ((TILE_SIZE) * currentMap.playerStartingLevel);
-    otherPlayerObject.base.level = currentMap.playerStartingLevel;
 
     otherPlayerObject.base.gridPos.x = ((otherPlayerObject.base.pos.x+PLAYER_CENTER_FIX) / TILE_SIZE);
     otherPlayerObject.base.gridPos.y = ((otherPlayerObject.base.pos.y+PLAYER_CENTER_FIX) / TILE_SIZE);
@@ -47,7 +46,7 @@ int O_GameInitializeOtherPlayer(void)
     otherPlayerObject.type = DS_TYPE_OTHERPLAYER;
     
     otherPlayerObject.base.active = true;
-    otherPlayerObject.base.level = 0;
+    otherPlayerObject.base.level = currentMap.playerStartingLevel;
     otherPlayerObject.base.level = SDL_clamp(otherPlayerObject.base.level, 0, MAX_N_LEVELS-1);
     otherPlayerObject.speed = 5.0f;
 
@@ -109,7 +108,7 @@ int O_GameOtherPlayerLoop(void)
     otherPlayerObject.base.pSpacePos.y = otherPlayerObject.base.centeredPos.y - player.centeredPos.y;
 
     // Determine AI's level
-    otherPlayerObject.base.level = (int)floor(otherPlayerObject.base.z / TILE_SIZE);
+    otherPlayerObject.base.level = (int)floor((otherPlayerObject.base.z+HALF_TILE_SIZE) / TILE_SIZE);
     otherPlayerObject.base.level = SDL_clamp(otherPlayerObject.base.level, 0, MAX_N_LEVELS-1);
 
     // Calculate the distance to player
