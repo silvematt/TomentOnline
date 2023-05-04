@@ -1136,9 +1136,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             cur->hasChanged = true;
             if(thisPlayer.isHost)
             {
-                if(cur->base.gridPos.x != 11 || cur->base.gridPos.y != 9)
+                if(cur->base.gridPos.x != 10 || cur->base.gridPos.y != 109)
                 {
-                    vector2Int_t targetPos = {11,9};
+                    vector2Int_t targetPos = {10,109};
                     path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, targetPos, cur);
                     cur->path = &path;
 
@@ -1374,9 +1374,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
             if(thisPlayer.isHost)
             {
                 // 1) Reach the center of the arena
-                if(cur->base.gridPos.x != 11 || cur->base.gridPos.y != 9)
+                if(cur->base.gridPos.x != 10 || cur->base.gridPos.y != 109)
                 {
-                    vector2Int_t targetPos = {11,9};
+                    vector2Int_t targetPos = {10,109};
                     path_t path = G_PerformPathfinding(cur->base.level, cur->base.gridPos, targetPos, cur);
                     cur->path = &path;
 
@@ -1478,7 +1478,6 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
 
                         // Select from: Resurrection, Mass Resurrection and Royal Resurrection
                         int resurrection =  rand() % (3);
-                        printf("RESURRECTION ID %d\n\n\n\n\n\n\n\n\n\n", resurrection);
 
                         if(resurrection == 0)   // Resurrection
                         {
@@ -1573,8 +1572,8 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
                             int massResurrectionNum = 6;
                             for(int i = 0; i < massResurrectionNum; i++)
                             {
-                                int mGridX = (rand() % (19 - 1 + 1)) + 1;
-                                int mGridY = (rand() % (23 - 1 + 1)) + 1;
+                                int mGridX = (rand() % (20 - 1 + 1)) + 1;
+                                int mGridY = (rand() % (118 - 100 + 1)) + 100;
 
                                 if(currentMap.dynamicSpritesLevel0[mGridY][mGridX] == NULL)
                                 {

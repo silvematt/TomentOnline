@@ -100,7 +100,7 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 350.0f;
+                player.attributes.maxHealth = 250.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 100.0f;
@@ -113,7 +113,7 @@ void G_InitPlayer(void)
 
             case CLASS_HEALER:
             {
-                player.attributes.maxHealth = 200.0f;
+                player.attributes.maxHealth = 100.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 250.0f;
@@ -126,7 +126,7 @@ void G_InitPlayer(void)
 
             case CLASS_DPS:
             {
-                player.attributes.maxHealth = 250.0f;
+                player.attributes.maxHealth = 150.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
                 player.attributes.maxMana = 150.0f;
