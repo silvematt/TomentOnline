@@ -161,6 +161,12 @@ void M_LoadMapAsCurrent(char* mapID)
 // -------------------------------
 void M_LoadObjectTMap(void)
 {
+      for(int i = 0; i < allDynamicSpritesLength; i++)
+            if(allDynamicSprites[i] != NULL)
+            {
+                  G_FreeDynamicSprite(allDynamicSprites[i]);
+            }
+
       allDynamicSpritesLength = 0;
 
       // Clear maps
