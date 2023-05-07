@@ -300,31 +300,49 @@ void G_AI_BehaviourMeeleEnemy(dynamicSprite_t* cur)
     }
 
     // Select Animation & Play it
+    cur->animSpeed = ANIMATION_SPEED_DIVIDER;
     switch(cur->state)
     {
         case DS_STATE_IDLE:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
 
         case DS_STATE_DEAD:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSpeedModifier;
             break;
 
         case DS_STATE_ATTACKING:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSpeedModifier;
             break;
 
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SpeedModifier;
+            break;
+
+        case DS_STATE_SPECIAL2:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SpeedModifier;
+            break;
+
+        case DS_STATE_SPECIAL3:
+            cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
+            cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SpeedModifier;
             break;
 
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
     }
 

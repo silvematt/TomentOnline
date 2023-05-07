@@ -147,10 +147,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
             
             cur->speed = 4.25f;
-            cur->attributes.maxHealth = 4250.0f;
+            cur->attributes.maxHealth = 4000.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 4250.0f;
+            cur->attributes.maxMana = 4000.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 25.0f;
@@ -236,6 +236,37 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
 
             cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
             break;
+
+
+        case DS_TheFrozenLord:
+
+            cur->base.name = "The  Frozen  Lord";
+            cur->isBoss = true;
+            cur->bossPreventClimbingLaddersWhileFighting = false;
+            cur->bossPreventOpeningDoorsWhileFighting = true;
+            cur->bossPreventActivatingTriggersWhileFighting = true;
+
+            cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
+            cur->spellInUse = SPELL_MORGATHUL_ORB;
+
+            cur->speed = 4.5f;
+            cur->attributes.maxHealth = 2500.0f;
+            cur->attributes.curHealth = cur->attributes.maxHealth;
+
+            cur->attributes.maxMana = 2500.0f;
+            cur->attributes.curMana = cur->attributes.maxMana;
+
+            cur->attributes.baseDamage = 20.0f;
+            cur->attributes.attackChance = 100;
+            cur->attributes.criticalChance = 10;
+            cur->attributes.criticalModifier = 1.5f;
+
+            // This boss has cooldowns for spells
+            cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[1] = U_TimerCreateNew(); // Fireball cooldown
+            cur->cooldowns[2] = U_TimerCreateNew(); // Spell1 cooldown
+            cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
+        break;
 
         default:
             printf("AI with ID %d was not initalized. Setting it with base stats.\n");
@@ -374,36 +405,43 @@ void G_AIPlayAnimationOnce(dynamicSprite_t* cur, objectanimationsID_e animID)
         case DS_STATE_IDLE:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
 
         case DS_STATE_DEAD:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSpeedModifier;
             break;
 
         case DS_STATE_ATTACKING:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSpeedModifier;
             break;
 
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SpeedModifier;
             break;
 
         case DS_STATE_SPECIAL2:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SpeedModifier;
             break;
 
         case DS_STATE_SPECIAL3:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SpeedModifier;
             break;
 
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
     }
 
@@ -444,42 +482,48 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
             break;
     }
 
-    // Immediatly set the correct animation
     switch(cur->state)
     {
         case DS_STATE_IDLE:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
 
         case DS_STATE_DEAD:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSpeedModifier;
             break;
 
         case DS_STATE_ATTACKING:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSpeedModifier;
             break;
 
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SpeedModifier;
             break;
 
         case DS_STATE_SPECIAL2:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SpeedModifier;
             break;
 
         case DS_STATE_SPECIAL3:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SpeedModifier;
             break;
 
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
+            cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
             break;
     }
 

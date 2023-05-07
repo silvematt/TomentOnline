@@ -89,7 +89,8 @@ typedef enum spritesObjectID_e
     S_MorgathulOrb,
     DS_Kroganar,
     DS_MorgathulCopy,
-    S_AltarSpellPower
+    S_AltarSpellPower,
+    DS_TheFrozenLord
 } spritesObjectID_t;
 
 // All skies textures
@@ -154,6 +155,7 @@ typedef struct objectAnimations_s
     unsigned animSpecial3ActionFrame;
     int animSpecial3SpeedModifier;
 } objectanimations_t;
+
 
 
 // Data type for Walls
@@ -493,7 +495,12 @@ typedef enum imgIDs_e
     IMG_ID_KROGANAR_RESURRECTION,
     IMG_ID_VIOLET_VOID,
     IMG_ID_MORGATHUL_COPY_RESURRECTION,
-    IMG_ID_S_ALTAR_SPELL_POWER
+    IMG_ID_S_ALTAR_SPELL_POWER,
+    IMG_ID_S_THEFROZENLORD_IDLE,
+    IMG_ID_S_THEFROZENLORD_DEATH,
+    IMG_ID_S_THEFROZENLORD_ATTACK1,
+    IMG_ID_S_THEFROZENLORD_ATTACK2,
+    IMG_ID_S_THEFROZENLORD_ATTACK3
 } imgIDs_e;
 
 // Archt Data

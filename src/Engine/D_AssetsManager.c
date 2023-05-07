@@ -16,6 +16,47 @@ void D_InitObject(object_t* obj)
     obj->animations = NULL;
 }
 
+static void D_InitializeObjectAnim(objectanimations_t* obj)
+{
+    obj->belongsTo = NULL;
+    
+    obj->animIdle = NULL;
+    obj->animIdleSheetLength = 0;
+    obj->animIdleActionFrame = 0;
+    obj->animIdleSpeedModifier = 0;
+
+    obj->animDie = NULL;
+    obj->animDieSheetLength = 0;
+    obj->animDieActionFrame = 0;
+    obj->animDieSpeedModifier = 0;
+
+    obj->animAttack = NULL;
+    obj->animAttackSheetLength = 0;
+    obj->animAttackActionFrame = 0;
+    obj->animAttackSpeedModifier = 0;
+
+    obj->animCastSpell = NULL;
+    obj->animCastSpellSheetLength = 0;
+    obj->animCastSpellActionFrame = 0;
+    obj->animCastSpellkSpeedModifier = 0;
+
+    obj->animSpecial1 = NULL;
+    obj->animSpecial1SheetLength = 0;
+    obj->animSpecial1ActionFrame = 0;
+    obj->animSpecial1SpeedModifier = 0;
+
+    obj->animSpecial2 = NULL;
+    obj->animSpecial2SheetLength = 0;
+    obj->animSpecial2ActionFrame = 0;
+    obj->animSpecial2SpeedModifier = 0;
+
+    obj->animSpecial3 = NULL;
+    obj->animSpecial3SheetLength = 0;
+    obj->animSpecial3ActionFrame = 0;
+    obj->animSpecial3SpeedModifier = 0;
+}
+
+
 //-------------------------------------
 // Sets defauls for an object
 //-------------------------------------
@@ -1047,8 +1088,9 @@ void D_InitLoadSprites(void)
     object_t* aiKroganar = (object_t*)malloc(sizeof(object_t));
     object_t* aiMorgathulCopy = (object_t*)malloc(sizeof(object_t));
     object_t* altarSpellPower = (object_t*)malloc(sizeof(object_t));
+    object_t* aiTheFrozenLord = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 30; // Set length
+    tomentdatapack.spritesLength = 31; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1080,6 +1122,7 @@ void D_InitLoadSprites(void)
     D_InitObject(aiKroganar);
     D_InitObject(aiMorgathulCopy);
     D_InitObject(altarSpellPower);
+    D_InitObject(aiTheFrozenLord);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1112,6 +1155,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_Kroganar] = aiKroganar;
     tomentdatapack.sprites[DS_MorgathulCopy] = aiMorgathulCopy;
     tomentdatapack.sprites[S_AltarSpellPower] = altarSpellPower;
+    tomentdatapack.sprites[DS_TheFrozenLord] = aiTheFrozenLord;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -1163,6 +1207,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_Skeleton]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_Skeleton]->animations);
         tomentdatapack.sprites[DS_Skeleton]->animations->belongsTo = tomentdatapack.sprites[DS_Skeleton];
 
         // Idle = Normal
@@ -1213,6 +1258,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[S_Fireball1]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_Fireball1]->animations);
         tomentdatapack.sprites[S_Fireball1]->animations->belongsTo = tomentdatapack.sprites[S_Fireball1];
 
         // Idle = Normal
@@ -1299,6 +1345,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[S_IceDart1]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_IceDart1]->animations);
         tomentdatapack.sprites[S_IceDart1]->animations->belongsTo = tomentdatapack.sprites[S_IceDart1];
 
         // Idle = Normal
@@ -1402,6 +1449,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_SkeletonElite]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_SkeletonElite]->animations);
         tomentdatapack.sprites[DS_SkeletonElite]->animations->belongsTo = tomentdatapack.sprites[DS_SkeletonElite];
 
         // Idle = Normal
@@ -1502,6 +1550,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_SkeletonBurnt]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_SkeletonBurnt]->animations);
         tomentdatapack.sprites[DS_SkeletonBurnt]->animations->belongsTo = tomentdatapack.sprites[DS_SkeletonBurnt];
 
         // Idle = Normal
@@ -1563,6 +1612,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_SkeletonLord]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_SkeletonLord]->animations);
         tomentdatapack.sprites[DS_SkeletonLord]->animations->belongsTo = tomentdatapack.sprites[DS_SkeletonLord];
 
         // Idle = Normal
@@ -1646,6 +1696,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_PlayerTank]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_PlayerTank]->animations);
         tomentdatapack.sprites[DS_PlayerTank]->animations->belongsTo = tomentdatapack.sprites[DS_PlayerTank];
 
         // Idle = Normal
@@ -1718,6 +1769,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_PlayerHealer]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_PlayerHealer]->animations);
         tomentdatapack.sprites[DS_PlayerHealer]->animations->belongsTo = tomentdatapack.sprites[DS_PlayerHealer];
 
         // Idle = Normal
@@ -1789,6 +1841,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_PlayerDPS]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_PlayerDPS]->animations);
         tomentdatapack.sprites[DS_PlayerDPS]->animations->belongsTo = tomentdatapack.sprites[DS_PlayerDPS];
 
         // Idle = Normal
@@ -1860,6 +1913,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[S_ConcentratedHeal]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_ConcentratedHeal]->animations);
         tomentdatapack.sprites[S_ConcentratedHeal]->animations->belongsTo = tomentdatapack.sprites[S_ConcentratedHeal];
 
         // Idle = Normal
@@ -1896,6 +1950,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[S_SwordProjectile]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_SwordProjectile]->animations);
         tomentdatapack.sprites[S_SwordProjectile]->animations->belongsTo = tomentdatapack.sprites[S_SwordProjectile];
 
         // Idle = Normal
@@ -1933,6 +1988,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations);
         tomentdatapack.sprites[DS_MorgathulTheKeeper]->animations->belongsTo = tomentdatapack.sprites[DS_MorgathulTheKeeper];
 
         // Idle = Normal
@@ -2012,6 +2068,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[S_MorgathulOrb]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_MorgathulOrb]->animations);
         tomentdatapack.sprites[S_MorgathulOrb]->animations->belongsTo = tomentdatapack.sprites[S_MorgathulOrb];
 
         // Idle = Normal
@@ -2048,6 +2105,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_Kroganar]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_Kroganar]->animations);
         tomentdatapack.sprites[DS_Kroganar]->animations->belongsTo = tomentdatapack.sprites[DS_Kroganar];
 
         // Idle = Normal
@@ -2097,6 +2155,7 @@ void D_InitLoadSprites(void)
 
         // Load animations as well
         tomentdatapack.sprites[DS_MorgathulCopy]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_MorgathulCopy]->animations);
         tomentdatapack.sprites[DS_MorgathulCopy]->animations->belongsTo = tomentdatapack.sprites[DS_MorgathulCopy];
 
         // Idle = Normal
@@ -2161,6 +2220,93 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_AltarSpellPower]->data = "SPELLPOWER";
     SDL_FreeSurface(temp1);
 
+     // AI DS_TheFrozenLord
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_S_THEFROZENLORD_IDLE))
+    {
+        tomentdatapack.sprites[DS_TheFrozenLord]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_TheFrozenLord]->animations);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->belongsTo = tomentdatapack.sprites[DS_TheFrozenLord];
+
+        // Idle = Normal
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animIdleSheetLength = 10;
+
+        // Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_DEATH].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_DEATH].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animDieSheetLength = 11;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animDieSpeedModifier = -100;
+        SDL_FreeSurface(animTemp1);
+
+        // Attack melee
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animAttackSheetLength = 10;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animAttackActionFrame = 5;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animAttackSpeedModifier = -100;
+        SDL_FreeSurface(animTemp1);
+
+        // Cast
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpellSheetLength = 10;
+        SDL_FreeSurface(animTemp1);
+
+        // Attack 2
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK2].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK2].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SheetLength = 9;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1ActionFrame = 4;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SpeedModifier = 200;
+        
+        SDL_FreeSurface(animTemp1);
+
+        // Violet void/copy
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SheetLength = 22;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2ActionFrame = 14;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SpeedModifier = 200;
+
+        SDL_FreeSurface(animTemp1);
+
+        /*
+        // Orb storm
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST2].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3SheetLength = 4;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3ActionFrame = 3;
+        
+        SDL_FreeSurface(animTemp1);
+        */
+    }
+    else
+        tomentdatapack.sprites[DS_TheFrozenLord]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[DS_TheFrozenLord]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[DS_TheFrozenLord]->flags, 2); // Set dynamic bit flag to 1
+
+    // Callback
+    tomentdatapack.sprites[DS_TheFrozenLord]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -2188,6 +2334,7 @@ void D_InitLoadSprites(void)
     D_SetObject(aiMorgathulTheKeeper, DS_MorgathulTheKeeper, tomentdatapack.sprites[DS_MorgathulTheKeeper]->texture, NULL);
     D_SetObject(aiMorgathulCopy, DS_MorgathulCopy, tomentdatapack.sprites[DS_MorgathulCopy]->texture, NULL);
     D_SetObject(altarSpellPower, S_AltarSpellPower, tomentdatapack.sprites[S_AltarSpellPower]->texture, NULL);
+    D_SetObject(aiTheFrozenLord, DS_TheFrozenLord, tomentdatapack.sprites[DS_TheFrozenLord]->texture, NULL);
 }
 
 
@@ -2459,6 +2606,7 @@ void D_InitLoadPlayersFP(void)
 
         // Load animations as well
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations);
         tomentdatapack.playersFP[PLAYER_FP_HANDS]->animations->belongsTo = tomentdatapack.playersFP[0];
 
         // Idle = Normal
@@ -2506,6 +2654,7 @@ void D_InitLoadPlayersFP(void)
 
         // Load animations as well
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.playersFP[PLAYER_FP_AXE]->animations);
         tomentdatapack.playersFP[PLAYER_FP_AXE]->animations->belongsTo = tomentdatapack.playersFP[0];
 
         // Idle = Normal
@@ -2586,6 +2735,7 @@ void D_InitLoadPlayersFP(void)
 
         // Load animations as well
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations);
         tomentdatapack.playersFP[PLAYER_FP_GREATSWORD]->animations->belongsTo = tomentdatapack.playersFP[0];
 
         // Idle = Normal
@@ -2665,6 +2815,7 @@ void D_InitLoadPlayersFP(void)
 
         // Load animations as well
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.playersFP[PLAYER_FP_MACE]->animations);
         tomentdatapack.playersFP[PLAYER_FP_MACE]->animations->belongsTo = tomentdatapack.playersFP[0];
 
         // Idle = Normal
