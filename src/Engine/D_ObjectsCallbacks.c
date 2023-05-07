@@ -213,3 +213,17 @@ void D_CallbackUseAltar(char* data)
         R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X-30, ALERT_MESSAGE_DEF_Y, "You pray to the Altar\nand your spell power increases.", 3.0f, 1.0f);
     }
 }
+
+//-------------------------------------
+// Changes the SkyID
+//-------------------------------------
+void D_CallbackTheFrozenEndFinalEncounter(char* data)
+{
+    currentMap.skyID = 2;
+    currentMap.fogColorR = 0;
+    currentMap.fogColorG = 0;
+    currentMap.fogColorB = 0;
+    currentMap.fogColor.r = 0;
+    currentMap.fogColor.g = 0;
+    currentMap.fogColor.b = 0;
+}

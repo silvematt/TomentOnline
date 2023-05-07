@@ -90,7 +90,8 @@ typedef enum spritesObjectID_e
     DS_Kroganar,
     DS_MorgathulCopy,
     S_AltarSpellPower,
-    DS_TheFrozenLord
+    DS_TheFrozenLord,
+    S_PickupChangeEnvironmentTheFrozenEnd, // changes skyid and fog settings before frozen end final boss
 } spritesObjectID_t;
 
 // All skies textures
@@ -500,7 +501,8 @@ typedef enum imgIDs_e
     IMG_ID_S_THEFROZENLORD_DEATH,
     IMG_ID_S_THEFROZENLORD_ATTACK1,
     IMG_ID_S_THEFROZENLORD_ATTACK2,
-    IMG_ID_S_THEFROZENLORD_ATTACK3
+    IMG_ID_S_THEFROZENLORD_ATTACK3,
+    IMG_ID_EMPTY_IMG
 } imgIDs_e;
 
 // Archt Data

@@ -26,4 +26,9 @@ void D_CallbackLadderDown(char* data);
 //-------------------------------------
 void D_CallbackUseAltar(char* data);
 
+//-------------------------------------
+// Changes the SkyID and Fog Settings for Frozen End
+//-------------------------------------
+void D_CallbackTheFrozenEndFinalEncounter(char* data);
+
 #endif

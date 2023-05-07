@@ -1089,8 +1089,9 @@ void D_InitLoadSprites(void)
     object_t* aiMorgathulCopy = (object_t*)malloc(sizeof(object_t));
     object_t* altarSpellPower = (object_t*)malloc(sizeof(object_t));
     object_t* aiTheFrozenLord = (object_t*)malloc(sizeof(object_t));
+    object_t* pickupChangeEnvironmentTheFrozenEnd = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 31; // Set length
+    tomentdatapack.spritesLength = 32; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1123,6 +1124,7 @@ void D_InitLoadSprites(void)
     D_InitObject(aiMorgathulCopy);
     D_InitObject(altarSpellPower);
     D_InitObject(aiTheFrozenLord);
+    D_InitObject(pickupChangeEnvironmentTheFrozenEnd);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1156,6 +1158,7 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_MorgathulCopy] = aiMorgathulCopy;
     tomentdatapack.sprites[S_AltarSpellPower] = altarSpellPower;
     tomentdatapack.sprites[DS_TheFrozenLord] = aiTheFrozenLord;
+    tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd] = pickupChangeEnvironmentTheFrozenEnd;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -2307,6 +2310,22 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[DS_TheFrozenLord]->Callback = NULL;
     SDL_FreeSurface(temp1);
 
+    // Pickup Change skybox
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_EMPTY_IMG].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_EMPTY_IMG].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_EMPTY_IMG))
+        tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+
+    U_SetBit(&tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->flags, 3); // Auto call callback upon player's collision (to pickup the potion by touching it)
+
+    // Callback
+    tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->Callback = D_CallbackTheFrozenEndFinalEncounter;
+    tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->data = "";
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -2335,6 +2354,7 @@ void D_InitLoadSprites(void)
     D_SetObject(aiMorgathulCopy, DS_MorgathulCopy, tomentdatapack.sprites[DS_MorgathulCopy]->texture, NULL);
     D_SetObject(altarSpellPower, S_AltarSpellPower, tomentdatapack.sprites[S_AltarSpellPower]->texture, NULL);
     D_SetObject(aiTheFrozenLord, DS_TheFrozenLord, tomentdatapack.sprites[DS_TheFrozenLord]->texture, NULL);
+    D_SetObject(pickupChangeEnvironmentTheFrozenEnd, S_PickupChangeEnvironmentTheFrozenEnd, tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->texture, NULL);
 }
 
 
