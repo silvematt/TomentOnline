@@ -12,5 +12,6 @@ void G_AI_BehaviourCasterEnemy(dynamicSprite_t* cur);
 void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur);
 void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur);
 void G_AI_BehaviourMorgathulCopy(dynamicSprite_t* cur);
+void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur);
 
 #endif

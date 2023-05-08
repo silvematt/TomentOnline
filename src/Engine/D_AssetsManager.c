@@ -760,8 +760,9 @@ void D_InitLoadTextures(void)
     textureObject_t* ice = (textureObject_t*)malloc(sizeof(textureObject_t));
     textureObject_t* iceConsacrated = (textureObject_t*)malloc(sizeof(textureObject_t));
     textureObject_t* violetVoid = (textureObject_t*)malloc(sizeof(textureObject_t));
+    textureObject_t* icyGround = (textureObject_t*)malloc(sizeof(textureObject_t));
 
-    tomentdatapack.texturesLength = 14; // Set length
+    tomentdatapack.texturesLength = 15; // Set length
 
     D_InitTextureAsset(wallBrick1);
     D_InitTextureAsset(wallBrick1Dark);
@@ -777,6 +778,7 @@ void D_InitLoadTextures(void)
     D_InitTextureAsset(ice);
     D_InitTextureAsset(iceConsacrated);
     D_InitTextureAsset(violetVoid);
+    D_InitTextureAsset(icyGround);
 
     // Put objects in the datapack
     tomentdatapack.textures[TEXTURE_WallBrick1] = wallBrick1;
@@ -793,6 +795,7 @@ void D_InitLoadTextures(void)
     tomentdatapack.textures[TEXTURE_Ice] = ice;
     tomentdatapack.textures[TEXTURE_IceConsacrated] = iceConsacrated;
     tomentdatapack.textures[TEXTURE_VioletVoid] = violetVoid;
+    tomentdatapack.textures[TEXTURE_IcyGround] = icyGround;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -946,6 +949,17 @@ void D_InitLoadTextures(void)
     U_SetBit(&tomentdatapack.textures[TEXTURE_VioletVoid]->flags, 0); // Set IsLadder = 1
     SDL_FreeSurface(temp1);
 
+    // IcyGround
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_TEXTURE_ICYGROUND].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_TEXTURE_ICYGROUND].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_TEXTURE_ICYGROUND))
+        tomentdatapack.textures[TEXTURE_IcyGround]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+    else
+        tomentdatapack.textures[TEXTURE_IcyGround]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.textures[TEXTURE_IcyGround]->flags, 0); // Set IsLadder = 1
+    SDL_FreeSurface(temp1);
+
     // Final sets
     wallBrick1->ID = TEXTURE_WallBrick1;
     wallBrick1Dark->ID = TEXTURE_WallBrick1Dark;
@@ -961,6 +975,7 @@ void D_InitLoadTextures(void)
     ice->ID = TEXTURE_Ice;
     iceConsacrated->ID = TEXTURE_IceConsacrated;
     violetVoid->ID = TEXTURE_VioletVoid;
+    icyGround->ID = TEXTURE_IcyGround;
 }
 
 void D_InitLoadWalls(void)
@@ -2239,6 +2254,7 @@ void D_InitLoadSprites(void)
         // Idle = Normal
         tomentdatapack.sprites[DS_TheFrozenLord]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.sprites[DS_TheFrozenLord]->animations->animIdleSheetLength = 10;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animIdleSpeedModifier = -100;
 
         // Death
         int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_DEATH].startingOffset);
@@ -2260,32 +2276,41 @@ void D_InitLoadSprites(void)
         SDL_FreeSurface(animTemp1);
 
         // Cast
-        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].startingOffset);
-        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK1].size);
-        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpellSheetLength = 10;
-        SDL_FreeSurface(animTemp1);
-
-        // Attack 2
         animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK2].startingOffset);
         animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK2].size);
         animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpell = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpellSheetLength = 9;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpellkSpeedModifier = -100;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animCastSpellActionFrame = 4;
+        SDL_FreeSurface(animTemp1);
+
+        // Blizzard
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
         tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SheetLength = 9;
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1ActionFrame = 4;
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SpeedModifier = 200;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SheetLength = 10;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial1SpeedModifier = -100;
         
         SDL_FreeSurface(animTemp1);
 
-        // Violet void/copy
-        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].startingOffset);
-        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_MORGATHUL_CAST1].size);
+        // Resurrections
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_IDLE].size);
         animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
         tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SheetLength = 22;
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2ActionFrame = 14;
-        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SpeedModifier = 200;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SheetLength = 10;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial2SpeedModifier = -100;
+
+        // Ground strike
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK3].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_S_THEFROZENLORD_ATTACK3].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3 = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3SheetLength = 22;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3ActionFrame = 14;
+        tomentdatapack.sprites[DS_TheFrozenLord]->animations->animSpecial3SpeedModifier = -100;
 
         SDL_FreeSurface(animTemp1);
 

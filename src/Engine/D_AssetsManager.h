@@ -53,7 +53,8 @@ typedef enum textureID_e
     TEXTURE_FloorDirt1,
     TEXTURE_Ice,
     TEXTURE_IceConsacrated,
-    TEXTURE_VioletVoid
+    TEXTURE_VioletVoid,
+    TEXTURE_IcyGround
 } textureID_e;
 
 // All sprites
@@ -502,7 +503,8 @@ typedef enum imgIDs_e
     IMG_ID_S_THEFROZENLORD_ATTACK1,
     IMG_ID_S_THEFROZENLORD_ATTACK2,
     IMG_ID_S_THEFROZENLORD_ATTACK3,
-    IMG_ID_EMPTY_IMG
+    IMG_ID_EMPTY_IMG,
+    IMG_ID_TEXTURE_ICYGROUND
 } imgIDs_e;
 
 // Archt Data

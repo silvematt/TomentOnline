@@ -83,7 +83,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
 
             cur->speed = 2.0f;
-            cur->attributes.maxHealth = 100.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 100.0f;
@@ -103,7 +103,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 4.0f;
-            cur->attributes.maxHealth = 600.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 600.0f;
@@ -124,7 +124,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
 
             cur->speed = 3.0f;
-            cur->attributes.maxHealth = 50.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 100.0f;
@@ -147,7 +147,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
             
             cur->speed = 4.25f;
-            cur->attributes.maxHealth = 4250.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 4250.0f;
@@ -177,7 +177,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_MORGATHUL_ORB;
 
             cur->speed = 1.5f;
-            cur->attributes.maxHealth = 2500.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 2500.0f;
@@ -203,7 +203,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 5.0f;
-            cur->attributes.maxHealth = 1250.0f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 1250.0f;
@@ -246,14 +246,14 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->bossPreventOpeningDoorsWhileFighting = true;
             cur->bossPreventActivatingTriggersWhileFighting = true;
 
-            cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
+            cur->BehaviourUpdate = G_AI_BehaviourTheFrozenLord;
             cur->spellInUse = SPELL_MORGATHUL_ORB;
 
-            cur->speed = 4.5f;
-            cur->attributes.maxHealth = 2500.0f;
+            cur->speed = 5.5f;
+            cur->attributes.maxHealth = 100000.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 2500.0f;
+            cur->attributes.maxMana = 3500.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 20.0f;

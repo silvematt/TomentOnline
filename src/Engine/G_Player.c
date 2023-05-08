@@ -100,10 +100,10 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 250.0f;
+                player.attributes.maxHealth = 250000000.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
-                player.attributes.maxMana = 100.0f;
+                player.attributes.maxMana = 250000000.0f;
                 player.attributes.curMana = player.attributes.maxMana;
 
                 G_PlayerSetWeapon(PLAYER_FP_MACE);

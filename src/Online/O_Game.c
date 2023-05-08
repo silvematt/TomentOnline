@@ -438,16 +438,47 @@ int O_GameOnPacketIsReceived(void)
 
             //printf("Packet received! ID: %d | - Values (%d,%d)\n", receivedPacket->id, aiPacket.networkID, aiPacket.spriteID);
 
-            // Spawn AI
-            if(currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] != NULL)
+            dynamicSprite_t* spawned;
+            if(aiPacket.level == 0)
             {
-                printf("Couldn't be able instantiate... game may be out of sync\n");
-                scanf("%d");
-            }
+                // Spawn AI
+                if(currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] != NULL)
+                {
+                    printf("Couldn't be able instantiate... game may be out of sync\n");
+                    scanf("%d");
+                }
 
-            currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-            dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX];
-            G_AIInitialize(spawned, aiPacket.level, aiPacket.spriteID, aiPacket.gridX, aiPacket.gridY);
+                currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                spawned = currentMap.dynamicSpritesLevel0[aiPacket.gridY][aiPacket.gridX];
+                G_AIInitialize(spawned, aiPacket.level, aiPacket.spriteID, aiPacket.gridX, aiPacket.gridY);
+            }
+            else if(aiPacket.level == 1)
+            {
+                // Spawn AI
+                if(currentMap.dynamicSpritesLevel1[aiPacket.gridY][aiPacket.gridX] != NULL)
+                {
+                    printf("Couldn't be able instantiate... game may be out of sync\n");
+                    scanf("%d");
+                }
+
+                currentMap.dynamicSpritesLevel1[aiPacket.gridY][aiPacket.gridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                spawned = currentMap.dynamicSpritesLevel1[aiPacket.gridY][aiPacket.gridX];
+                G_AIInitialize(spawned, aiPacket.level, aiPacket.spriteID, aiPacket.gridX, aiPacket.gridY);
+            }
+            else if(aiPacket.level == 2)
+            {
+                // Spawn AI
+                if(currentMap.dynamicSpritesLevel2[aiPacket.gridY][aiPacket.gridX] != NULL)
+                {
+                    printf("Couldn't be able instantiate... game may be out of sync\n");
+                    scanf("%d");
+                }
+
+                currentMap.dynamicSpritesLevel2[aiPacket.gridY][aiPacket.gridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                spawned = currentMap.dynamicSpritesLevel2[aiPacket.gridY][aiPacket.gridX];
+                G_AIInitialize(spawned, aiPacket.level, aiPacket.spriteID, aiPacket.gridX, aiPacket.gridY);
+            }
+            
 
             if(aiPacket.playAnimation)
             {
