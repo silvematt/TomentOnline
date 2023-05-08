@@ -72,7 +72,8 @@ typedef enum playerSpells_e
     SPELL_ICEDART1 = 8,
     SPELL_CONCENTRATED_HEAL = 24,
     SPELL_SWORD_PROJECTILE = 25,
-    SPELL_MORGATHUL_ORB = 27
+    SPELL_MORGATHUL_ORB = 27,
+    SPELL_ICE_BLAST = 33
 } playerSpells_e;
 
 typedef struct player_s

@@ -1105,8 +1105,10 @@ void D_InitLoadSprites(void)
     object_t* altarSpellPower = (object_t*)malloc(sizeof(object_t));
     object_t* aiTheFrozenLord = (object_t*)malloc(sizeof(object_t));
     object_t* pickupChangeEnvironmentTheFrozenEnd = (object_t*)malloc(sizeof(object_t));
+    object_t* spellIceBlast = (object_t*)malloc(sizeof(object_t));
+    object_t* aiFrozenLordsCaster = (object_t*)malloc(sizeof(object_t));
 
-    tomentdatapack.spritesLength = 32; // Set length
+    tomentdatapack.spritesLength = 34; // Set length
 
     D_InitObject(spritesBarrel1);
     D_InitObject(spritesCampfire);
@@ -1140,6 +1142,8 @@ void D_InitLoadSprites(void)
     D_InitObject(altarSpellPower);
     D_InitObject(aiTheFrozenLord);
     D_InitObject(pickupChangeEnvironmentTheFrozenEnd);
+    D_InitObject(spellIceBlast);
+    D_InitObject(aiFrozenLordsCaster);
 
     // Put objects in the datapack
     tomentdatapack.sprites[S_Barrel1] = spritesBarrel1;
@@ -1174,6 +1178,8 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_AltarSpellPower] = altarSpellPower;
     tomentdatapack.sprites[DS_TheFrozenLord] = aiTheFrozenLord;
     tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd] = pickupChangeEnvironmentTheFrozenEnd;
+    tomentdatapack.sprites[S_IceBlast] = spellIceBlast;
+    tomentdatapack.sprites[DS_FrozenLordsCaster] = aiFrozenLordsCaster;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -2351,6 +2357,87 @@ void D_InitLoadSprites(void)
     tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->data = "";
     SDL_FreeSurface(temp1);
 
+
+    // Spell Ice Blast
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_ICE_BLAST].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_ICE_BLAST].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_SPELL_ICE_BLAST))
+    {
+        tomentdatapack.sprites[S_IceBlast]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[S_IceBlast]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[S_IceBlast]->animations);
+        tomentdatapack.sprites[S_IceBlast]->animations->belongsTo = tomentdatapack.sprites[S_IceBlast];
+
+        // Idle = Normal
+        tomentdatapack.sprites[S_IceBlast]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_IceBlast]->animations->animIdleSheetLength = 6;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_SPELL_ICE_BLAST_EXPLOSION].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_SPELL_ICE_BLAST_EXPLOSION].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[S_IceBlast]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[S_IceBlast]->animations->animDieSheetLength = 6;
+
+        SDL_FreeSurface(animTemp1);
+    }
+    else
+        tomentdatapack.sprites[S_IceBlast]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[S_IceBlast]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[S_IceBlast]->flags, 1); // Set animated sprite bit flag to 1
+    // Sprite-Specific, set the lookup table for the sprite sheets length
+    tomentdatapack.spritesSheetsLenghtTable[S_IceBlast] = 6;
+
+    // Callback
+    tomentdatapack.sprites[S_IceBlast]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
+    // AI SkeletonBurnt
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_AI_SKELETON_BURNT))
+    {
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->texture = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+
+        // Load animations as well
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations = (objectanimations_t*)malloc(sizeof(objectanimations_t));
+        D_InitializeObjectAnim(tomentdatapack.sprites[DS_FrozenLordsCaster]->animations);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->belongsTo = tomentdatapack.sprites[DS_FrozenLordsCaster];
+
+        // Idle = Normal
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animIdle = SDL_ConvertSurface(temp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animIdleSheetLength = 0;
+
+        // Skeleton Death
+        int animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT_DEATH].startingOffset);
+        SDL_RWops* animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT_DEATH].size);
+        SDL_Surface* animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animDie = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animDieSheetLength = 4;
+        SDL_FreeSurface(animTemp1);
+
+        // Skeleton Attack
+        animOffset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT_ATTACK2].startingOffset);
+        animSdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+animOffset, tomentdatapack.IMGArch.toc[IMG_ID_AI_SKELETON_BURNT_ATTACK2].size);
+        animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->animations->animAttackSheetLength = 6;
+        SDL_FreeSurface(animTemp1);
+
+    }
+    else
+        tomentdatapack.sprites[DS_FrozenLordsCaster]->texture = tomentdatapack.enginesDefaults[EDEFAULT_1]->texture;
+    U_SetBit(&tomentdatapack.sprites[DS_FrozenLordsCaster]->flags, 0); // Set collision bit flag to 1
+    U_SetBit(&tomentdatapack.sprites[DS_FrozenLordsCaster]->flags, 2); // Set dynamic bit flag to 1
+
+    // Callback
+    tomentdatapack.sprites[DS_FrozenLordsCaster]->Callback = NULL;
+    SDL_FreeSurface(temp1);
+
     // Final sets
     D_SetObject(spritesBarrel1, S_Barrel1, tomentdatapack.sprites[S_Barrel1]->texture, NULL);
     D_SetObject(spritesCampfire, S_Campfire, tomentdatapack.sprites[S_Campfire]->texture, NULL);
@@ -2380,6 +2467,8 @@ void D_InitLoadSprites(void)
     D_SetObject(altarSpellPower, S_AltarSpellPower, tomentdatapack.sprites[S_AltarSpellPower]->texture, NULL);
     D_SetObject(aiTheFrozenLord, DS_TheFrozenLord, tomentdatapack.sprites[DS_TheFrozenLord]->texture, NULL);
     D_SetObject(pickupChangeEnvironmentTheFrozenEnd, S_PickupChangeEnvironmentTheFrozenEnd, tomentdatapack.sprites[S_PickupChangeEnvironmentTheFrozenEnd]->texture, NULL);
+    D_SetObject(spellIceBlast, S_IceBlast, tomentdatapack.sprites[S_IceBlast]->texture, NULL);
+    D_SetObject(spellIceBlast, DS_FrozenLordsCaster, tomentdatapack.sprites[DS_FrozenLordsCaster]->texture, NULL);
 }
 
 

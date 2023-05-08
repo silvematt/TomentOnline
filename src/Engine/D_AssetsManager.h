@@ -93,6 +93,8 @@ typedef enum spritesObjectID_e
     S_AltarSpellPower,
     DS_TheFrozenLord,
     S_PickupChangeEnvironmentTheFrozenEnd, // changes skyid and fog settings before frozen end final boss
+    S_IceBlast,
+    DS_FrozenLordsCaster
 } spritesObjectID_t;
 
 // All skies textures
@@ -504,7 +506,10 @@ typedef enum imgIDs_e
     IMG_ID_S_THEFROZENLORD_ATTACK2,
     IMG_ID_S_THEFROZENLORD_ATTACK3,
     IMG_ID_EMPTY_IMG,
-    IMG_ID_TEXTURE_ICYGROUND
+    IMG_ID_TEXTURE_ICYGROUND,
+    IMG_ID_SPELL_ICE_BLAST,
+    IMG_ID_SPELL_ICE_BLAST_EXPLOSION,
+    IMG_ID_AI_SKELETON_BURNT_ATTACK2
 } imgIDs_e;
 
 // Archt Data

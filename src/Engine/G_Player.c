@@ -100,10 +100,10 @@ void G_InitPlayer(void)
         {
             case CLASS_TANK:
             {
-                player.attributes.maxHealth = 250000000.0f;
+                player.attributes.maxHealth = 250.0f;
                 player.attributes.curHealth = player.attributes.maxHealth;
                 
-                player.attributes.maxMana = 250000000.0f;
+                player.attributes.maxMana = 100.0f;
                 player.attributes.curMana = player.attributes.maxMana;
 
                 G_PlayerSetWeapon(PLAYER_FP_MACE);
@@ -396,6 +396,7 @@ void G_InGameInputHandling(const uint8_t* keyboardState)
             player.z += 100 * deltaTime; 
     */
 
+    /*
     if(keyboardState[SDL_SCANCODE_KP_MINUS])
     {
         player.attributes.curHealth -= 1.0f;
@@ -417,6 +418,7 @@ void G_InGameInputHandling(const uint8_t* keyboardState)
     {
         player.attributes.curMana += 1.0f;
     }
+    */
 
 
     //playerinput.input.x = SDL_clamp(playerinput.input.x, -1.0f , 1.0f);
@@ -1190,11 +1192,13 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
                 A_ChangeState(GSTATE_MENU);
             }
 
-            if(e->key.keysym.sym == SDLK_F1)
+            /*
+            else if(e->key.keysym.sym == SDLK_F1)
             {
                 //debugRendering = !debugRendering;
             }
-
+            */
+            /*
             // reloads the map (used for building maps)
             if(e->key.keysym.sym == SDLK_F5)
             {
@@ -1232,8 +1236,9 @@ void G_InGameInputHandlingEvent(SDL_Event* e)
 
                 r_debugPathfinding = false;
             }
+            */
 
-            // Change Weapons
+            // Skills
             else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_1)
             {
                 // Check cooldown
@@ -2026,7 +2031,7 @@ void G_PlayerCheckPuddleDamage(void)
     mappudlle_t* cur = activeMapPuddlesHead;
     while(cur != NULL)
     {   
-        if(cur->damagesPlayers && player.gridPosition.x == cur->gridX && player.gridPosition.y == cur->gridY)
+        if(cur->damagesPlayers && player.gridPosition.x == cur->gridX && player.gridPosition.y == cur->gridY && player.level == cur->level)
         {
             // Take puddle damage
             G_PlayerTakeDamage(cur->damage * deltaTime);

@@ -359,6 +359,8 @@ void G_ChangeMap(char* mapID)
     // Check if game has ended
     if(strcmp("END_GAME", mapID) == 0)
     {
+        closesocket(otherPlayer.socket);
+        
         player.hasBeenInitialized = false;
         G_SetMenu(&EndGameMenu);
         A_ChangeState(GSTATE_MENU);
@@ -445,6 +447,10 @@ void G_UpdateProjectiles(void)
                             damage = 0.0f;
                             break;
 
+                        case S_IceBlast:
+                            damage = 70.0f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -504,6 +510,10 @@ void G_UpdateProjectiles(void)
                             damage = 50.25f;
                             break;
 
+                        case S_IceBlast:
+                            damage = 70.0f;
+                            break;
+
                         default:
                             damage = 0.0f;
                             break;
@@ -544,6 +554,10 @@ void G_UpdateProjectiles(void)
 
                         case S_MorgathulOrb:
                             damage = 50.25f;
+                            break;
+
+                        case S_IceBlast:
+                            damage = 70.0f;
                             break;
 
                         default:

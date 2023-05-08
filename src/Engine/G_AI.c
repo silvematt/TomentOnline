@@ -83,7 +83,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
 
             cur->speed = 2.0f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 100.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 100.0f;
@@ -103,7 +103,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 4.0f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 600.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 600.0f;
@@ -124,7 +124,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
 
             cur->speed = 3.0f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 50.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 100.0f;
@@ -147,10 +147,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_FIREBALL1;
             
             cur->speed = 4.25f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 4000.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
-            cur->attributes.maxMana = 4250.0f;
+            cur->attributes.maxMana = 4000.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
             cur->attributes.baseDamage = 25.0f;
@@ -177,7 +177,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->spellInUse = SPELL_MORGATHUL_ORB;
 
             cur->speed = 1.5f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 2500.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 2500.0f;
@@ -203,7 +203,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->BehaviourUpdate = G_AI_BehaviourMeeleEnemy;
             
             cur->speed = 5.0f;
-            cur->attributes.maxHealth = 1.0f;
+            cur->attributes.maxHealth = 1250.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 1250.0f;
@@ -247,10 +247,37 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->bossPreventActivatingTriggersWhileFighting = true;
 
             cur->BehaviourUpdate = G_AI_BehaviourTheFrozenLord;
-            cur->spellInUse = SPELL_MORGATHUL_ORB;
+            cur->spellInUse = SPELL_ICE_BLAST;
 
             cur->speed = 5.5f;
-            cur->attributes.maxHealth = 100000.0f;
+            cur->attributes.maxHealth = 4250.0f;
+            cur->attributes.curHealth = cur->attributes.maxHealth;
+
+            cur->attributes.maxMana = 4250.0f;
+            cur->attributes.curMana = cur->attributes.maxMana;
+
+            cur->attributes.baseDamage = 36.0f;
+            cur->attributes.attackChance = 100;
+            cur->attributes.criticalChance = 20;
+            cur->attributes.criticalModifier = 1.5f;
+
+            // This boss has cooldowns for spells
+            cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[1] = U_TimerCreateNew(); // Fireball cooldown
+            cur->cooldowns[2] = U_TimerCreateNew(); // Spell1 cooldown
+            cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
+        break;
+
+        case DS_FrozenLordsCaster:
+
+            cur->base.name = "Frozen  Caster";
+            cur->isBoss = false;
+
+            cur->BehaviourUpdate = G_AI_BehaviourCasterEnemy;
+            cur->spellInUse = SPELL_ICEDART1;
+
+            cur->speed = 2.5f;
+            cur->attributes.maxHealth = 1.0f;
             cur->attributes.curHealth = cur->attributes.maxHealth;
 
             cur->attributes.maxMana = 3500.0f;
@@ -260,12 +287,6 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.attackChance = 100;
             cur->attributes.criticalChance = 10;
             cur->attributes.criticalModifier = 1.5f;
-
-            // This boss has cooldowns for spells
-            cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
-            cur->cooldowns[1] = U_TimerCreateNew(); // Fireball cooldown
-            cur->cooldowns[2] = U_TimerCreateNew(); // Spell1 cooldown
-            cur->cooldowns[3] = U_TimerCreateNew(); // Spell2 cooldown
         break;
 
         default:
@@ -558,7 +579,7 @@ void G_AICheckPuddleDamage(dynamicSprite_t* ai)
         // If it is a networked instance, the damage needs to be dealt from the other player
         if(!cur->isNetworkedInstance && ai->isAlive)
         {
-            if(cur->damagesAI && ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY)
+            if(cur->damagesAI && ai->base.gridPos.x == cur->gridX && ai->base.gridPos.y == cur->gridY && ai->base.level == cur->level)
             {
                 // Take puddle damage
                 G_AITakeDamage(ai, cur->damage * deltaTime, true);

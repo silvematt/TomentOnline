@@ -3593,6 +3593,17 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
                             packedpuddle_t puddles[puddlesLength];
                             int count = 0;
 
+                            int hostTarget = rand() % 2;
+
+                            int targetGridX = player.gridPosition.x;
+                            int targetGridY = player.gridPosition.y;
+
+                            if(hostTarget == 1)
+                            {
+                                targetGridX = otherPlayerObject.base.gridPos.x;
+                                targetGridY = otherPlayerObject.base.gridPos.y;
+                            }
+
                             for(int x = -4; x < 4; x++)
                             {
                                 for(int y = -4; y < 4; y++)
@@ -3603,7 +3614,7 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
                                     mappudlle_t* puddle = activeMapPuddlesHead;
                                     while(puddle != NULL)
                                     {
-                                        if(puddle->gridX == player.gridPosition.x+x && puddle->gridY == player.gridPosition.y+y)
+                                        if(puddle->gridX == targetGridX+x && puddle->gridY == targetGridY+y)
                                         {
                                             already = true;
                                             break;
@@ -3613,7 +3624,7 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
 
                                     if(!already)
                                     {
-                                        puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), player.gridPosition.x+x, player.gridPosition.y+y, false, true, 75.0f, 10000, cur->base.level, TEXTURE_IcyGround, false);
+                                        puddles[count] = G_SpawnMapPuddle(REPL_GenerateNetworkID(), targetGridX+x, targetGridY+y, false, true, 50.0f, 20000, cur->base.level, TEXTURE_IcyGround, false);
                                         count++;
                                     }
                                 }
@@ -3640,6 +3651,14 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
 
                                 float projAngle = cur->base.angle + 180;
                                 float projZ = player.z;
+
+                                if(cur->joinerAggro > cur->hostAggro)
+                                {
+                                    projAngle = ((atan2(-(cur->base.centeredPos.y - (otherPlayerObject.lastPosY+PLAYER_CENTER_FIX)), (cur->base.centeredPos.x - (otherPlayerObject.lastPosX+PLAYER_CENTER_FIX))))* RADIAN_TO_DEGREE)*-1 + 180;
+                                    FIX_ANGLES_DEGREES(projAngle);
+                                    projZ = otherPlayerObject.lastPosZ + HALF_TILE_SIZE;
+                                }
+
                                 for(int i = 0; i < 36; i++)
                                 {
                                     FIX_ANGLES_DEGREES(projAngle);
@@ -3649,11 +3668,12 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
                                     projAngle += 10;
                                 }
 
-                                
+
                                 cur->cooldowns[0]->Start(cur->cooldowns[0]);
                                 cur->cooldowns[2]->Stop(cur->cooldowns[2]);
                                 G_AIPlayAnimationLoop(cur, ANIM_IDLE);
                                 O_GameAIPlayAnim(cur->networkID, ANIM_IDLE, true);
+                               
                             }
                         }
                         else
@@ -4043,112 +4063,152 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
                         // Caster Resurrection
                         else if(resurrection == 1)
                         {
+                            int counter = 0; // how many caster he spawned
+
                             int mGridY = 61;
                             int mGridX = 62;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+
+                                    counter++;
+                                }
                             }
+                            
 
-                            mGridY = 61;
-                            mGridX = 68;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                mGridY = 61;
+                                mGridX = 68;
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 61;
                             mGridX = 78;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 65;
                             mGridX = 81;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 73;
                             mGridX = 81;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 82;
                             mGridX = 81;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 85;
                             mGridX = 74;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 85;
                             mGridX = 67;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
 
                             mGridY = 85;
                             mGridX = 61;
-                            if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                            if(counter < 4 && rand() % 3 != 0)
                             {
-                                currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
-                                dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
-                                G_AIInitialize(spawned, 1, DS_SkeletonBurnt, mGridX, mGridY);
-                                //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
+                                if(currentMap.dynamicSpritesLevel1[mGridY][mGridX] == NULL)
+                                {
+                                    currentMap.dynamicSpritesLevel1[mGridY][mGridX] = (dynamicSprite_t*)malloc(sizeof(dynamicSprite_t));
+                                    dynamicSprite_t* spawned = currentMap.dynamicSpritesLevel1[mGridY][mGridX];
+                                    G_AIInitialize(spawned, 1, DS_FrozenLordsCaster, mGridX, mGridY);
+                                    //G_AIPlayAnimationOnce(spawned, ANIM_SPECIAL1);
 
-                                O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_SkeletonBurnt, false, ANIM_SPECIAL1, false);
+                                    O_GameAIInstantiate(spawned->networkID, 1, mGridX, mGridY, DS_FrozenLordsCaster, false, ANIM_SPECIAL1, false);
+                                    counter++;
+                                }
                             }
                         }
                     }
@@ -4323,11 +4383,38 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
                 }
 
                 FIX_ANGLES_DEGREES(projAngle);
-                    
-                uint32_t networkID = REPL_GenerateNetworkID();
-                G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
-                O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
                 
+                if(cur->bossPhase == 0)
+                {
+                    uint32_t networkID = REPL_GenerateNetworkID();
+                    G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                    O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+                }
+                else
+                {
+                    FIX_ANGLES_DEGREES(projAngle);
+                            
+                    uint32_t networkID = REPL_GenerateNetworkID();
+                    G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                    O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+                    
+                    // Copies cast only 1 projectile
+                    projAngle += 15;
+                    FIX_ANGLES_DEGREES(projAngle);
+                    
+                    networkID = REPL_GenerateNetworkID();
+                    G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                    O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+                    
+
+                    projAngle -= 25;
+                    FIX_ANGLES_DEGREES(projAngle);
+                    
+                    networkID = REPL_GenerateNetworkID();
+                    G_SpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur, false);
+                    O_GameSpawnProjectile(networkID, cur->spellInUse, (projAngle) * (M_PI / 180), cur->base.level, cur->base.centeredPos.x, cur->base.centeredPos.y, cur->base.z, projZ-(cur->base.z+HALF_TILE_SIZE), false, cur->networkID);
+            
+                }
 
                 // Pause the cooldown, it will be resumed after this animation ends
                 cur->cooldowns[1]->Pause(cur->cooldowns[1]);
@@ -4337,7 +4424,7 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
         {
             if(cur->animFrame == curAnimActionFrame && thisPlayer.isHost)
             {
-                // Do violet void
+                // Ground smash
                 int puddlesLength = 64;
                 packedpuddle_t puddles[puddlesLength];
                 int count = 0;
