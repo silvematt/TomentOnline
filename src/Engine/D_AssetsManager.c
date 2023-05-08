@@ -1494,6 +1494,7 @@ void D_InitLoadSprites(void)
         animTemp1 = SDL_LoadBMP_RW(animSdlWops, SDL_TRUE);
         tomentdatapack.sprites[DS_SkeletonElite]->animations->animAttack = SDL_ConvertSurface(animTemp1, win_surface->format, SDL_TEXTUREACCESS_TARGET);
         tomentdatapack.sprites[DS_SkeletonElite]->animations->animAttackSheetLength = 4;
+        tomentdatapack.sprites[DS_SkeletonElite]->animations->animAttackSpeedModifier = 25;
         SDL_FreeSurface(animTemp1);
 
         // Skeleton Resurrect

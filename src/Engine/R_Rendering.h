@@ -73,7 +73,7 @@ extern walldata_t currentThinWalls[MAX_PROJECTION_PLANE_WIDTH * MAX_THIN_WALL_TR
 extern unsigned visibleThinWallsLength;
 
 // Alert message
-#define ALERT_MESSAGE_DEF_X 360
+#define ALERT_MESSAGE_DEF_X 540
 #define ALERT_MESSAGE_DEF_Y 10
 
 extern alertMessage_t* alertMessagesHead;

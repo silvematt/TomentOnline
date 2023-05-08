@@ -109,7 +109,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 600.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 20.0f;
+            cur->attributes.baseDamage = 10.0f;
             cur->attributes.attackChance = 90;
             cur->attributes.criticalChance = 20;
             cur->attributes.criticalModifier = 2.0f;
@@ -153,7 +153,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 4000.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 25.0f;
+            cur->attributes.baseDamage = 20.0f;
             cur->attributes.attackChance = 100;
             cur->attributes.criticalChance = 10;
             cur->attributes.criticalModifier = 1.5f;
@@ -256,7 +256,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.maxMana = 4250.0f;
             cur->attributes.curMana = cur->attributes.maxMana;
 
-            cur->attributes.baseDamage = 36.0f;
+            cur->attributes.baseDamage = 30.0f;
             cur->attributes.attackChance = 100;
             cur->attributes.criticalChance = 20;
             cur->attributes.criticalModifier = 1.5f;
@@ -553,7 +553,7 @@ void G_AIPlayAnimationLoop(dynamicSprite_t* cur, objectanimationsID_e animID)
 
 void G_AITakeDamage(dynamicSprite_t* cur, float amount, bool setAggro)
 {
-    if(cur != NULL && cur->isAlive)
+    if(cur != NULL)
     {
         cur->attributes.curHealth -= amount;
 
@@ -568,7 +568,7 @@ void G_AITakeDamage(dynamicSprite_t* cur, float amount, bool setAggro)
 
 bool G_AICanAttack(dynamicSprite_t* cur)
 {
-    return (cur->state != DS_STATE_ATTACKING && cur->state != DS_STATE_DEAD && cur->state != DS_STATE_CASTING && cur->state != DS_STATE_SPECIAL1 && cur->state != DS_STATE_SPECIAL2 && cur->state != DS_STATE_SPECIAL3);
+    return (cur->isAlive && cur->state != DS_STATE_ATTACKING && cur->state != DS_STATE_DEAD && cur->state != DS_STATE_CASTING && cur->state != DS_STATE_SPECIAL1 && cur->state != DS_STATE_SPECIAL2 && cur->state != DS_STATE_SPECIAL3);
 }
 
 void G_AICheckPuddleDamage(dynamicSprite_t* ai)

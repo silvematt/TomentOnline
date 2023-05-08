@@ -1848,9 +1848,9 @@ void G_AI_BehaviourSkeletonLord(dynamicSprite_t* cur)
     }
 
     // Extra, close door of player's spawn
-    if(cur->isAlive && doorstateLevel0[18][11] == DState_Open && player.gridPosition.y < 17 && cur->base.gridPos.y < 17)
+    if(thisPlayer.isHost && cur->isAlive && doorstateLevel0[119][10] == DState_Open && (player.gridPosition.y < 116 || otherPlayerObject.base.gridPos.y < 116) && cur->base.gridPos.y < 116)
     {
-        G_SetDoorState(0, 18, 11, DState_Closing);
+        G_SetDoorState(0, 119, 10, DState_Closing);
     }
 }
 
@@ -2665,9 +2665,9 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
     }
 
     // Extra, close door of player's spawn
-    if(cur->isAlive && doorstateLevel0[18][11] == DState_Open && player.gridPosition.y < 17 && cur->base.gridPos.y < 17)
+    if(thisPlayer.isHost && cur->isAlive && doorstateLevel0[58][21] == DState_Open && (player.gridPosition.x > 24 || otherPlayerObject.base.gridPos.x > 24) && cur->base.gridPos.y < 116)
     {
-        G_SetDoorState(0, 18, 11, DState_Closing);
+        G_SetDoorState(0, 58, 21, DState_Closing);
     }
 }
 
@@ -4508,8 +4508,8 @@ void G_AI_BehaviourTheFrozenLord(dynamicSprite_t* cur)
     }
 
     // Extra, close door of player's spawn
-    if(cur->isAlive && doorstateLevel0[18][11] == DState_Open && player.gridPosition.y < 17 && cur->base.gridPos.y < 17)
+    if(thisPlayer.isHost && cur->isAlive && doorstateLevel0[73][58] == DState_Open && (player.gridPosition.x > 64 || otherPlayerObject.base.gridPos.x > 64) && cur->base.gridPos.y < 116)
     {
-        G_SetDoorState(0, 18, 11, DState_Closing);
+        G_SetDoorState(0, 73, 58, DState_Closing);
     }
 }
