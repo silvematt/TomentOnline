@@ -69,7 +69,7 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
     cur->posArrived = false;
 
     for(int i = 0; i < AI_MAX_SPELLS; i++)
-        (cur->cooldowns[i]) = NULL;
+        cur->cooldowns[i] = NULL;
 
     cur->bossPhase = 0;
 
@@ -602,7 +602,11 @@ void G_FreeDynamicSprite(dynamicSprite_t* ai)
 
     for(int i = 0; i < AI_MAX_SPELLS; i++)
         if(ai->cooldowns[i] != NULL)
+        {
             free(ai->cooldowns[i]);
+            ai->cooldowns[i] = NULL;
+        }
 
     free(ai);
+    ai = NULL;
 }
