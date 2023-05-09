@@ -235,6 +235,10 @@ void G_AIInitialize(dynamicSprite_t* cur, int level, int spriteID, int x, int y)
             cur->attributes.criticalModifier = 1.5f;
 
             cur->cooldowns[0] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[1] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[2] = U_TimerCreateNew(); // Abs cooldown
+            cur->cooldowns[3] = U_TimerCreateNew(); // Abs cooldown
+
             break;
 
 
