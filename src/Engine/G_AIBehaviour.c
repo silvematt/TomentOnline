@@ -2382,47 +2382,55 @@ void G_AI_BehaviourMorgathulTheKeeper(dynamicSprite_t* cur)
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleActionFrame;
             break;
 
         case DS_STATE_DEAD:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animDie;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animDieSpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animDieActionFrame;
             break;
 
         case DS_STATE_ATTACKING:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttack;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackSpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animAttackActionFrame;
             break;
 
         case DS_STATE_CASTING:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animCastSpell;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animCastSpellSheetLength;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animCastSpellActionFrame;
             break;
 
         case DS_STATE_SPECIAL1:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1SpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial1ActionFrame;
             break;
 
         case DS_STATE_SPECIAL2:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2SpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial2ActionFrame;
             break;
 
         case DS_STATE_SPECIAL3:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3SpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animSpecial3ActionFrame;
             break;
 
         default:
             cur->curAnim = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdle;
             cur->curAnimLength = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSheetLength;
             cur->animSpeed = cur->animSpeed + tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleSpeedModifier;
+            curAnimActionFrame = tomentdatapack.sprites[cur->base.spriteID]->animations->animIdleActionFrame;
             break;
     }
 
