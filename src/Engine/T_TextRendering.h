@@ -2,6 +2,18 @@
 #define TEXT_RENDERING_H_INCLUDED
 
 #include "SDL.h"
+#include <stdbool.h>
+
+#define TEXTFIELD_MAX_LENGTH 32
+
+typedef struct textfield_t
+{
+    int x, y, w, h;
+    bool isFocus;
+    char text[TEXTFIELD_MAX_LENGTH];
+    int textLimit;
+    float textScale;
+} textfield_t;
 
 // ----------------------------------------------------------------------
 // Displays the given text
@@ -20,5 +32,10 @@ void T_DisplayTextScaled(int fontID, char* text, int x, int y, float scaleFactor
 // You could make different translations for each map or find a better way to translate
 // ----------------------------------------------------------------------
 void T_TranslateASCIIToSpriteSheetCoords(char c, int* destX, int* destY);
+
+// ----------------------------------------------------------------------
+// Returns a new TextField
+// ----------------------------------------------------------------------
+textfield_t* T_NewTextfield(int x, int y, int w, int h, int textlimit, float textScale);
 
 #endif

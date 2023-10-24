@@ -203,6 +203,8 @@ void D_InitUIAssets(void)
     uiAssets_t* skillIconDpsCheapshot = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconDpsObliterate = (uiAssets_t*)malloc(sizeof(uiAssets_t));
     uiAssets_t* skillIconDpsSplit = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* inputfield01 = (uiAssets_t*)malloc(sizeof(uiAssets_t));
+    uiAssets_t* inputfield01_active = (uiAssets_t*)malloc(sizeof(uiAssets_t));
 
     tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR] = selectCursor;
     tomentdatapack.uiAssets[M_ASSET_TITLE] = menuTitle;
@@ -240,8 +242,10 @@ void D_InitUIAssets(void)
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_CHEAPSHOT] = skillIconDpsCheapshot;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_OBLITERATE] = skillIconDpsObliterate;
     tomentdatapack.uiAssets[G_ASSET_SKILL_ICON_DPS_SPLIT] = skillIconDpsSplit;
+    tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01] = inputfield01;
+    tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE] = inputfield01_active;
 
-    tomentdatapack.uiAssetsLenght = 36;
+    tomentdatapack.uiAssetsLenght = 38;
 
     // Fill objects
     // Convert all the surfaces that we will load in the same format as the win_surface
@@ -707,6 +711,26 @@ void D_InitUIAssets(void)
     }
     else
         printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_FreeSurface(temp1);
+
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_INPUTFIELD_01].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_INPUTFIELD_01].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_INPUTFIELD_01))
+        tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_SetColorKey(tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
+    SDL_FreeSurface(temp1);
+
+    offset = tomentdatapack.IMGArch.tocOffset + (tomentdatapack.IMGArch.toc[IMG_ID_INPUTFIELD_01_ACTIVE].startingOffset);
+    sdlWops = SDL_RWFromConstMem((byte*)tomentdatapack.IMGArch.buffer+offset, tomentdatapack.IMGArch.toc[IMG_ID_INPUTFIELD_01_ACTIVE].size);
+    temp1 = SDL_LoadBMP_RW(sdlWops, SDL_TRUE);
+    if(D_CheckTextureLoaded(temp1, IMG_ID_INPUTFIELD_01_ACTIVE))
+        tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE]->texture = SDL_ConvertSurface(temp1, win_surface->format, 0);
+    else
+        printf("FATAL ERROR! Engine Default \"%d\" failed to load. Further behaviour is undefined.\n", IMG_ID_EDEFAULT_1);
+    SDL_SetColorKey(tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE]->texture, SDL_TRUE, r_transparencyColor);    // Make transparency color for blitting
     SDL_FreeSurface(temp1);
 }
 

@@ -1,7 +1,6 @@
 #include "G_MainMenu.h"
 #include "G_Game.h"
 #include "R_Rendering.h"
-#include "T_TextRendering.h"
 #include "D_AssetsManager.h"
 
 #include "../Network/netdef.h"
@@ -29,7 +28,8 @@ static void CALLBACK_LOBBY_Ready(void);
 
 static void CALLBACK_DISCONNECTED_Leave(void);
 
-
+static void CALLBACK_SETUPHOSTMENU_Host(void);
+static void CALLBACK_SETUPJOINMENU_Join(void);
 // ----------------------------
 // Define Menus
 // ----------------------------
@@ -42,13 +42,14 @@ menuelement_t MainMenuElements[] =
     {"About",       {250, 370, 400, 40}, CALLBACK_MAINMENU_About},
     {"Quit",        {250, 420, 400, 40}, CALLBACK_MAINMENU_Quit}
 };
-menu_t MainMenu = {MENU_START, MainMenuElements, 6, &MainMenuElements[1]};
+
+menu_t MainMenu = {MENU_START, MainMenuElements, 6, &MainMenuElements[1], 0};
 
 menuelement_t DeathMenuElements[] =
 {
     {"Return",           {220, 250, 200, 40}, CALLBACK_ReturnToMainMenu}
 };
-menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 1, &DeathMenuElements[0]};
+menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 1, &DeathMenuElements[0], 0};
 
 menuelement_t OptionsMenuElements[] =
 {
@@ -56,33 +57,65 @@ menuelement_t OptionsMenuElements[] =
     {"Default class:",  {220, 250, 400, 40}, CALLBACK_OPTIONSMENU_ChangeDefaultClass},
     {"Return",          {220, 350, 200, 40}, CALLBACK_ReturnToMainMenu},
 };
-menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 3, &OptionsMenuElements[0]};
+menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 3, &OptionsMenuElements[0], 0};
 
 menuelement_t EndGameMenuElements[] =
 {
     {"Return",    {220, 350, 400, 40}, CALLBACK_ReturnToMainMenu},
 };
-menu_t EndGameMenu = {MENU_END_GAME, EndGameMenuElements, 1, &EndGameMenuElements[0]};
+menu_t EndGameMenu = {MENU_END_GAME, EndGameMenuElements, 1, &EndGameMenuElements[0], 0};
 
 menuelement_t AboutMenuElements[] =
 {
     {"Return",    {220, 350, 400, 40}, CALLBACK_ReturnToMainMenu},
 };
-menu_t AboutMenu = {MENU_ABOUT, AboutMenuElements, 1, &AboutMenuElements[0]};
+menu_t AboutMenu = {MENU_ABOUT, AboutMenuElements, 1, &AboutMenuElements[0], 0};
 
 menuelement_t HostGameMenuElements[] =
 {
     {"Abort",   {220, 350, 400, 40}, CALLBACK_HOSTMENU_Abort},
 };
 
-menu_t HostGameMenu = {MENU_HOSTGAME, HostGameMenuElements, 1, &HostGameMenuElements[0]};
+menu_t HostGameMenu = {MENU_HOSTGAME, HostGameMenuElements, 1, &HostGameMenuElements[0], 0};
+
+//------
+menuelement_t SetupHostGameElements[] = 
+{
+    {"Host",     {250, 350, 400, 40}, CALLBACK_SETUPHOSTMENU_Host},
+    {"Return",   {250, 400, 400, 40}, CALLBACK_ReturnToMainMenu},
+};
+
+textfield_t SetupHostGameTextFields[] =
+{
+    {240,270,280,45,false,"Enter Text...", 14, 1.0f} // Host username
+};
+
+menu_t SetupHostGameMenu = {MENU_SETUPHOSTGAME, SetupHostGameElements, 2, &SetupHostGameElements[0], 1, SetupHostGameTextFields};
+// ----
 
 menuelement_t JoinGameMenuElements[] =
 {
     {"Abort",   {220, 350, 400, 40}, CALLBACK_JOINMENU_Abort},
 };
 
-menu_t JoinGameMenu = {MENU_JOINGAME, JoinGameMenuElements, 1, &JoinGameMenuElements[0]};
+menu_t JoinGameMenu = {MENU_JOINGAME, JoinGameMenuElements, 1, &JoinGameMenuElements[0], 0};
+
+//------
+menuelement_t SetupJoinGameElements[] = 
+{
+    {"Join",     {250, 500, 400, 40}, CALLBACK_SETUPJOINMENU_Join},
+    {"Return",   {250, 550, 400, 40}, CALLBACK_ReturnToMainMenu},
+};
+
+textfield_t SetupJoinGameTextFields[] =
+{
+    {220,220,280,40,false,"Enter Text...", 14, 1.0f }, // Joiner username
+    {220,320,280,40,false,"Enter Text...", 20, 1.0f }, // Host address
+    {220,420,280,40,false,"61530", 10, 1.0f },         // Host port
+};
+
+menu_t SetupJoinGameMenu = {MENU_SETUPJOINGAME, SetupJoinGameElements, 2, &SetupJoinGameElements[0], 3, SetupJoinGameTextFields};
+// ----
 
 
 menuelement_t InLobbyMenuElements[] =
@@ -90,17 +123,21 @@ menuelement_t InLobbyMenuElements[] =
     {"Ready",       {650, 550, 400, 40}, CALLBACK_LOBBY_Ready},
     {"Leave",       {50, 550, 200, 40}, NULL},
 };
-menu_t InLobbyMenu = {MENU_INLOBBY, InLobbyMenuElements, 2, &InLobbyMenuElements[0]};
+menu_t InLobbyMenu = {MENU_INLOBBY, InLobbyMenuElements, 2, &InLobbyMenuElements[0], 0};
 
 menuelement_t DisconnectedMenuElements[] =
 {
     {"Leave",   {220, 350, 400, 40}, CALLBACK_DISCONNECTED_Leave},
 };
 
-menu_t DisconnectedMenu = {MENU_DISCONNECTED, DisconnectedMenuElements, 1, &DisconnectedMenuElements[0]};
+menu_t DisconnectedMenu = {MENU_DISCONNECTED, DisconnectedMenuElements, 1, &DisconnectedMenuElements[0], 0};
 
 
 menu_t* currentMenu;
+
+// Flags to keep track of the selected input field
+bool isEditingTextField = false;
+textfield_t* textFieldEditing = NULL;
 
 
 void G_InitMainMenu()
@@ -176,7 +213,27 @@ void G_RenderCurrentMenuBackground(void)
         case MENU_ABOUT:
         {
             T_DisplayTextScaled(FONT_BLKCRY, "About", 210, 80, 2.0f);
-            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia Silvestro  ( silvematt)\nVersion: 1.0", 80, 200, 1.0f);
+            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia  Silvestro  ( silvematt)\nVersion: 1.0", 80, 200, 1.0f);
+
+            break;
+        }
+
+        case MENU_SETUPHOSTGAME:
+        {
+            T_DisplayTextScaled(FONT_BLKCRY, "Host  Ga me", 210, 80, 2.0f);
+
+            T_DisplayTextScaled(FONT_BLKCRY, "Username:", 240, 207, 1.5f);
+
+            break;
+        }
+
+        case MENU_SETUPJOINGAME:
+        {
+            T_DisplayTextScaled(FONT_BLKCRY, "Join  Ga me", 210, 50, 2.0f);
+
+            T_DisplayTextScaled(FONT_BLKCRY, "Username:", 220, 175, 1.5f);
+            T_DisplayTextScaled(FONT_BLKCRY, "IP Address:", 220, 270, 1.5f);
+            T_DisplayTextScaled(FONT_BLKCRY, "Port:", 220, 375, 1.5f);
 
             break;
         }
@@ -336,6 +393,16 @@ void G_RenderCurrentMenu(void)
         T_DisplayTextScaled(FONT_BLKCRY, currentMenu->elements[i].text, currentMenu->elements[i].box.x, currentMenu->elements[i].box.y, 1.25f);
     }
 
+    // Display Text Fields
+    for(int i = 0; i < currentMenu->textFieldsLength; i++)
+    {
+        SDL_Rect textFieldScreenpos = {currentMenu->textFields[i].x, currentMenu->textFields[i].y, currentMenu->textFields[i].w, currentMenu->textFields[i].h};
+        SDL_Rect textFieldSize = {(0), (0), 309, 52};
+        R_BlitIntoScreenScaled(&textFieldSize, currentMenu->textFields[i].isFocus ? tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE]->texture : tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01]->texture, &textFieldScreenpos);
+
+        T_DisplayTextScaled(FONT_BLKCRY, currentMenu->textFields[i].text, currentMenu->textFields[i].x, currentMenu->textFields[i].y, 1.25f);
+    }
+
     // Display cursor
     SDL_Rect cursorRect = {currentMenu->selectedElement->box.x - CURSOR_X_OFFSET, currentMenu->selectedElement->box.y, tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR]->texture->w, tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR]->texture->h};
     R_BlitIntoScreen(NULL, tomentdatapack.uiAssets[M_ASSET_SELECT_CURSOR]->texture, &cursorRect);
@@ -351,22 +418,78 @@ void G_InMenuInputHandling(SDL_Event* e)
     x = e->button.x;
     y = e->button.y;
 
-    for(int i = 0; i < currentMenu->elementsLength; i++)
+    if(!isEditingTextField)
     {
-        bool isOn = (( x > currentMenu->elements[i].box.x) && ( x < currentMenu->elements[i].box.x + currentMenu->elements[i].box.w ) && 
-                     ( y > currentMenu->elements[i].box.y) && ( y < currentMenu->elements[i].box.y + currentMenu->elements[i].box.h ));
+        for(int i = 0; i < currentMenu->elementsLength; i++)
+        {
+            bool isOn = (( x > currentMenu->elements[i].box.x) && ( x < currentMenu->elements[i].box.x + currentMenu->elements[i].box.w ) && 
+                        ( y > currentMenu->elements[i].box.y) && ( y < currentMenu->elements[i].box.y + currentMenu->elements[i].box.h ));
 
-        if(e->type == SDL_MOUSEMOTION)
-        {
-            // Select hovering element
-            if (isOn)
-                currentMenu->selectedElement = &currentMenu->elements[i];
-        }
-        else if(e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
-        {
-            if (isOn && currentMenu->selectedElement->OnClick != NULL)
+            if(e->type == SDL_MOUSEMOTION)
             {
-                currentMenu->selectedElement->OnClick();
+                // Select hovering element
+                if (isOn)
+                    currentMenu->selectedElement = &currentMenu->elements[i];
+            }
+            else if(e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
+            {
+                if (isOn && currentMenu->selectedElement->OnClick != NULL)
+                {
+                    currentMenu->selectedElement->OnClick();
+                    return;
+                }
+            }
+        }
+    }
+
+    // Check Text Fields
+    if(!isEditingTextField)
+    {
+        for(int i = 0; i < currentMenu->textFieldsLength; i++)
+        {
+            bool isOn = (( x > currentMenu->textFields[i].x) && ( x < currentMenu->textFields[i].x + currentMenu->textFields[i].w) && 
+                        ( y > currentMenu->textFields[i].y) && ( y < currentMenu->textFields[i].y + currentMenu->textFields[i].h));
+
+            if(e->type == SDL_MOUSEMOTION)
+            {
+                // Select hovering element
+                //if (isOn)
+                //    currentMenu->selectedElement = &currentMenu->elements[i];
+            }
+            else if(e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT)
+            {
+                if (isOn && !isEditingTextField)
+                {
+                    isEditingTextField = true;
+                    currentMenu->textFields[i].isFocus = true;
+                    textFieldEditing = &currentMenu->textFields[i];
+                    
+                    // If it's the first time clicking a "Enter Text..." field, remove the placeholder text
+                    if(strcmp("Enter Text...", textFieldEditing->text) == 0)
+                        textFieldEditing->text[0] = '\0';
+
+                    SDL_StartTextInput();
+                    return;
+                }
+            }
+        }
+    }
+    else // if is editing a field
+    {
+        if(textFieldEditing != NULL)
+        {
+            // Get is on
+            bool isOn = (( x > textFieldEditing->x) && ( x < textFieldEditing->x + textFieldEditing->w) && 
+                        (  y > textFieldEditing->y) && ( y < textFieldEditing->y + textFieldEditing->h));
+
+            // Check click out of box
+            if((e->type == SDL_MOUSEBUTTONUP && e->button.button == SDL_BUTTON_LEFT && !isOn) ||
+                (e->type == SDL_KEYUP && (e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym == SDLK_ESCAPE)))
+            {
+                textFieldEditing->isFocus = false;
+                textFieldEditing = NULL;
+                isEditingTextField = false;
+                SDL_StopTextInput();
                 return;
             }
         }
@@ -393,11 +516,17 @@ static void CALLBACK_MAINMENU_NewGame(void)
 
 static void CALLBACK_MAINMENU_HostGame(void)
 {
+    G_SetMenu(&SetupHostGameMenu);
+    A_ChangeState(GSTATE_MENU);
+}
+
+static void CALLBACK_SETUPHOSTMENU_Host(void)
+{
     // Initialize the player
     player.hasBeenInitialized = false;
 
     NET_InitializeNet();
-    if(NET_HostGameProcedure() == 0)
+    if(NET_HostGameProcedure(SetupHostGameTextFields[0].text) == 0)
     {
         G_SetMenu(&HostGameMenu);
         A_ChangeState(GSTATE_MENU);
@@ -406,16 +535,23 @@ static void CALLBACK_MAINMENU_HostGame(void)
 
 static void CALLBACK_MAINMENU_JoinGame(void)
 {
+    G_SetMenu(&SetupJoinGameMenu);
+    A_ChangeState(GSTATE_MENU);
+}
+
+static void CALLBACK_SETUPJOINMENU_Join(void)
+{
     // Initialize the player
     player.hasBeenInitialized = false;
 
     NET_InitializeNet();
-    if(NET_JoinGameProcedure() == 0)
+    if(NET_JoinGameProcedure(SetupJoinGameTextFields[0].text, SetupJoinGameTextFields[1].text, SetupJoinGameTextFields[2].text) == 0)
     {
         G_SetMenu(&JoinGameMenu);
         A_ChangeState(GSTATE_MENU);
     }
 }
+
 
 static void CALLBACK_MAINMENU_Options(void)
 {

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "SDL.h"
+#include "T_TextRendering.h"
 
 // How off the text the cursor should be
 #define CURSOR_X_OFFSET 35
@@ -18,7 +19,9 @@ typedef enum
     MENU_HOSTGAME,
     MENU_JOINGAME,
     MENU_INLOBBY,
-    MENU_DISCONNECTED
+    MENU_DISCONNECTED,
+    MENU_SETUPHOSTGAME,
+    MENU_SETUPJOINGAME
 } menusIDs_e;
 
 
@@ -35,6 +38,10 @@ typedef struct menu_s
     menuelement_t* elements;
     int elementsLength;
     menuelement_t* selectedElement;
+    
+    // Text fields
+    int textFieldsLength;
+    textfield_t* textFields;
 } menu_t;
 
 
@@ -68,6 +75,9 @@ extern menu_t InLobbyMenu;
 
 extern menuelement_t DisconnectedMenuElements[];
 extern menu_t DisconnectedMenu;
+
+extern bool isEditingTextField;
+extern textfield_t * textFieldEditing;
 
 //-------------------------------------
 // Initialize the Main Menu state

@@ -11,10 +11,10 @@ INCLUDE_PATHS = -IC:\MinGWLibs\include\SDL2
 LIBRARY_PATHS = -LC:\MinGWLibs\lib
 
 #COMPILER_FLAGS specifies the additional compilation options we're using
-COMPILER_FLAGS = -O2 -g
+COMPILER_FLAGS = -O2 -Wl,--subsystem,windows -mwindows
 
 #LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lws2_32
+LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lws2_32 -fopenmp
 
 #OBJ_NAME specifies the name of our exectuable
 OBJ_NAME = bin/TomentOnline

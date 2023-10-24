@@ -66,7 +66,7 @@ int NET_InitializeNet(void);
 void NET_InitializeNetPlayers(void);
 
 // Starts the procedure to host a game
-int NET_HostGameProcedure(void);
+int NET_HostGameProcedure(char* passedUsername);
 int NET_HostGameWaitForConnection(void);
 int NET_HostGameWaitForGreet(void);
 
@@ -76,7 +76,7 @@ int NET_HostGameSendGreet(void);
 int NET_HostGameAbortConnection(void);
 
 // Starts the procedure to join a game
-int NET_JoinGameProcedure(void);
+int NET_JoinGameProcedure(char* passedUsername, char* passedIP, char* passedPort);
 int NET_JoinGameWaitForConnection(void);
 int NET_JoinGameOnConnectionEstabilishes(void);
 int NET_JoinGameWaitForGreet(void);

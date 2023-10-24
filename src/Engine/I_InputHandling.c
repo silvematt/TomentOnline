@@ -50,6 +50,25 @@ void I_HandleInputMenu(void)
                 application.quit = true;
             break;
 
+            case SDL_KEYDOWN:
+                if(e.key.keysym.sym == SDLK_BACKSPACE && isEditingTextField && textFieldEditing != NULL)
+                {
+                    int len = strlen(textFieldEditing->text);
+                    if(len > 0)
+                        textFieldEditing->text[len - 1] = '\0'; // Set the last character to null terminator
+                }
+                break;
+
+            case SDL_TEXTINPUT:
+                if(isEditingTextField && textFieldEditing != NULL)
+                {
+                    int len = strlen(textFieldEditing->text);
+
+                    if(len < TEXTFIELD_MAX_LENGTH && len < textFieldEditing->textLimit)
+                        strcat(textFieldEditing->text, e.text.text);
+                }
+            break;
+
             default:
                 break;
         }

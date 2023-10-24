@@ -591,3 +591,15 @@ void T_TranslateASCIIToSpriteSheetCoords(char c, int* destX, int* destY)
             break;
     }
 }
+
+textfield_t* T_NewTextfield(int x, int y, int w, int h, int textlimit, float textScale)
+{
+    textfield_t* tfield = (textfield_t*)malloc(sizeof(textfield_t));
+    tfield->x = x;
+    tfield->y = y;
+    tfield->w = w;
+    tfield->h = h;
+    tfield->text[0] = '\0';
+    tfield->textLimit = textlimit;
+    tfield->textScale = textScale;
+}

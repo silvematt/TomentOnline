@@ -418,7 +418,9 @@ void G_UpdateProjectiles(void)
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
                     O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
-                    return;
+                    i++;
+                    cur = cur->next;
+                    continue;
                 }
 
                 // AI hit
@@ -468,7 +470,11 @@ void G_UpdateProjectiles(void)
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
                     O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
-                    return;
+
+                    i++;
+                    cur = cur->next;
+
+                    continue;
                 }
 
                 // Check other player heal
@@ -524,7 +530,11 @@ void G_UpdateProjectiles(void)
                     cur->this.isBeingDestroyed = true;
                     G_AIPlayAnimationOnce(&cur->this, ANIM_DIE);
                     O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, false);
-                    return;
+
+                    i++;
+                    cur = cur->next;
+
+                    continue;
                 }
             }
             // Check client side collision
@@ -572,7 +582,10 @@ void G_UpdateProjectiles(void)
                     
                     // Force destroy is true because we've requested the destroyment of an instance that on this side is networked but on the other side is local
                     O_GameDestroyProjectile(cur->networkID, cur->this.base.spriteID, true);
-                    return;
+                    i++;
+                    cur = cur->next;
+
+                    continue;
                 }
             }
         }

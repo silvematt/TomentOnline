@@ -65,12 +65,10 @@ void NET_InitializeNetPlayers(void)
 }
 
 
-int NET_HostGameProcedure(void)
+int NET_HostGameProcedure(char* passedUsername)
 {
-    printf("Enter username: ");
-    gets(thisPlayer.name);
-    fflush(stdin);
-
+    strcpy(thisPlayer.name, passedUsername);
+    
     // Player 1 is the host
     thisPlayer.id = 0;
 
@@ -262,7 +260,7 @@ int NET_HostGameSendGreet(void)
 }
 
 
-int NET_JoinGameProcedure(void)
+int NET_JoinGameProcedure(char* passedUsername, char* passedIP, char* passedPort)
 {
     printf("Joining a game...\n");
     
@@ -305,17 +303,9 @@ int NET_JoinGameProcedure(void)
     }
 
     // Get server address and port
-    printf("Enter address in 192.168.1.1 format...\n");
-    gets(remoteAddress);
-    fflush(stdin);
-
-    printf("Enter port number\n");
-    scanf("%hu", &remotePort);
-    fflush(stdin);
-
-    printf("Enter username: ");
-    gets(thisPlayer.name);
-    fflush(stdin);
+    strcpy(thisPlayer.name, passedUsername);
+    strcpy(remoteAddress, passedIP);
+    remotePort = atoi(passedPort);
 
     // Setup host
     struct sockaddr_in hostAddress;
