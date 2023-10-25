@@ -110,7 +110,7 @@ menuelement_t SetupJoinGameElements[] =
 textfield_t SetupJoinGameTextFields[] =
 {
     {220,220,280,40,false,"Enter Text...", 14, 1.0f }, // Joiner username
-    {220,320,280,40,false,"192.168.1.191", 20, 1.0f }, // Host address
+    {220,320,280,40,false,"Enter Text...", 20, 1.0f }, // Host address
     {220,420,280,40,false,"61530", 10, 1.0f },         // Host port
 };
 

@@ -961,7 +961,13 @@ static void G_PlayerUIRender_ThisPlayer()
     while(last != NULL)
     {
         last->y = initialYPos + additivePos;
+
+        // Clip, should not happen since messages are destroyed quickly
+        if(last->y < 0)
+            last->y = 0;
+
         additivePos -= INCOMING_CHAT_DEFAULT_MESSAGES_SPACING;
+        
         last = last->previous;
     }
 }   
