@@ -4,6 +4,7 @@
 #include "G_Player.h"
 #include "R_Rendering.h"
 #include "U_Timer.h"
+#include "T_TextRendering.h"
 #include "../Network/packet.h"
 
 // DOOR DEFINE
@@ -36,6 +37,10 @@ extern projectileNode_t* projectilesHead;
 extern projectileNode_t* explodingProjectilesHead;
 
 extern mappudlle_t* activeMapPuddlesHead;
+
+// Chat
+extern incomingchatmessage_t* chatMsgsHead;
+extern textfield_t chatField;
 
 
 //-------------------------------------
@@ -78,9 +83,21 @@ void G_UpdateProjectiles(void);
 //-------------------------------------
 void G_SpawnProjectile(uint32_t networkID, int id, float angle, int level, float posx, float posy, float posz, float verticalAngle, bool isOfPlayer, dynamicSprite_t* aiOwner, bool isNetworkInstance);
 
+//-------------------------------------
+// Updates the Puddles
+//-------------------------------------
 void G_UpdateMapPuddles(void);
+
+//-------------------------------------
+// Spawns a new Puddle
+//-------------------------------------
 packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damagesAI, bool damagesPlayer, float damage, int duration, int level, int newFloorID, bool isNetworkInstance);
 
-void G_ResetGame(void);
+
+//-------------------------------------
+// Spawns a new incoming chat message
+//-------------------------------------
+void G_SpawnIncomingChatMessage(int fontID, int x, int y, char* msg, float duration, float scale);
+
 
 #endif

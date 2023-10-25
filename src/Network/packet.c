@@ -576,3 +576,21 @@ pckt_t* PCKT_MakePlayerDeathPacket(pckt_t* packet)
 
     return packet;
 }
+
+pckt_t* PCKT_MakeChatMessagePacket(pckt_t* packet, char* msg)
+{
+    PCKT_Zero(packet);
+    
+    // Create the packet
+    packet->protocol = PROT_ID_TCP;
+    packet->id = PCKTID_CHATMESSAGE;
+
+    // Create and fill the content
+    pckt_chatmessage_t content;
+    strcpy(content.message, msg);
+
+    // Convert content as packet.data
+    memcpy(packet->data, &content, sizeof(content));
+
+    return packet;
+}

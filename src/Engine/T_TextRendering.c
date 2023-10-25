@@ -603,3 +603,14 @@ textfield_t* T_NewTextfield(int x, int y, int w, int h, int textlimit, float tex
     tfield->textLimit = textlimit;
     tfield->textScale = textScale;
 }
+
+void T_SetTextField(textfield_t *tfield, int x, int y, int w, int h, int textlimit, float textScale)
+{
+    tfield->x = x;
+    tfield->y = y;
+    tfield->w = w;
+    tfield->h = h;
+    tfield->text[0] = '\0';
+    tfield->textLimit = textlimit;
+    tfield->textScale = textScale;
+}

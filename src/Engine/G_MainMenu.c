@@ -110,7 +110,7 @@ menuelement_t SetupJoinGameElements[] =
 textfield_t SetupJoinGameTextFields[] =
 {
     {220,220,280,40,false,"Enter Text...", 14, 1.0f }, // Joiner username
-    {220,320,280,40,false,"Enter Text...", 20, 1.0f }, // Host address
+    {220,320,280,40,false,"192.168.1.191", 20, 1.0f }, // Host address
     {220,420,280,40,false,"61530", 10, 1.0f },         // Host port
 };
 
@@ -213,7 +213,7 @@ void G_RenderCurrentMenuBackground(void)
         case MENU_ABOUT:
         {
             T_DisplayTextScaled(FONT_BLKCRY, "About", 210, 80, 2.0f);
-            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia  Silvestro  ( silvematt)\nVersion: 1.0", 80, 200, 1.0f);
+            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia  Silvestro  ( silvematt)\nVersion: 1.1", 80, 200, 1.0f);
 
             break;
         }
@@ -400,7 +400,7 @@ void G_RenderCurrentMenu(void)
         SDL_Rect textFieldSize = {(0), (0), 309, 52};
         R_BlitIntoScreenScaled(&textFieldSize, currentMenu->textFields[i].isFocus ? tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE]->texture : tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01]->texture, &textFieldScreenpos);
 
-        T_DisplayTextScaled(FONT_BLKCRY, currentMenu->textFields[i].text, currentMenu->textFields[i].x, currentMenu->textFields[i].y, 1.25f);
+        T_DisplayTextScaled(FONT_BLKCRY, currentMenu->textFields[i].text, currentMenu->textFields[i].x, currentMenu->textFields[i].y, currentMenu->textFields[i].textScale);
     }
 
     // Display cursor

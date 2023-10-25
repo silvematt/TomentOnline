@@ -370,59 +370,68 @@ void G_PlayerCollisionCheck()
 //-------------------------------------
 void G_InGameInputHandling(const uint8_t* keyboardState)
 {
-    // Forward / backwards
-    if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W])
-        playerinput.input.y += 1.0f;
-    else if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S])
-        playerinput.input.y -= 1.0f;
+    if(!chatField.isFocus)
+    {
+        // Forward / backwards
+        if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W])
+            playerinput.input.y += 1.0f;
+        else if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S])
+            playerinput.input.y -= 1.0f;
+        else
+            playerinput.input.y = 0.0f;
+        
+        // Strafe right and left
+        if(keyboardState[SDL_SCANCODE_A])
+            playerinput.strafe.x = -1.0f; 
+        else if(keyboardState[SDL_SCANCODE_D])
+            playerinput.strafe.x = 1.0f; 
+        else
+            playerinput.strafe.x = 0.0f; 
+
+        /* Player fly
+        if(keyboardState[SDL_SCANCODE_LCTRL])
+            if(player.z > 1)
+                player.z -= 100 * deltaTime; 
+
+        if(keyboardState[SDL_SCANCODE_LSHIFT])
+            if(player.z < 191)
+                player.z += 100 * deltaTime; 
+        */
+
+        /*
+        if(keyboardState[SDL_SCANCODE_KP_MINUS])
+        {
+            player.attributes.curHealth -= 1.0f;
+            player.z -= 1.0f;
+        }
+
+        if(keyboardState[SDL_SCANCODE_KP_PLUS])
+        {
+            player.attributes.curHealth += 1.0f;
+            player.z += 1.0f;
+        }
+
+        if(keyboardState[SDL_SCANCODE_KP_3])
+        {
+            player.attributes.curMana -= 1.0f;
+        }
+
+        if(keyboardState[SDL_SCANCODE_KP_6])
+        {
+            player.attributes.curMana += 1.0f;
+        }
+        */
+
+
+        //playerinput.input.x = SDL_clamp(playerinput.input.x, -1.0f , 1.0f);
+        playerinput.input.y = SDL_clamp(playerinput.input.y, -1.0f , 1.0f);
+    } 
     else
-        playerinput.input.y = 0.0f;
+    {
+        playerinput.strafe.x = 0;
+        playerinput.input.y = 0;
+    }
     
-    // Strafe right and left
-    if(keyboardState[SDL_SCANCODE_A])
-        playerinput.strafe.x = -1.0f; 
-    else if(keyboardState[SDL_SCANCODE_D])
-        playerinput.strafe.x = 1.0f; 
-    else
-        playerinput.strafe.x = 0.0f; 
-
-    /* Player fly
-    if(keyboardState[SDL_SCANCODE_LCTRL])
-        if(player.z > 1)
-            player.z -= 100 * deltaTime; 
-
-    if(keyboardState[SDL_SCANCODE_LSHIFT])
-        if(player.z < 191)
-            player.z += 100 * deltaTime; 
-    */
-
-    /*
-    if(keyboardState[SDL_SCANCODE_KP_MINUS])
-    {
-        player.attributes.curHealth -= 1.0f;
-        player.z -= 1.0f;
-    }
-
-    if(keyboardState[SDL_SCANCODE_KP_PLUS])
-    {
-        player.attributes.curHealth += 1.0f;
-        player.z += 1.0f;
-    }
-
-    if(keyboardState[SDL_SCANCODE_KP_3])
-    {
-        player.attributes.curMana -= 1.0f;
-    }
-
-    if(keyboardState[SDL_SCANCODE_KP_6])
-    {
-        player.attributes.curMana += 1.0f;
-    }
-    */
-
-
-    //playerinput.input.x = SDL_clamp(playerinput.input.x, -1.0f , 1.0f);
-    playerinput.input.y = SDL_clamp(playerinput.input.y, -1.0f , 1.0f);
 }
 
 
@@ -903,7 +912,58 @@ static void G_PlayerUIRender_ThisPlayer()
         T_DisplayText(FONT_BLKCRY, arr, 540, 545);
     }    
     
+    // Render text input field if need to
+    if(chatField.isFocus)
+    {
+        SDL_Rect textFieldScreenpos = {chatField.x, chatField.y, chatField.w, chatField.h};
+        SDL_Rect textFieldSize = {(0), (0), 309, 52};
+        R_BlitIntoScreenScaled(&textFieldSize, chatField.isFocus ? tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01_ACTIVE]->texture : tomentdatapack.uiAssets[M_ASSET_INPUTFIELD_01]->texture, &textFieldScreenpos);
 
+        T_DisplayTextScaled(FONT_BLKCRY, chatField.text, chatField.x, chatField.y, chatField.textScale);
+    }
+
+    // Render and handle chat
+    incomingchatmessage_t* last = NULL;
+    incomingchatmessage_t* cur = chatMsgsHead;
+    while(cur != NULL)
+    {
+        if(cur->timer->GetTicks(cur->timer) >= cur->duration)
+        {
+            // Destroy this
+            if(chatMsgsHead == cur)
+                chatMsgsHead = cur->next;
+
+            if(cur->next != NULL)
+                cur->next->previous = cur->previous;
+
+            if(cur->previous != NULL)
+                cur->previous->next = cur->next;
+
+            // Restore floor texture
+            incomingchatmessage_t* dead = cur;
+            cur = cur->next;
+            free(dead->timer);
+            free(dead);
+            continue;
+        }
+        else
+        {
+            T_DisplayTextScaled(cur->fontID, cur->msg, cur->x, cur->y, cur->scale);
+        }
+
+        last = cur;
+        cur = cur->next;
+    }
+
+    // Order Y
+    int initialYPos = INCOMING_CHAT_INITIAL_Y_POS;
+    int additivePos = 0;
+    while(last != NULL)
+    {
+        last->y = initialYPos + additivePos;
+        additivePos -= INCOMING_CHAT_DEFAULT_MESSAGES_SPACING;
+        last = last->previous;
+    }
 }   
 
 // Fill needs to account for other player health
@@ -1076,213 +1136,273 @@ void G_PlayerUIRender(void)
 //-------------------------------------
 void G_InGameInputHandlingEvent(SDL_Event* e)
 {
-    switch(e->type)
+    if(!chatField.isFocus)
     {
-        case SDL_MOUSEMOTION:
-            playerinput.mouseInput.x = e->motion.xrel;
-            playerinput.mouseInput.y = -e->motion.yrel;
-            break;
+        switch(e->type)
+        {
+            case SDL_MOUSEMOTION:
+                playerinput.mouseInput.x = e->motion.xrel;
+                playerinput.mouseInput.y = -e->motion.yrel;
+                break;
 
-        case SDL_MOUSEBUTTONUP:
-            if(e->button.button == SDL_BUTTON_LEFT)
-            {
-                if(G_PlayerCanAttack())
+            case SDL_MOUSEBUTTONUP:
+                if(e->button.button == SDL_BUTTON_LEFT)
                 {
-                    G_PlayerPlayAnimationOnce(ANIM_ATTACK1);
-                    player.hasToCast = true;
-                    player.hasCasted = false;
-                }
-            }
-            break;
-
-
-        case SDL_KEYUP:
-            // Space player's interacions
-            if(e->key.keysym.sym == SDLK_SPACE && player.state != PSTATE_CLIMBING_LADDER)
-            {
-                // Interactions
-                objectType_e objType = G_GetFromObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
-
-                if(objType == ObjT_Door)
-                {
-                    printf("Tapped a door\n");
-                    
-                    if(player.isFightingBoss && player.bossFighting->bossPreventOpeningDoorsWhileFighting)
+                    if(G_PlayerCanAttack())
                     {
-                        alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
-                        R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
+                        G_PlayerPlayAnimationOnce(ANIM_ATTACK1);
+                        player.hasToCast = true;
+                        player.hasCasted = false;
                     }
-                    else
+                }
+                break;
+
+
+            case SDL_KEYUP:
+                // Space player's interacions
+                if(e->key.keysym.sym == SDLK_SPACE && player.state != PSTATE_CLIMBING_LADDER)
+                {
+                    // Interactions
+                    objectType_e objType = G_GetFromObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
+
+                    if(objType == ObjT_Door)
                     {
-                        // Open/Close
-                        if(G_GetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Closed || G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Closing)
-                            G_SetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, DState_Opening);
+                        printf("Tapped a door\n");
                         
-                        else if(G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Open || G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Opening)
-                            G_SetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, DState_Closing);
+                        if(player.isFightingBoss && player.bossFighting->bossPreventOpeningDoorsWhileFighting)
+                        {
+                            alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
+                            R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
+                        }
+                        else
+                        {
+                            // Open/Close
+                            if(G_GetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Closed || G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Closing)
+                                G_SetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, DState_Opening);
+                            
+                            else if(G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Open || G_GetDoorState(player.level,player.inFrontGridPosition.y, player.inFrontGridPosition.x) == DState_Opening)
+                                G_SetDoorState(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, DState_Closing);
+                        }
                     }
-                }
-                else if(objType == ObjT_Empty)
-                {
-                    printf("Tapped an empty space\n");
-                }
-                else if(objType == ObjT_Sprite)
-                {
-                    printf("Tapped a sprite\n");
-                    
-                    int spriteID = R_GetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
-                    if(tomentdatapack.sprites[spriteID]->Callback != NULL && U_GetBit(&tomentdatapack.sprites[spriteID]->flags, 3) == 0)
+                    else if(objType == ObjT_Empty)
                     {
-                        tomentdatapack.sprites[spriteID]->Callback(tomentdatapack.sprites[spriteID]->data);
+                        printf("Tapped an empty space\n");
+                    }
+                    else if(objType == ObjT_Sprite)
+                    {
+                        printf("Tapped a sprite\n");
+                        
+                        int spriteID = R_GetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
+                        if(tomentdatapack.sprites[spriteID]->Callback != NULL && U_GetBit(&tomentdatapack.sprites[spriteID]->flags, 3) == 0)
+                        {
+                            tomentdatapack.sprites[spriteID]->Callback(tomentdatapack.sprites[spriteID]->data);
 
-                        // If the tapped sprite was a pickup, destroy it from the map after the player took it
-                        if(tomentdatapack.sprites[spriteID]->Callback == D_CallbackPickup)
-                        {
-                            R_SetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, 0);
-                            R_SetValueFromCollisionMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, 0);
-                            G_SetObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, ObjT_Empty);
-                        }
-                        else if(tomentdatapack.sprites[spriteID]->Callback == D_CallbackUseAltar)
-                        {
-                            R_SetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, S_AltarEmpty);
-                            G_SetObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, ObjT_Sprite);
+                            // If the tapped sprite was a pickup, destroy it from the map after the player took it
+                            if(tomentdatapack.sprites[spriteID]->Callback == D_CallbackPickup)
+                            {
+                                R_SetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, 0);
+                                R_SetValueFromCollisionMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, 0);
+                                G_SetObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, ObjT_Empty);
+                            }
+                            else if(tomentdatapack.sprites[spriteID]->Callback == D_CallbackUseAltar)
+                            {
+                                R_SetValueFromSpritesMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, S_AltarEmpty);
+                                G_SetObjectTMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x, ObjT_Sprite);
+                            }
                         }
                     }
-                }
-                else if(objType == ObjT_Wall)
-                {
-                    printf("Tapped a wall\n");
-                }
-                else if(objType == ObjT_Trigger)
-                {
-                    printf("Tapped a trigger\n");
-                    
-                    if(player.isFightingBoss && player.bossFighting->bossPreventActivatingTriggersWhileFighting)
+                    else if(objType == ObjT_Wall)
                     {
-                        alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
-                        R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
+                        printf("Tapped a wall\n");
                     }
+                    else if(objType == ObjT_Trigger)
+                    {
+                        printf("Tapped a trigger\n");
+                        
+                        if(player.isFightingBoss && player.bossFighting->bossPreventActivatingTriggersWhileFighting)
+                        {
+                            alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
+                            R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
+                        }
+                        else
+                        {
+                            wallObject_t* object = R_GetWallObjectFromMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
+                            if(tomentdatapack.walls[object->assetID]->Callback != NULL)
+                            {
+                                // Prevent the player from climbing ladders if he's in a bossfight that does not allow ladders
+                                if(player.isFightingBoss && player.bossFighting->bossPreventClimbingLaddersWhileFighting &&
+                                    (object->assetID == W_WallLadder || object->assetID == W_WallLadderDown))
+                                {
+                                    alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
+                                    R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
+                                }
+                                else
+                                    tomentdatapack.walls[object->assetID]->Callback(object->data);
+                            }
+                        }
+                        
+                    }
+                }
+                else if(e->key.keysym.sym == SDLK_c)
+                {
+                    if(G_PlayerCanAttack())
+                        I_PlayerCastSpell(player.curSpell);
+                }
+                else if(e->key.keysym.sym == SDLK_ESCAPE)
+                {
+                    G_SetMenu(&MainMenu);
+                    A_ChangeState(GSTATE_MENU);
+                }
+
+                /*
+                else if(e->key.keysym.sym == SDLK_F1)
+                {
+                    //debugRendering = !debugRendering;
+                }
+                */
+                /*
+                // reloads the map (used for building maps)
+                if(e->key.keysym.sym == SDLK_F5)
+                {
+                    int curx = player.position.x;
+                    int cury = player.position.y;
+                    int curz = player.z;
+                    float curAngle = player.angle;
+                    float curVerticalMovement = player.verticalHeadMovement;
+
+                    G_InitGame();
+
+                    player.position.x = curx;
+                    player.position.y = cury;
+                    player.z = curz;
+                    player.angle = curAngle;
+                    player.verticalHeadMovement = curVerticalMovement;
+                }
+
+                else if(e->key.keysym.sym == SDLK_F2)
+                {
+                    r_debugPathfinding = true;
+
+                    // Update minimap
+                    R_DrawMinimap();
+
+                    vector2Int_t deb = {11, 9};
+                    if(allDynamicSprites[0] != NULL)
+                        G_PerformPathfindingDebug(allDynamicSprites[0]->base.level, allDynamicSprites[0]->base.gridPos, deb);
                     else
                     {
-                        wallObject_t* object = R_GetWallObjectFromMap(player.level, player.inFrontGridPosition.y, player.inFrontGridPosition.x);
-                        if(tomentdatapack.walls[object->assetID]->Callback != NULL)
-                        {
-                            // Prevent the player from climbing ladders if he's in a bossfight that does not allow ladders
-                            if(player.isFightingBoss && player.bossFighting->bossPreventClimbingLaddersWhileFighting &&
-                                (object->assetID == W_WallLadder || object->assetID == W_WallLadderDown))
-                            {
-                                alertMessage_t* mess = (alertMessage_t*)malloc(sizeof(alertMessage_t));
-                                R_QueueAlertMessage(mess, ALERT_MESSAGE_DEF_X, ALERT_MESSAGE_DEF_Y, "You can't do that now.", 2.0f, 1.0f);
-                            }
-                            else
-                                tomentdatapack.walls[object->assetID]->Callback(object->data);
-                        }
+                        printf("Tried to debug pathfinding between first dynamic sprite and player, but no dynamic sprite is present in this map... Performing Pathfinding from center of the map to the player...\n");
+                        vector2Int_t gridpos = {floor(MAP_WIDTH / 2), floor(MAP_HEIGHT / 2)};
+                        G_PerformPathfindingDebug(player.level, gridpos, deb);
                     }
-                    
+
+                    r_debugPathfinding = false;
                 }
-            }
-            else if(e->key.keysym.sym == SDLK_c)
-            {
-                if(G_PlayerCanAttack())
-                    I_PlayerCastSpell(player.curSpell);
-            }
-            else if(e->key.keysym.sym == SDLK_ESCAPE)
-            {
-                G_SetMenu(&MainMenu);
-                A_ChangeState(GSTATE_MENU);
-            }
+                */
 
-            /*
-            else if(e->key.keysym.sym == SDLK_F1)
-            {
-                //debugRendering = !debugRendering;
-            }
-            */
-            /*
-            // reloads the map (used for building maps)
-            if(e->key.keysym.sym == SDLK_F5)
-            {
-                int curx = player.position.x;
-                int cury = player.position.y;
-                int curz = player.z;
-                float curAngle = player.angle;
-                float curVerticalMovement = player.verticalHeadMovement;
-
-                G_InitGame();
-
-                player.position.x = curx;
-                player.position.y = cury;
-                player.z = curz;
-                player.angle = curAngle;
-                player.verticalHeadMovement = curVerticalMovement;
-            }
-
-            else if(e->key.keysym.sym == SDLK_F2)
-            {
-                r_debugPathfinding = true;
-
-                // Update minimap
-                R_DrawMinimap();
-
-                vector2Int_t deb = {11, 9};
-                if(allDynamicSprites[0] != NULL)
-                    G_PerformPathfindingDebug(allDynamicSprites[0]->base.level, allDynamicSprites[0]->base.gridPos, deb);
-                else
+                // Skills
+                else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_1)
                 {
-                    printf("Tried to debug pathfinding between first dynamic sprite and player, but no dynamic sprite is present in this map... Performing Pathfinding from center of the map to the player...\n");
-                    vector2Int_t gridpos = {floor(MAP_WIDTH / 2), floor(MAP_HEIGHT / 2)};
-                    G_PerformPathfindingDebug(player.level, gridpos, deb);
+                    // Check cooldown
+                    if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+                    {
+                        // DO SKILL
+                        G_PlayerPlayAnimationOnce(ANIM_SPECIAL1);
+                        player.hasToCast = true;
+                        player.hasCasted = false;
+
+                        player.skills[0].timer->Start(player.skills[0].timer);
+                    }
                 }
-
-                r_debugPathfinding = false;
-            }
-            */
-
-            // Skills
-            else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_1)
-            {
-                // Check cooldown
-                if(player.skills[0].timer->GetTicks(player.skills[0].timer) >= player.skills[0].cooldown)
+                else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_2)
                 {
-                    // DO SKILL
-                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL1);
-                    player.hasToCast = true;
-                    player.hasCasted = false;
-
-                    player.skills[0].timer->Start(player.skills[0].timer);
+                    // Check cooldown
+                    if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+                    {
+                        // DO SKILL
+                        G_PlayerPlayAnimationOnce(ANIM_SPECIAL2);
+                        player.hasToCast = true;
+                        player.hasCasted = false;
+                        player.skills[1].timer->Start(player.skills[1].timer);
+                    }
                 }
-            }
-            else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_2)
-            {
-                // Check cooldown
-                if(player.skills[1].timer->GetTicks(player.skills[1].timer) >= player.skills[1].cooldown)
+                else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_3)
                 {
-                    // DO SKILL
-                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL2);
-                    player.hasToCast = true;
-                    player.hasCasted = false;
-                    player.skills[1].timer->Start(player.skills[1].timer);
+                    // Check cooldown
+                    if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
+                    {
+                        // DO SKILL
+                        G_PlayerPlayAnimationOnce(ANIM_SPECIAL3);
+                        player.hasToCast = true;
+                        player.hasCasted = false;
+
+                        player.skills[2].timer->Start(player.skills[2].timer);
+                    }
                 }
-            }
-            else if(G_PlayerCanAttack() && e->key.keysym.sym == SDLK_3)
-            {
-                // Check cooldown
-                if(player.skills[2].timer->GetTicks(player.skills[2].timer) >= player.skills[2].cooldown)
+                else if(G_PlayerCanAttack() && player.hasIceDart && e->key.keysym.sym == SDLK_4)
+                    G_PlayerSetSpell(SPELL_ICEDART1);
+                else if(G_PlayerCanAttack() &&  player.hasFireball && e->key.keysym.sym == SDLK_5)
+                    G_PlayerSetSpell(SPELL_FIREBALL1);
+                else if(e->key.keysym.sym == SDLK_RETURN)
                 {
-                    // DO SKILL
-                    G_PlayerPlayAnimationOnce(ANIM_SPECIAL3);
-                    player.hasToCast = true;
-                    player.hasCasted = false;
+                    if(!chatField.isFocus)
+                    {
+                        isEditingTextField = true;
+                        textFieldEditing = &chatField;
+                        chatField.isFocus = true;
+                        chatField.text[0] = '\0';
 
-                    player.skills[2].timer->Start(player.skills[2].timer);
+                        SDL_StartTextInput();
+                    }
                 }
-            }
-            else if(G_PlayerCanAttack() && player.hasIceDart && e->key.keysym.sym == SDLK_4)
-                G_PlayerSetSpell(SPELL_ICEDART1);
-            else if(G_PlayerCanAttack() &&  player.hasFireball && e->key.keysym.sym == SDLK_5)
-                G_PlayerSetSpell(SPELL_FIREBALL1);
 
-        break;
+            break;
+        }
+    }
+    else
+    {
+        // Focus on chat
+        switch(e->type)
+        {
+            case SDL_KEYUP:
+                if(e->key.keysym.sym == SDLK_BACKSPACE && isEditingTextField && textFieldEditing != NULL)
+                {
+                    int len = strlen(textFieldEditing->text);
+                    if(len > 0)
+                        textFieldEditing->text[len - 1] = '\0'; // Set the last character to null terminator
+                }
+                // Send message / close chat
+                else if(e->key.keysym.sym == SDLK_RETURN)
+                {
+                    if(strlen(chatField.text) > 0)
+                    {
+                        // Send message
+                        O_GameSendChatMessage(chatField.text);
+
+                        char tempTxt[INCOMING_CHAT_MSG_MAX_LENGTH] = "You: ";
+                        strcat(tempTxt, chatField.text);
+                        G_SpawnIncomingChatMessage(FONT_BLKCRY, 2, INCOMING_CHAT_INITIAL_Y_POS, tempTxt, INCOMING_CHAT_DEFAULT_DURATION, INCOMING_CHAT_DEFAULT_SCALE);
+                    }
+
+                    // Restore
+                    isEditingTextField = false;
+                    textFieldEditing = NULL;
+                    chatField.isFocus = false;
+                    SDL_StopTextInput();
+                }
+                break; 
+
+            case SDL_TEXTINPUT:
+                if(isEditingTextField && textFieldEditing != NULL)
+                {
+                    int len = strlen(textFieldEditing->text);
+
+                    if(len < TEXTFIELD_MAX_LENGTH && len < textFieldEditing->textLimit)
+                        strcat(textFieldEditing->text, e->text.text);
+                }
+            break;
+
+        }
     }
 }
 

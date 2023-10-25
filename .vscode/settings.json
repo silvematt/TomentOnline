@@ -8,6 +8,8 @@
         "g_player.h": "c",
         "o_game.h": "c",
         "replication.h": "c",
-        "t_textrendering.h": "c"
+        "t_textrendering.h": "c",
+        "o_lobby.h": "c",
+        "u_timer.h": "c"
     }
 }

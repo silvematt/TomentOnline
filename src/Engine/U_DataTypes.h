@@ -334,4 +334,23 @@ typedef struct mappuddle_s
     struct mappuddle_s* previous;
 } mappudlle_t;
 
+#define INCOMING_CHAT_INITIAL_Y_POS 440
+#define INCOMING_CHAT_DEFAULT_DURATION 5000.0f
+#define INCOMING_CHAT_DEFAULT_SCALE 1.0f
+#define INCOMING_CHAT_DEFAULT_MESSAGES_SPACING 35
+#define INCOMING_CHAT_MSG_MAX_LENGTH 128
+typedef struct incomingchatmessage_t
+{
+    char msg[INCOMING_CHAT_MSG_MAX_LENGTH];
+    int x,y;
+    float duration;
+    int fontID;
+    float scale;
+
+    Timer* timer;
+
+    struct incomingchatmessage_t* next;
+    struct incomingchatmessage_t* previous;
+} incomingchatmessage_t;
+
 #endif

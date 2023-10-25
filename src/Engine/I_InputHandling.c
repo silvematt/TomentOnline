@@ -1,5 +1,6 @@
 #include "I_InputHandling.h"
 #include "../Online/O_Lobby.h"
+#include "../Online/O_Lobby.h"
 
 playerinput_t playerinput;
 

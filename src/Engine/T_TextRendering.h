@@ -38,4 +38,6 @@ void T_TranslateASCIIToSpriteSheetCoords(char c, int* destX, int* destY);
 // ----------------------------------------------------------------------
 textfield_t* T_NewTextfield(int x, int y, int w, int h, int textlimit, float textScale);
 
+void T_SetTextField(textfield_t *tfield, int x, int y, int w, int h, int textlimit, float textScale);
+
 #endif

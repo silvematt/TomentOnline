@@ -39,6 +39,11 @@ projectileNode_t* explodingProjectilesHead = NULL;
 // Active puddles
 mappudlle_t* activeMapPuddlesHead = NULL;
 
+// Chat
+incomingchatmessage_t* chatMsgsHead = NULL;
+textfield_t chatField;
+
+
 //-------------------------------------
 // Initialize game related stuff 
 //-------------------------------------
@@ -47,6 +52,8 @@ void G_InitGame(void)
     // Initialize game
     if(gameTimer == NULL)
         gameTimer = U_TimerCreateNew();
+
+    T_SetTextField(&chatField, 1, 480, 274,39, 32, 0.75f);
 
     playerUpdatePacketsTimer = U_TimerCreateNew();
 
@@ -855,4 +862,42 @@ packedpuddle_t G_SpawnMapPuddle(int networkID, int gridX, int gridY, bool damage
 
     // Return packed puddle data
     return data;
+}
+
+
+void G_SpawnIncomingChatMessage(int fontID, int x, int y, char* msg, float duration, float scale)
+{
+    // Allocate a node
+    incomingchatmessage_t* newNode = (incomingchatmessage_t*)malloc(sizeof(incomingchatmessage_t));
+
+    newNode->x = x;
+    newNode->y = y;
+    strcpy(newNode->msg, msg);
+    newNode->duration = duration;
+    newNode->fontID = fontID;
+    newNode->scale = scale;
+    
+    newNode->timer = U_TimerCreateNew();
+    newNode->timer->Start(newNode->timer);
+
+    // Add to list
+    newNode->next = NULL;
+    if(chatMsgsHead == NULL)
+    {
+        chatMsgsHead = newNode;
+        chatMsgsHead->next = NULL;
+        chatMsgsHead->previous = NULL;
+    }
+    else
+    {
+        incomingchatmessage_t* current = chatMsgsHead;
+
+        while(current->next != NULL)
+            current = current->next;
+
+        // Now we can add
+        current->next = newNode;
+        current->next->next = NULL;
+        newNode->previous = current;
+    }
 }

@@ -7,6 +7,7 @@
 #include "../Network/netdef.h"
 #include "../Network/packet.h"
 #include "../Engine/U_DataTypes.h"
+#include "../Engine/T_TextRendering.h"
 
 extern dynamicSprite_t otherPlayerObject;
 
@@ -37,5 +38,6 @@ void O_GameAIInstantiate(int pNetworkID, int pLevel, int pGridX, int pGridY, int
 void O_GameSpawnPuddles(int length, packedpuddle_t puddles[MAX_PUDDLE_ABS_SIZE]);
 void O_GameHealOther(float amount);
 void O_GameSendDeathPacket(void);
+void O_GameSendChatMessage(char* msg);
 
 #endif

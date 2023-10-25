@@ -533,6 +533,23 @@ int O_GameOnPacketIsReceived(void)
             A_ChangeState(GSTATE_MENU);
             break;
         }
+
+        case PCKTID_CHATMESSAGE:
+        {
+            // Show message
+            // Manage packet
+            pckt_chatmessage_t chatPacket;
+            memcpy(&chatPacket, receivedPacket->data, sizeof(chatPacket));
+
+            //printf("Packet received! ID: %d | - Values (%s)\n", receivedPacket->id, chatPacket.message);
+            char tempTxt[INCOMING_CHAT_MSG_MAX_LENGTH] = "";
+            strcat(tempTxt, otherPlayer.name);
+            strcat(tempTxt, ": ");
+            strcat(tempTxt, chatPacket.message);
+            G_SpawnIncomingChatMessage(FONT_BLKCRY_GREEN, 2, INCOMING_CHAT_INITIAL_Y_POS, tempTxt, INCOMING_CHAT_DEFAULT_DURATION, INCOMING_CHAT_DEFAULT_SCALE);
+
+            break;
+        }
     }
 }
 
@@ -823,5 +840,22 @@ void O_GameSendDeathPacket(void)
     else
     {
         printf("CRITICAL ERROR: Send buffer was full when in O_GameSendDeathPacket\n");
+    }
+}
+
+void O_GameSendChatMessage(char* msg)
+{
+    pckt_t* chatPacket = PCKT_MakeChatMessagePacket(&packetToSend, msg);
+    
+    if(outputPcktBuffer.packetsToWrite < MAX_PCKTS_PER_BUFFER)
+    {
+        // Store the packet in the output buffer
+        outputPcktBuffer.hasBegunWriting = TRUE;
+        memcpy(outputPcktBuffer.buffer+(outputPcktBuffer.packetsToWrite*PCKT_SIZE), (char*)chatPacket, PCKT_SIZE);
+        outputPcktBuffer.packetsToWrite++;
+    }
+    else
+    {
+        printf("CRITICAL ERROR: Send buffer was full when in O_GameHealOther\n");
     }
 }

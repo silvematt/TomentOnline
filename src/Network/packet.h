@@ -31,6 +31,7 @@
 #define PCKTID_PUDDLES_INSTANTIATE  14
 #define PCKTID_HEAL_OTHER           15
 #define PCKTID_PLAYER_DEATH         16
+#define PCKTID_CHATMESSAGE          17
 
 #define PCKT_BUFFER PCKT_SIZE
 
@@ -184,6 +185,12 @@ typedef struct pckt_heal_other_t
     float healAmount;
 } pckt_heal_other_t;
 
+#define CHATMESSAGE_MAX_LENGTH 33
+typedef struct pckt_chatmessage_t
+{
+    char message[CHATMESSAGE_MAX_LENGTH];
+} pckt_chatmessage_t;
+
 #define MAX_PCKTS_PER_BUFFER 200
 typedef struct pckt_buffer_t
 {
@@ -230,6 +237,7 @@ pckt_t* PCKT_MakeAIInstantiatePacket(pckt_t* packet, int pNetworkID, int pLevel,
 pckt_t* PCKT_MakePuddlesInstantiatePacket(pckt_t* packet);
 pckt_t* PCKT_MakeHealOtherPacket(pckt_t* packet, float pAmount);
 pckt_t* PCKT_MakePlayerDeathPacket(pckt_t* packet);
+pckt_t* PCKT_MakeChatMessagePacket(pckt_t* packet, char* msg);
 
 int PCKT_ReceivePacket(int (*OnPacketArrives)(void));
 int PCKT_SendPacket(int (*OnPacketIsSent)(void));
