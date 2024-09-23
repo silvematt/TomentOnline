@@ -745,6 +745,13 @@ void G_PlayerRender(void)
 
     // Blit FP
     R_BlitIntoScreenScaled(&size, curAnim, &screenPos);
+
+    // Show FPS
+    if(showFPS)
+    {
+        snprintf(fpsText, 16, "%d", (int)readOnlyFPS);
+        T_DisplayText(FONT_BLKCRY, fpsText, 760, 20);
+    }
 }
 
 

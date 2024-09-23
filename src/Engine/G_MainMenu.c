@@ -17,6 +17,7 @@ static void CALLBACK_MAINMENU_Options(void);
 static void CALLBACK_MAINMENU_Quit(void);
 static void CALLBACK_ReturnToMainMenu(void);
 static void CALLBACK_OPTIONSMENU_ChangeGraphics(void);
+static void CALLBACK_OPTIONSMENU_ChangeShowFPS(void);
 static void CALLBACK_OPTIONSMENU_ChangeDefaultClass(void);
 static void CALLBACK_MAINMENU_About(void);
 static void CALLBACK_Continue(void);
@@ -54,10 +55,11 @@ menu_t DeathMenu = {MENU_DEATH, DeathMenuElements, 1, &DeathMenuElements[0], 0};
 menuelement_t OptionsMenuElements[] =
 {
     {"Graphics:",       {220, 200, 400, 40}, CALLBACK_OPTIONSMENU_ChangeGraphics},
-    {"Default class:",  {220, 250, 400, 40}, CALLBACK_OPTIONSMENU_ChangeDefaultClass},
-    {"Return",          {220, 350, 200, 40}, CALLBACK_ReturnToMainMenu},
+    {"Fps:",            {220, 250, 400, 40}, CALLBACK_OPTIONSMENU_ChangeShowFPS},
+    {"Default class:",  {220, 350, 400, 40}, CALLBACK_OPTIONSMENU_ChangeDefaultClass},
+    {"Return",          {220, 450, 200, 40}, CALLBACK_ReturnToMainMenu},
 };
-menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 3, &OptionsMenuElements[0], 0};
+menu_t OptionsMenu = {MENU_OPTIONS, OptionsMenuElements, 4, &OptionsMenuElements[0], 0};
 
 menuelement_t EndGameMenuElements[] =
 {
@@ -183,17 +185,29 @@ void G_RenderCurrentMenuBackground(void)
             switch(thisPlayer.favoriteClass)
             {
                 case CLASS_TANK:
-                    T_DisplayTextScaled(FONT_BLKCRY, "Tank", 400, 255, 1.0f);
+                    T_DisplayTextScaled(FONT_BLKCRY, "Tank", 400, 355, 1.0f);
                     break;
                 
                 case CLASS_HEALER:
-                    T_DisplayTextScaled(FONT_BLKCRY, "Healer", 400, 255, 1.0f);
+                    T_DisplayTextScaled(FONT_BLKCRY, "Healer", 400, 355, 1.0f);
                     break;
 
                 case CLASS_DPS:
-                    T_DisplayTextScaled(FONT_BLKCRY, "Dps", 400, 255, 1.0f);
+                    T_DisplayTextScaled(FONT_BLKCRY, "Dps", 400, 355, 1.0f);
                     break;
             }
+
+            switch(showFPS)
+            {
+                case true:
+                    T_DisplayTextScaled(FONT_BLKCRY, "true", 300, 255, 1.0f);
+                    break;
+                
+                case false:
+                    T_DisplayTextScaled(FONT_BLKCRY, "false", 300, 255, 1.0f);
+                    break;
+            }
+            break;
             break;
         }
 
@@ -213,7 +227,7 @@ void G_RenderCurrentMenuBackground(void)
         case MENU_ABOUT:
         {
             T_DisplayTextScaled(FONT_BLKCRY, "About", 210, 80, 2.0f);
-            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia  Silvestro  ( silvematt)\nVersion: 1.1", 80, 200, 1.0f);
+            T_DisplayTextScaled(FONT_BLKCRY, "Programmer:  Mattia  Silvestro  ( silvematt)\nVersion: 1.1   OpenMP", 80, 200, 1.0f);
 
             break;
         }
@@ -581,6 +595,11 @@ static void CALLBACK_OPTIONSMENU_ChangeGraphics(void)
 
     R_SetRenderingGraphics(r_CurrentGraphicsSetting);
     R_ClearRendering();
+}
+
+static void CALLBACK_OPTIONSMENU_ChangeShowFPS(void)
+{
+    showFPS = !showFPS;
 }
 
 static void CALLBACK_OPTIONSMENU_ChangeDefaultClass(void)

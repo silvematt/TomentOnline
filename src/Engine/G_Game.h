@@ -13,6 +13,7 @@
 #define DOOR_OPEN_SPEED 100.0f
 #define DOOR_CLOSE_SPEED 100.0f
 
+#define N_FRAMES_SKIP_FOR_DISPLAY 20
 
 // Game Timer
 extern Timer* gameTimer;
@@ -41,6 +42,11 @@ extern mappudlle_t* activeMapPuddlesHead;
 // Chat
 extern incomingchatmessage_t* chatMsgsHead;
 extern textfield_t chatField;
+
+extern bool showFPS;
+extern float readOnlyFPS; // to write FPS on screen
+extern char fpsText[16];
+extern int frameCountForFPSDisplay; // to update readOnlyFPS not everyframe, but every x frames 
 
 
 //-------------------------------------
